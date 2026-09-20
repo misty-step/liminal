@@ -2,11 +2,20 @@
  * Liminal candidate QA journeys — runs ON the ephemeral QA VM against the
  * locally built candidate. Captures mobile + desktop screenshots of every
  * meaningful state and asserts the expected feedback for each journey.
+ *
+ * Two server instances are expected, both from the same `next build`:
+ * - BASE (default http://localhost:3000): live judge configured — the scoped
+ *   OpenRouter key is set server-side, so guesses are judged for real.
+ * - OUTAGE_BASE (default http://localhost:3001): identical build with
+ *   JEV_DECISIONS_URL pointed at an unreachable endpoint (e.g.
+ *   http://127.0.0.1:9), so every judgment fails honestly as an upstream
+ *   outage. The outage journey runs there and asserts no guess is consumed.
  */
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
+const OUTAGE_BASE = process.env.OUTAGE_BASE ?? "http://localhost:3001";
 const OUT = process.env.OUT ?? "/home/exedev/shots";
 mkdirSync(OUT, { recursive: true });
 
@@ -62,17 +71,6 @@ const browser = await chromium.launch();
   check("near miss shows exactly one Close", closeMarks === 1, `close marks=${closeMarks}`);
   await page.screenshot({ path: `${OUT}/02-desktop-near-miss.png`, fullPage: true });
 
-  const before = await page.locator(".history li").count();
-  await guess(page, "sundial");
-  const notice = await page.locator(".notice").innerText().catch(() => "");
-  const after = await page.locator(".history li").count();
-  check(
-    "judge outage is honest and consumes no guess",
-    notice.includes("unavailable") && before === after,
-    `notice="${notice.slice(0, 60)}" guesses ${before}->${after}`,
-  );
-  await page.screenshot({ path: `${OUT}/03-desktop-judge-outage.png`, fullPage: true });
-
   await guess(page, spec.win);
   const reveal = await page.locator(".reveal h3").innerText().catch(() => "");
   check("verified answer opens the drawer", reveal.toLowerCase().includes("drawer open"), reveal);
@@ -98,6 +96,44 @@ const browser = await chromium.launch();
   const reportStatus = await page.locator(".report .teaser").last().innerText().catch(() => "");
   check("answer report is filed", reportStatus.includes("Thanks"), reportStatus);
   await page.screenshot({ path: `${OUT}/07-desktop-report-filed.png`, fullPage: true });
+  await context.close();
+}
+
+// ---------- Judge outage (dedicated instance with an unreachable judge) ----------
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const page = await context.newPage();
+  await page.goto(OUTAGE_BASE, { waitUntil: "networkidle" });
+  const before = await page.locator(".history li").count();
+  await guess(page, "sundial");
+  const notice = await page.locator(".notice").innerText().catch(() => "");
+  const after = await page.locator(".history li").count();
+  check(
+    "judge outage is honest and consumes no guess",
+    notice.includes("unavailable") && before === after,
+    `notice="${notice.slice(0, 60)}" guesses ${before}->${after}`,
+  );
+  await page.screenshot({ path: `${OUT}/03-desktop-judge-outage.png`, fullPage: true });
+  await context.close();
+}
+
+// ---------- Wordplay practice journey (rebuilt wordplay deck) ----------
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const page = await context.newPage();
+  await page.goto(BASE, { waitUntil: "networkidle" });
+  const spec = ANSWERS["Made and Taken"];
+  await openDrawer(page, "Made and Taken");
+  const title = await puzzleTitle(page);
+  check("wordplay drawer opens in practice", title === "Made and Taken", title);
+  await guess(page, spec.near);
+  const closeMarks = await page.locator(".history .marks .state.close").count();
+  check("wordplay near miss shows exactly one Close", closeMarks === 1, `close marks=${closeMarks}`);
+  await page.screenshot({ path: `${OUT}/15-wordplay-near.png`, fullPage: true });
+  await guess(page, spec.win);
+  const reveal = await page.locator(".reveal h3").innerText().catch(() => "");
+  check("wordplay verified answer opens the drawer", reveal.toLowerCase().includes("drawer open"), reveal);
+  await page.screenshot({ path: `${OUT}/16-wordplay-win.png`, fullPage: true });
   await context.close();
 }
 
