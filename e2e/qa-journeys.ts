@@ -173,7 +173,7 @@ const browser = await chromium.launch();
   // The cabinet grid is already visible in practice mode (screenshot 09 shows
   // it above the finished drawer). Switch back to the daily view to capture
   // that distinct state instead of re-shooting the same pixels.
-  await page.click(".tabs button:text('Daily')");
+  await page.click(".tabs button:text('Today')");
   await page.waitForTimeout(200);
   await page.screenshot({ path: `${OUT}/10-desktop-daily-view.png`, fullPage: true });
   await context.close();
