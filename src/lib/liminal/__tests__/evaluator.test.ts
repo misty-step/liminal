@@ -3,44 +3,44 @@ import { getPuzzle } from "../deck";
 import { evaluateGuess, guessesRemaining, isSolved, judgedFeedback } from "../evaluator";
 import { normalizeAnswer } from "../normalize";
 
-const relic = getPuzzle("pocket-relic")!;
-const measures = getPuzzle("hidden-measures")!;
+const vessel = getPuzzle("bath-vessel")!;
+const kept = getPuzzle("made-and-taken")!;
 
 describe("normalizeAnswer", () => {
   it("normalizes case, articles, punctuation, and whitespace", () => {
     expect(normalizeAnswer("  A Glass SHARD ")).toBe("glass shard");
-    expect(normalizeAnswer("The Coin.")).toBe("coin");
-    expect(normalizeAnswer("wheel-barrow")).toBe("wheel-barrow");
+    expect(normalizeAnswer("The Sink.")).toBe("sink");
+    expect(normalizeAnswer("wash-basin")).toBe("wash-basin");
   });
 });
 
 describe("evaluateGuess", () => {
   it("accepts verified answers as full wins", () => {
-    const feedback = evaluateGuess(relic, "Coin");
+    const feedback = evaluateGuess(vessel, "Sink");
     expect(feedback.solved).toBe(true);
     expect(feedback.states).toEqual({ c1: "inside", c2: "inside", c3: "inside" });
     expect(feedback.source).toBe("authored");
   });
 
   it("marks the failed condition close on tested near misses", () => {
-    const feedback = evaluateGuess(relic, "glass shard");
+    const feedback = evaluateGuess(vessel, "shampoo bottle");
     expect(feedback.solved).toBe(false);
-    expect(feedback.states).toEqual({ c1: "inside", c2: "inside", c3: "close" });
+    expect(feedback.states).toEqual({ c1: "inside", c2: "close", c3: "inside" });
   });
 
   it("rejects guesses that repeat the clues", () => {
-    const feedback = evaluateGuess(relic, "Worn smooth by time or handling — not sharp, not rough");
+    const feedback = evaluateGuess(vessel, "It can hold a pool of water");
     expect(feedback.rejected).toBe("echo");
     expect(Object.values(feedback.states).every((s) => s === "outside")).toBe(true);
   });
 
   it("rejects empty and oversized guesses", () => {
-    expect(evaluateGuess(relic, "   ").rejected).toBe("empty");
-    expect(evaluateGuess(relic, "x".repeat(200)).rejected).toBe("too-long");
+    expect(evaluateGuess(vessel, "   ").rejected).toBe("empty");
+    expect(evaluateGuess(vessel, "x".repeat(200)).rejected).toBe("too-long");
   });
 
   it("flags unknown answers for the semantic service without scoring them", () => {
-    const feedback = evaluateGuess(measures, "sundial");
+    const feedback = evaluateGuess(kept, "sundial");
     expect(feedback.needsJudgment).toBe(true);
     expect(feedback.solved).toBe(false);
     expect(Object.values(feedback.states).every((s) => s === "outside")).toBe(true);
@@ -49,9 +49,9 @@ describe("evaluateGuess", () => {
 
 describe("judgedFeedback and helpers", () => {
   it("derives solved from judged states", () => {
-    const win = judgedFeedback(relic, { c1: "inside", c2: "inside", c3: "inside" }, "judged", "v1");
+    const win = judgedFeedback(vessel, { c1: "inside", c2: "inside", c3: "inside" }, "judged", "v1");
     expect(win.solved).toBe(true);
-    const miss = judgedFeedback(relic, { c1: "inside", c2: "close", c3: "inside" }, "judged", "v1");
+    const miss = judgedFeedback(vessel, { c1: "inside", c2: "close", c3: "inside" }, "judged", "v1");
     expect(miss.solved).toBe(false);
   });
 

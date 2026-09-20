@@ -1,0 +1,1256 @@
+{
+  "at": "2026-09-20T18:57:58.658Z",
+  "deckVersion": "2026-09-20.3",
+  "promptVersion": "liminal-judge-2026-09-20.3",
+  "model": "typesafe/jev-1.13",
+  "url": "https://openrouter.ai/api/alpha/decisions",
+  "rows": 50,
+  "answers": 23,
+  "nearMisses": 17,
+  "heldOut": 10,
+  "failures": 1,
+  "detail": [
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "sink",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.99,
+        "c2": 0.98,
+        "c3": 0.97
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 251,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "bathtub",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.97,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 307,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "washbasin",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.98,
+        "c3": 0.98
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 225,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "toilet",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.98,
+        "c3": 0.77
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 228,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "kitchen sink",
+      "expected": {
+        "c1": "outside-or-close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.96,
+        "c2": 0.98,
+        "c3": 0.97
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 198,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "shampoo bottle",
+      "expected": {
+        "c1": "inside",
+        "c2": "outside-or-close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 1,
+        "c3": 0.71
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 219,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "faucet",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.96,
+        "c3": 0.81
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 229,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "shower head",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.62,
+        "c3": 0.85
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 252,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "pedestal sink",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.98,
+        "c2": 0.97,
+        "c3": 0.96
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 229,
+      "ok": true
+    },
+    {
+      "puzzleId": "bath-vessel",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "toilet bowl",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.97,
+        "c3": 0.92
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 171,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "mug",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 1,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 241,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "teapot",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.94,
+        "c3": 0.87
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 222,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "pitcher",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.95,
+        "c3": 0.98
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 208,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "kettle",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.98,
+        "c2": 1,
+        "c3": 0.94
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 261,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "jar",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 1,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 309,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "jug",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.99,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 203,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "bowl",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 1,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 227,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "bottle",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.91,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 208,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "pan",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.91,
+        "c2": 1,
+        "c3": 0.87
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 382,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "wok",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.85,
+        "c2": 0.99,
+        "c3": 0.57
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 190,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "colander",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 0.91,
+        "c2": 1,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 279,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "aquarium",
+      "expected": {
+        "c1": "inside",
+        "c2": "outside-or-close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.64,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 224,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "watering can",
+      "expected": {
+        "c1": "inside",
+        "c2": "outside-or-close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.99,
+        "c2": 0.72,
+        "c3": 0.88
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 256,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "barrel",
+      "expected": {
+        "c1": "inside",
+        "c2": "outside-or-close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.64,
+        "c3": 0.94
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 220,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "vase",
+      "expected": {
+        "c1": "inside",
+        "c2": "outside-or-close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.99,
+        "c2": 0.74,
+        "c3": 0.84
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 206,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "bucket",
+      "expected": {
+        "c1": "inside",
+        "c2": "outside-or-close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.56,
+        "c3": 0.97
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 207,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "tumbler",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.98,
+        "c3": 0.95
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 196,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "measuring cup",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.88,
+        "c2": 1,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 193,
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "carafe",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.95,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 254,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "decision",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.98,
+        "c2": 0.83,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 196,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "phone call",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.96,
+        "c2": 0.87,
+        "c3": 0.6
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 362,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "wrong turn",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.84,
+        "c2": 0.87,
+        "c3": 0.79
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 280,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "u-turn",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.94,
+        "c2": 0.69,
+        "c3": 0.97
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 227,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "apology",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.67,
+        "c2": 0.71,
+        "c3": 0.98
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 205,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "cake",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.99,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 228,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "pie",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.92,
+        "c3": 0.94
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 348,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "sandwich",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 1,
+        "c3": 0.98
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 220,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "salad",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside-or-close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.75,
+        "c3": 0.94
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 162,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "conference call",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.6,
+        "c2": 0.68,
+        "c3": 0.96
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 212,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "vow",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.78,
+        "c2": 0.69,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 196,
+      "ok": true
+    },
+    {
+      "puzzleId": "made-and-taken",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "mental note",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.77,
+        "c2": 0.93,
+        "c3": 0.97
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 245,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "audition",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.91,
+        "c2": 0.92,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 289,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "interview",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.94,
+        "c2": 0.93,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 218,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "drug test",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.97,
+        "c3": 0.93
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 223,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "answer",
+      "answer": "driving test",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 1,
+        "c2": 0.97,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 210,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "rebellion",
+      "expected": {
+        "c1": "outside-or-close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": null,
+      "confidences": null,
+      "status": "unavailable:uncertain",
+      "attempts": 1,
+      "elapsedMs": 179,
+      "ok": false
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "launch",
+      "expected": {
+        "c1": "outside-or-close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.61,
+        "c2": 0.91,
+        "c3": 0.94
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 239,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "near-miss",
+      "answer": "takeover",
+      "expected": {
+        "c1": "outside-or-close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.7,
+        "c2": 0.59,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 192,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "eye test",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.99,
+        "c2": 0.83,
+        "c3": 0.99
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 210,
+      "ok": true
+    },
+    {
+      "puzzleId": "pass-or-fail",
+      "judgmentVersion": "2026-09-20.3",
+      "kind": "held-out",
+      "answer": "background check",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "confidences": {
+        "c1": 0.98,
+        "c2": 0.93,
+        "c3": 1
+      },
+      "status": "judged",
+      "attempts": 1,
+      "elapsedMs": 202,
+      "ok": true
+    }
+  ]
+}

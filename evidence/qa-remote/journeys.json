@@ -1,0 +1,60 @@
+{
+  "at": "2026-09-20T17:38:57.831Z",
+  "results": [
+    {
+      "name": "daily puzzle is a deck drawer",
+      "ok": true,
+      "detail": "The Pocket Relic"
+    },
+    {
+      "name": "near miss shows exactly one Close",
+      "ok": true,
+      "detail": "close marks=1"
+    },
+    {
+      "name": "judge outage is honest and consumes no guess",
+      "ok": true,
+      "detail": "notice=\"The judge is unavailable right now. Your guess was not used \" guesses 1->1"
+    },
+    {
+      "name": "verified answer opens the drawer",
+      "ok": true,
+      "detail": "Drawer open — pebble"
+    },
+    {
+      "name": "progress survives refresh",
+      "ok": true,
+      "detail": "history=2"
+    },
+    {
+      "name": "answer report is filed",
+      "ok": true,
+      "detail": "Thanks — the report is filed."
+    },
+    {
+      "name": "clue echo is rejected without consuming a guess",
+      "ok": true,
+      "detail": "rows=0"
+    },
+    {
+      "name": "practice opens the chosen drawer",
+      "ok": true,
+      "detail": "The Pocket Relic"
+    },
+    {
+      "name": "five guesses close the drawer",
+      "ok": true,
+      "detail": "The drawer stays closed pips=5"
+    },
+    {
+      "name": "mobile win journey",
+      "ok": true,
+      "detail": "Drawer open — pebble"
+    },
+    {
+      "name": "reduced motion disables transitions",
+      "ok": true,
+      "detail": "0s"
+    }
+  ]
+}

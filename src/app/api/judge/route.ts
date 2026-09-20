@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPuzzle } from "@/lib/liminal/deck";
+import { judgeEnabledFor } from "@/lib/liminal/judgment";
 import { normalizeAnswer } from "@/lib/liminal/normalize";
 import { judgeAnswer, judgeEnvFrom, memoryCache } from "@/lib/liminal/typeSafe";
 import { MAX_ANSWER_LENGTH } from "@/lib/liminal/types";
@@ -51,6 +52,15 @@ export async function POST(request: Request) {
   }
 
   const env = judgeEnvFrom(process.env);
+  if (!judgeEnabledFor(puzzle, process.env)) {
+    // Calibration gate: the live judge is not yet trustworthy for this
+    // puzzle's conditions (see evidence/calibration-findings.md). Refuse
+    // honestly; the client does not consume a guess.
+    return NextResponse.json(
+      { status: "unavailable", reason: "uncalibrated" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
   const result = await judgeAnswer({
     puzzle,
     answer,

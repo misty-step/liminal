@@ -20,6 +20,14 @@ TypeScript strict, bun, vitest, Cloudflare Workers deploy.
 - Outside / Close / Inside per condition; never decimal dashboards.
 - Literal-object and wordplay puzzles are labeled and judged separately.
 - Reject invented objects, clue repetition, and instruction-like input.
+  Clue repetition is refused deterministically before judging (free).
+  Invented and instruction-like input has no deterministic detector — any
+  lexical rule would falsely refuse real answers — so the live judge rejects
+  it semantically: confidently outside every condition, never a win, never
+  executed.
+- Guess budget: a guess is consumed exactly when it receives a confident
+  judgment (authored or live). Echo/empty/too-long, honest uncertainty,
+  outage, rate limit, and the calibration gate consume nothing.
 - Outages are honest: no fabricated scores, no unfairly consumed guesses.
 
 ## Editing judgments

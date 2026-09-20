@@ -1,0 +1,75 @@
+{
+  "at": "2026-09-20T19:18:49.281Z",
+  "results": [
+    {
+      "name": "daily puzzle is a deck drawer",
+      "ok": true,
+      "detail": "The Vessel in the Wall"
+    },
+    {
+      "name": "near miss shows exactly one Close",
+      "ok": true,
+      "detail": "close marks=1"
+    },
+    {
+      "name": "verified answer opens the drawer",
+      "ok": true,
+      "detail": "Drawer open — sink"
+    },
+    {
+      "name": "progress survives refresh",
+      "ok": true,
+      "detail": "history=2"
+    },
+    {
+      "name": "answer report is filed",
+      "ok": true,
+      "detail": "Thanks — the report is filed."
+    },
+    {
+      "name": "judge outage is honest and consumes no guess",
+      "ok": true,
+      "detail": "notice=\"The judge is unavailable right now. Your guess was not used \" guesses 0->0"
+    },
+    {
+      "name": "wordplay drawer opens in practice",
+      "ok": true,
+      "detail": "Made and Taken"
+    },
+    {
+      "name": "wordplay near miss shows exactly one Close",
+      "ok": true,
+      "detail": "close marks=1"
+    },
+    {
+      "name": "wordplay verified answer opens the drawer",
+      "ok": true,
+      "detail": "Drawer open — phone call"
+    },
+    {
+      "name": "clue echo is rejected without consuming a guess",
+      "ok": true,
+      "detail": "rows=0"
+    },
+    {
+      "name": "practice opens the chosen drawer",
+      "ok": true,
+      "detail": "The Kitchen Well"
+    },
+    {
+      "name": "five guesses close the drawer",
+      "ok": true,
+      "detail": "The drawer stays closed pips=5"
+    },
+    {
+      "name": "mobile win journey",
+      "ok": true,
+      "detail": "Drawer open — sink"
+    },
+    {
+      "name": "reduced motion disables transitions",
+      "ok": true,
+      "detail": "0s"
+    }
+  ]
+}

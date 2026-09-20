@@ -216,17 +216,9 @@ export default function Page() {
               const state = lastGuess?.states[condition.id];
               return (
                 <li key={condition.id}>
-                  <span
-                    className={`state ${state ?? "outside"}`}
-                    data-label={state ? STATE_LABEL[state] : "Unjudged"}
-                    aria-hidden="true"
-                  />
-                  <span>
-                    <span className="visually-hidden">
-                      {state ? `${STATE_LABEL[state]}: ` : "Not yet judged: "}
-                    </span>
-                    {condition.text}
-                  </span>
+                  <span className={`state ${state ?? "outside"}`} aria-hidden="true" />
+                  <span className="state-label">{state ? STATE_LABEL[state] : "Unjudged"}</span>
+                  <span className="condition-text">{condition.text}</span>
                 </li>
               );
             })}
