@@ -4,6 +4,7 @@ import {
   DEFAULT_MODEL,
   JUDGE_PROMPT_VERSION,
   buildQuestions,
+  judgeEnabledFor,
   judgmentKey,
   stateFromNoul,
 } from "../judgment";
@@ -47,5 +48,13 @@ describe("judgment mapping", () => {
       model: "jev-1.13",
     });
     expect(other).not.toBe(key);
+  });
+
+  it("refuses uncalibrated puzzles unless explicitly allowed", () => {
+    const uncalibrated = { ...relic, judgeStatus: "uncalibrated" as const };
+    expect(judgeEnabledFor(uncalibrated, {})).toBe(false);
+    expect(judgeEnabledFor(uncalibrated, { JEV_ALLOW_UNCALIBRATED: "0" })).toBe(false);
+    expect(judgeEnabledFor(uncalibrated, { JEV_ALLOW_UNCALIBRATED: "1" })).toBe(true);
+    expect(judgeEnabledFor({ ...relic, judgeStatus: "calibrated" }, {})).toBe(true);
   });
 });

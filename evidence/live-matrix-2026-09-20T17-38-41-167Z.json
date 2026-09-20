@@ -1,0 +1,944 @@
+{
+  "at": "2026-09-20T17:38:41.167Z",
+  "model": "typesafe/jev-1.13",
+  "url": "https://openrouter.ai/api/alpha/decisions",
+  "rows": 55,
+  "failures": 39,
+  "detail": [
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "pebble",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "marble",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "coin",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "bead",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "gemstone",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "ring",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "answer",
+      "answer": "key",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "near-miss",
+      "answer": "boulder",
+      "expected": {
+        "c1": "close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "near-miss",
+      "answer": "sponge",
+      "expected": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "near-miss",
+      "answer": "glass shard",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "near-miss",
+      "answer": "nail",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "pocket-relic",
+      "kind": "near-miss",
+      "answer": "geode",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "mug",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "teapot",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "pitcher",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "kettle",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "jar",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "jug",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "bowl",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "bottle",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "pan",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "answer",
+      "answer": "wok",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "near-miss",
+      "answer": "colander",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "near-miss",
+      "answer": "sieve",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "close",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "near-miss",
+      "answer": "basket",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "near-miss",
+      "answer": "sponge",
+      "expected": {
+        "c1": "close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "kitchen-well",
+      "kind": "near-miss",
+      "answer": "funnel",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "close",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "answer",
+      "answer": "wheelbarrow",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "answer",
+      "answer": "windmill",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "answer",
+      "answer": "treadmill",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "answer",
+      "answer": "trampoline",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "answer",
+      "answer": "lampshade",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "answer",
+      "answer": "lamppost",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "near-miss",
+      "answer": "cupcake",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "near-miss",
+      "answer": "inchworm",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "near-miss",
+      "answer": "graveyard",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "near-miss",
+      "answer": "kilogram",
+      "expected": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "outside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "near-miss",
+      "answer": "amphora",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "hidden-measures",
+      "kind": "near-miss",
+      "answer": "campsite",
+      "expected": {
+        "c1": "close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "castle",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "whistle",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "comb",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "thumb",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "sandwich",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "chalk",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "salmon",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "yolk",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "tomb",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "bomb",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "outside",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "answer",
+      "answer": "handkerchief",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "near-miss",
+      "answer": "knife",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": true
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "near-miss",
+      "answer": "gnome",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "close",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "near-miss",
+      "answer": "hourglass",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "near-miss",
+      "answer": "wristwatch",
+      "expected": {
+        "c1": "inside",
+        "c2": "inside",
+        "c3": "close"
+      },
+      "actual": {
+        "c1": "inside",
+        "c2": "close",
+        "c3": "inside"
+      },
+      "status": "judged",
+      "ok": false
+    },
+    {
+      "puzzleId": "silent-partners",
+      "kind": "near-miss",
+      "answer": "listen",
+      "expected": {
+        "c1": "close",
+        "c2": "inside",
+        "c3": "inside"
+      },
+      "actual": {
+        "c1": "outside",
+        "c2": "close",
+        "c3": "close"
+      },
+      "status": "judged",
+      "ok": false
+    }
+  ]
+}

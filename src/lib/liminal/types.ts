@@ -10,6 +10,12 @@ export interface Condition {
   id: string;
   /** Player-facing condition text. Authored by hand; never generated at runtime. */
   text: string;
+  /**
+   * Self-contained phrasing handed to the judge for this condition. It must not
+   * rely on antecedents from the display text (no dangling "its name"). Falls
+   * back to `text` when omitted.
+   */
+  judge?: string;
 }
 
 /** One authored near miss: a real answer that fails exactly one condition. */
@@ -39,6 +45,12 @@ export interface Puzzle {
   teaser: string;
   conditions: Condition[];
   judgments: AuthoredJudgment;
+  /**
+   * Whether live semantic judging has been calibrated for this puzzle's
+   * conditions. Defaults to "uncalibrated": the judge refuses such puzzles
+   * unless explicitly allowed, and never consumes a guess when it refuses.
+   */
+  judgeStatus?: "calibrated" | "uncalibrated";
 }
 
 export type JudgmentSource = "authored" | "cached" | "judged";

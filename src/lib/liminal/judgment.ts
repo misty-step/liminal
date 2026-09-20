@@ -16,7 +16,7 @@ export const JUDGE_THRESHOLDS = {
   close: 0.35,
 } as const;
 
-export const JUDGE_PROMPT_VERSION = "liminal-judge-2026-09-20.1";
+export const JUDGE_PROMPT_VERSION = "liminal-judge-2026-09-20.2";
 export const DEFAULT_MODEL = "jev-latest";
 
 export function stateFromNoul(probability: number): ConditionState {
@@ -51,14 +51,15 @@ export interface JudgeQuestion {
 /**
  * One Noul per condition. The player answer is passed as state data and never
  * interpreted as instructions; the question text is authored here, not by the
- * player.
+ * player. Each condition supplies a self-contained `judge` phrasing so the
+ * model never has to resolve an antecedent like "its name".
  */
 export function buildQuestions(puzzle: Puzzle): Record<string, JudgeQuestion> {
   const questions: Record<string, JudgeQuestion> = {};
   for (const condition of puzzle.conditions) {
     questions[condition.id] = {
       type: "noul",
-      instructions: `Does \`answer\` satisfy this condition: ${condition.text}?`,
+      instructions: condition.judge ?? condition.text,
       criteria: {
         true: "The answer clearly satisfies the condition.",
         false: "The answer does not satisfy the condition.",
@@ -66,6 +67,13 @@ export function buildQuestions(puzzle: Puzzle): Record<string, JudgeQuestion> {
     };
   }
   return questions;
+}
+
+export function judgeEnabledFor(
+  puzzle: Puzzle,
+  env: Record<string, string | undefined>,
+): boolean {
+  return puzzle.judgeStatus === "calibrated" || env.JEV_ALLOW_UNCALIBRATED === "1";
 }
 
 export interface JudgeOutcome {

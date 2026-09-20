@@ -76,13 +76,18 @@ bun run build
 
 ## Known limitations (this slice)
 
-- **Live calibration is required and not yet run.** Fixture tests prove the
-  rules, not the live model. Run `scripts/live-matrix.ts` against live Jev
-  (`OPENROUTER_API_KEY` or `TYPESAFE_API_KEY`) before release and attach the
-  `evidence/live-matrix-*.json` output. The full-deck positive/near-miss matrix
-  is a release gate.
-- The semantic judge is coded and unit-tested against mocked transports; it has
-  not run against the live Jev endpoint in this slice (no key in the build
-  environment). Zoe owns the scoped key.
+- **Live calibration was run and FAILED.** `scripts/live-matrix.ts` judged all
+  55 deck labels against live Jev (`typesafe/jev-1.13`): 39/55 and 41/55 rows
+  mismatched across two prompt versions. Raw evidence and analysis:
+  `evidence/live-matrix-*.json`, `evidence/calibration-findings.md`. The live
+  judge is therefore gated OFF in code: puzzles default to
+  `judgeStatus: "uncalibrated"` and `/api/judge` refuses them (still without
+  consuming a guess) unless `JEV_ALLOW_UNCALIBRATED=1`.
+- **The authored layer is the launch-deck authority.** It is deterministic,
+  offline, and enforced by the 51-test suite plus `evidence/validation-matrix.md`.
+- **"Close" has two meanings** once the judge is enabled: authored near miss
+  vs model uncertainty. See the findings doc before enabling.
+- The semantic judge is unit-tested against mocked transports; live judging
+  remains disabled pending the remediation plan in the findings doc.
 - Practice-mode drawer browsing is a list, not an elaborate cabinet animation.
 - No analytics, no accounts, no multiplayer (by design).

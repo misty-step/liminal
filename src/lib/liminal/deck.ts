@@ -19,9 +19,21 @@ export const DECK: readonly Puzzle[] = [
     mode: "literal",
     teaser: "Something old and smooth that you could close your hand around.",
     conditions: [
-      { id: "c1", text: "A small physical object — it fits in a closed hand" },
-      { id: "c2", text: "Made of stone, metal, or glass" },
-      { id: "c3", text: "Worn smooth by time or handling — not sharp, not rough" },
+      {
+        id: "c1",
+        text: "A small physical object — it fits in a closed hand",
+        judge: "Is `answer` a small physical object that fits in a closed hand?",
+      },
+      {
+        id: "c2",
+        text: "Made of stone, metal, or glass",
+        judge: "Is `answer` made of stone, metal, or glass?",
+      },
+      {
+        id: "c3",
+        text: "Worn smooth by time or handling — not sharp, not rough",
+        judge: "Is `answer` worn smooth by time or handling — neither sharp nor rough?",
+      },
     ],
     judgments: {
       version: "2026-09-20.1",
@@ -42,9 +54,13 @@ export const DECK: readonly Puzzle[] = [
     mode: "literal",
     teaser: "Vessels that keep what you pour into them.",
     conditions: [
-      { id: "c1", text: "A container" },
-      { id: "c2", text: "Found in a kitchen" },
-      { id: "c3", text: "Can hold liquid without leaking" },
+      { id: "c1", text: "A container", judge: "Is `answer` a container?" },
+      { id: "c2", text: "Found in a kitchen", judge: "Would `answer` be found in a kitchen?" },
+      {
+        id: "c3",
+        text: "Can hold liquid without leaking",
+        judge: "Can `answer` hold liquid without leaking?",
+      },
     ],
     judgments: {
       version: "2026-09-20.1",
@@ -65,9 +81,23 @@ export const DECK: readonly Puzzle[] = [
     mode: "wordplay",
     teaser: "The unit is in there somewhere — just not where you would look first.",
     conditions: [
-      { id: "c1", text: "A real, recognizable thing — not a person, place, or action" },
-      { id: "c2", text: "Its name hides a unit of measurement in consecutive letters" },
-      { id: "c3", text: "The hidden unit is not at the start or end of the name" },
+      {
+        id: "c1",
+        text: "A real, recognizable thing — not a person, place, or action",
+        judge: "Is `answer` a real, recognizable thing — not a person, a place, or an action?",
+      },
+      {
+        id: "c2",
+        text: "Its name hides a unit of measurement in consecutive letters",
+        judge:
+          "Do the letters of the name of `answer` contain a unit of measurement as consecutive letters (for example, 'bar' inside 'wheelbarrow')?",
+      },
+      {
+        id: "c3",
+        text: "The hidden unit is not at the start or end of the name",
+        judge:
+          "Within the name of `answer`, is the hidden unit of measurement somewhere other than the very start or the very end of the name?",
+      },
     ],
     judgments: {
       version: "2026-09-20.1",
@@ -89,9 +119,23 @@ export const DECK: readonly Puzzle[] = [
     mode: "wordplay",
     teaser: "Each keeps a letter it never says out loud.",
     conditions: [
-      { id: "c1", text: "A real, recognizable thing — not a person, place, or action" },
-      { id: "c2", text: "Its name contains a silent letter" },
-      { id: "c3", text: "The silent letter is not the first letter of the name" },
+      {
+        id: "c1",
+        text: "A real, recognizable thing — not a person, place, or action",
+        judge: "Is `answer` a real, recognizable thing — not a person, a place, or an action?",
+      },
+      {
+        id: "c2",
+        text: "Its name contains a silent letter",
+        judge:
+          "Does the name of `answer` contain a silent letter — a letter that is not pronounced when the word is spoken, such as the 'b' in 'comb' or the 't' in 'castle'?",
+      },
+      {
+        id: "c3",
+        text: "The silent letter is not the first letter of the name",
+        judge:
+          "In the name of `answer`, is the silent letter somewhere other than the first letter of the name?",
+      },
     ],
     judgments: {
       version: "2026-09-20.1",
