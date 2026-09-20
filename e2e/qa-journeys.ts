@@ -107,13 +107,7 @@ const browser = await chromium.launch();
   const page = await context.newPage();
   await page.goto(BASE, { waitUntil: "networkidle" });
   const conditionText = await page.evaluate(() => {
-    const li = document.querySelector(".conditions li");
-    const spans = li?.querySelectorAll("span");
-    return (
-      spans?.[1]?.textContent
-        ?.replace(/^(Not yet judged|Unjudged|Outside|Close|Inside):\s*/, "")
-        .trim() ?? ""
-    );
+    return document.querySelector(".conditions .condition-text")?.textContent?.trim() ?? "";
   });
   await guess(page, conditionText);
   const notice = await page.locator(".notice").innerText().catch(() => "");

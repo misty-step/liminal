@@ -182,25 +182,17 @@ h2.title {
   border-color: var(--close);
   background: linear-gradient(90deg, var(--close) 50%, transparent 50%);
 }
-.state[data-label]::after {
-  content: attr(data-label);
-  position: absolute;
-  left: 1.4rem;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 0.7rem;
+
+.state-label {
+  flex: 0 0 auto;
+  min-width: 3.6rem;
+  font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--paper-dim);
-  white-space: nowrap;
 }
-.conditions li {
-  padding-left: 2.9rem;
-  position: relative;
-}
-.conditions .state {
-  position: absolute;
-  left: 0.75rem;
+.condition-text {
+  flex: 1 1 auto;
 }
 
 .guess-form {
