@@ -76,9 +76,11 @@ bun run build
   `{ "pattern": "liminal.mistystep.io", "custom_domain": true }`.
 - Worker secrets: `OPENROUTER_API_KEY` (scoped) or `TYPESAFE_API_KEY`.
 - Worker vars: `JEV_MODEL=typesafe/jev-1.13`, `JEV_DECISIONS_URL=https://openrouter.ai/api/alpha/decisions`.
-- The repo is ready for the OpenNext Cloudflare build (chrondle precedent);
-  adding `@opennextjs/cloudflare` + `open-next.config.ts` is the remaining
-  deploy step.
+- Build: `bun run build:cf` (OpenNext, `open-next.config.ts`); deploy:
+  `bun run deploy:cf` (wrangler `--env production`).
+- Durable store: D1 `liminal-judgments` (binding `LIMINAL_DB`) retains
+  first-writer-wins judgments keyed by the versioned judgment keys and holds
+  append-only answer reports; schema lives in `migrations/`.
 
 ## Known limitations (this slice)
 

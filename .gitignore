@@ -5,6 +5,8 @@ build/
 .env
 .env.*
 !.env.example
+.dev.vars
+.dev.vars.*
 *.tsbuildinfo
 next-env.d.ts
 coverage/

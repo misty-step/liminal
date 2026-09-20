@@ -53,12 +53,17 @@ export function judgeEnvFrom(env: Record<string, string | undefined>): JudgeEnv 
   return null;
 }
 
+/**
+ * A judgment store. `set` returns the retained winner for the key: durable
+ * implementations preserve the first stored state and return it instead of
+ * the candidate, so concurrent judges converge on one verdict.
+ */
 export interface JudgmentCache {
-  get(key: string): ConditionState | undefined;
-  set(key: string, state: ConditionState): void;
+  get(key: string): ConditionState | undefined | Promise<ConditionState | undefined>;
+  set(key: string, state: ConditionState): ConditionState | Promise<ConditionState>;
 }
 
-/** Bounded in-memory cache. Production swaps this for durable storage. */
+/** Bounded in-memory cache. It is a hot layer, never a durable authority. */
 export function memoryCache(limit = 5000): JudgmentCache {
   const map = new Map<string, ConditionState>();
   return {
@@ -71,6 +76,7 @@ export function memoryCache(limit = 5000): JudgmentCache {
         if (oldest !== undefined) map.delete(oldest);
       }
       map.set(key, state);
+      return state;
     },
   };
 }
@@ -112,7 +118,7 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
       answer,
       model: env.model,
     });
-    const cached = cache.get(key);
+    const cached = await cache.get(key);
     if (cached) {
       states[condition.id] = cached;
     } else {
@@ -196,8 +202,9 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
       }
     }
     for (const [conditionId, state] of Object.entries(fresh)) {
-      states[conditionId] = state;
-      cache.set(
+      // The store returns the retained winner: a durable authority may hold a
+      // verdict from an earlier concurrent caller; serve that instead.
+      states[conditionId] = await cache.set(
         judgmentKey({ puzzleId: puzzle.id, conditionId, answer, model: env.model }),
         state,
       );

@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import { getPuzzle } from "@/lib/liminal/deck";
 import { judgeEnabledFor } from "@/lib/liminal/judgment";
 import { normalizeAnswer } from "@/lib/liminal/normalize";
-import { judgeAnswer, judgeEnvFrom, memoryCache } from "@/lib/liminal/typeSafe";
+import { judgeAnswer, judgeEnvFrom } from "@/lib/liminal/typeSafe";
+import { judgeCache } from "@/lib/liminal/store";
 import { MAX_ANSWER_LENGTH } from "@/lib/liminal/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-const cache = memoryCache();
 
 // Bounded per-IP rate limit: 20 judgments per minute.
 const WINDOW_MS = 60_000;
@@ -65,7 +64,8 @@ export async function POST(request: Request) {
     puzzle,
     answer,
     env,
-    cache,
+    // Durable on Workers (D1 first-writer-wins); process-local elsewhere.
+    cache: await judgeCache(),
     timeoutMs: 4000,
   });
 
