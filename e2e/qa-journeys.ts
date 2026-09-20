@@ -111,7 +111,7 @@ const browser = await chromium.launch();
     const spans = li?.querySelectorAll("span");
     return (
       spans?.[1]?.textContent
-        ?.replace(/^(Unjudged|Outside|Close|Inside):\s*/, "")
+        ?.replace(/^(Not yet judged|Unjudged|Outside|Close|Inside):\s*/, "")
         .trim() ?? ""
     );
   });
