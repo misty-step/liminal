@@ -11,10 +11,10 @@ const OUT = process.env.OUT ?? "/home/exedev/shots";
 mkdirSync(OUT, { recursive: true });
 
 const ANSWERS: Record<string, { win: string; near: string; loss: string[] }> = {
-  "The Pocket Relic": { win: "pebble", near: "nail", loss: ["boulder", "sponge", "glass shard", "nail", "geode"] },
-  "The Kitchen Well": { win: "mug", near: "colander", loss: ["colander", "sieve", "basket", "sponge", "funnel"] },
-  "Hidden Measures": { win: "windmill", near: "cupcake", loss: ["cupcake", "inchworm", "graveyard", "kilogram", "amphora"] },
-  "Silent Partners": { win: "comb", near: "knife", loss: ["knife", "gnome", "hourglass", "listen", "wristwatch"] },
+  "The Vessel in the Wall": { win: "sink", near: "shampoo bottle", loss: ["kitchen sink", "shampoo bottle", "shower head"] },
+  "The Kitchen Well": { win: "mug", near: "colander", loss: ["colander", "aquarium", "watering can", "barrel", "vase"] },
+  "Made and Taken": { win: "phone call", near: "cake", loss: ["cake", "pie", "sandwich", "salad"] },
+  "Pass or Fail": { win: "audition", near: "rescue", loss: ["launch", "takeover", "rescue"] },
 };
 
 const results: { name: string; ok: boolean; detail?: string }[] = [];
@@ -118,15 +118,15 @@ const browser = await chromium.launch();
   await context.close();
 }
 
-// ---------- Loss journey on The Pocket Relic ----------
+// ---------- Loss journey on The Kitchen Well ----------
 {
   const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const page = await context.newPage();
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await openDrawer(page, "The Pocket Relic");
+  await openDrawer(page, "The Kitchen Well");
   const title = await puzzleTitle(page);
-  check("practice opens the chosen drawer", title === "The Pocket Relic", title);
-  for (const answer of ANSWERS["The Pocket Relic"].loss) {
+  check("practice opens the chosen drawer", title === "The Kitchen Well", title);
+  for (const answer of ANSWERS["The Kitchen Well"].loss) {
     await guess(page, answer);
   }
   const reveal = await page.locator(".reveal h3").innerText().catch(() => "");

@@ -5,26 +5,22 @@ A verified answer yields Inside on every condition. A near miss yields Close on
 exactly the listed condition and Inside elsewhere. Both are enforced by
 `__tests__/deck.test.ts` (51-test suite).
 
-## The Pocket Relic (pocket-relic, literal)
+## The Vessel in the Wall (bath-vessel, literal)
 
 | answer | kind | c1 | c2 | c3 |
 | --- | --- | --- | --- | --- |
-| pebble | verified answer | inside | inside | inside |
-| marble | verified answer | inside | inside | inside |
-| coin | verified answer | inside | inside | inside |
-| bead | verified answer | inside | inside | inside |
-| gemstone | verified answer | inside | inside | inside |
-| ring | verified answer | inside | inside | inside |
-| key | verified answer | inside | inside | inside |
-| boulder | near miss (fails c1) | close | inside | inside |
-| sponge | near miss (fails c2) | inside | close | inside |
-| glass shard | near miss (fails c3) | inside | inside | close |
-| nail | near miss (fails c3) | inside | inside | close |
-| geode | near miss (fails c3) | inside | inside | close |
+| sink | verified answer | inside | inside | inside |
+| bathtub | verified answer | inside | inside | inside |
+| washbasin | verified answer | inside | inside | inside |
+| toilet | verified answer | inside | inside | inside |
+| kitchen sink | near miss (fails c1) | close | inside | inside |
+| shampoo bottle | near miss (fails c2) | inside | close | inside |
+| faucet | near miss (fails c3) | inside | inside | close |
+| shower head | near miss (fails c3) | inside | inside | close |
 
-Conditions: c1 = A small physical object — it fits in a closed hand; c2 = Made of stone, metal, or glass; c3 = Worn smooth by time or handling — not sharp, not rough
+Conditions: c1 = Commonly found in a bathroom; c2 = Plumbed in — it has a drain or pipes; c3 = It can hold a pool of water
 
-Clue-echo rejection sample: "small physical object it fits in a closed hand" -> echo
+Clue-echo rejection sample: "commonly found in a bathroom" -> echo
 
 ## The Kitchen Well (kitchen-well, literal)
 
@@ -41,58 +37,47 @@ Clue-echo rejection sample: "small physical object it fits in a closed hand" -> 
 | pan | verified answer | inside | inside | inside |
 | wok | verified answer | inside | inside | inside |
 | colander | near miss (fails c3) | inside | inside | close |
-| sieve | near miss (fails c3) | inside | inside | close |
-| basket | near miss (fails c3) | inside | inside | close |
-| sponge | near miss (fails c1) | close | inside | inside |
-| funnel | near miss (fails c3) | inside | inside | close |
+| aquarium | near miss (fails c2) | inside | close | inside |
+| watering can | near miss (fails c2) | inside | close | inside |
+| barrel | near miss (fails c2) | inside | close | inside |
+| vase | near miss (fails c2) | inside | close | inside |
+| bucket | near miss (fails c2) | inside | close | inside |
 
 Conditions: c1 = A container; c2 = Found in a kitchen; c3 = Can hold liquid without leaking
 
 Clue-echo rejection sample: "container" -> echo
 
-## Hidden Measures (hidden-measures, wordplay)
+## Made and Taken (made-and-taken, wordplay)
 
 | answer | kind | c1 | c2 | c3 |
 | --- | --- | --- | --- | --- |
-| wheelbarrow | verified answer | inside | inside | inside |
-| windmill | verified answer | inside | inside | inside |
-| treadmill | verified answer | inside | inside | inside |
-| trampoline | verified answer | inside | inside | inside |
-| lampshade | verified answer | inside | inside | inside |
-| lamppost | verified answer | inside | inside | inside |
-| cupcake | near miss (fails c3) | inside | inside | close |
-| inchworm | near miss (fails c3) | inside | inside | close |
-| graveyard | near miss (fails c3) | inside | inside | close |
-| kilogram | near miss (fails c2) | inside | close | inside |
-| amphora | near miss (fails c3) | inside | inside | close |
-| campsite | near miss (fails c1) | close | inside | inside |
+| decision | verified answer | inside | inside | inside |
+| phone call | verified answer | inside | inside | inside |
+| wrong turn | verified answer | inside | inside | inside |
+| u-turn | verified answer | inside | inside | inside |
+| apology | verified answer | inside | inside | inside |
+| cake | near miss (fails c3) | inside | inside | close |
+| pie | near miss (fails c3) | inside | inside | close |
+| sandwich | near miss (fails c3) | inside | inside | close |
+| salad | near miss (fails c3) | inside | inside | close |
 
-Conditions: c1 = A real, recognizable thing — not a person, place, or action; c2 = Its name hides a unit of measurement in consecutive letters; c3 = The hidden unit is not at the start or end of the name
+Conditions: c1 = You can make it — people really say this; c2 = You can take it — people really say this; c3 = It is not a physical object
 
-Clue-echo rejection sample: "real recognizable thing not a person place or action" -> echo
+Clue-echo rejection sample: "you can make it people really say this" -> echo
 
-## Silent Partners (silent-partners, wordplay)
+## Pass or Fail (pass-or-fail, wordplay)
 
 | answer | kind | c1 | c2 | c3 |
 | --- | --- | --- | --- | --- |
-| castle | verified answer | inside | inside | inside |
-| whistle | verified answer | inside | inside | inside |
-| comb | verified answer | inside | inside | inside |
-| thumb | verified answer | inside | inside | inside |
-| sandwich | verified answer | inside | inside | inside |
-| chalk | verified answer | inside | inside | inside |
-| salmon | verified answer | inside | inside | inside |
-| yolk | verified answer | inside | inside | inside |
-| tomb | verified answer | inside | inside | inside |
-| bomb | verified answer | inside | inside | inside |
-| handkerchief | verified answer | inside | inside | inside |
-| knife | near miss (fails c3) | inside | inside | close |
-| gnome | near miss (fails c3) | inside | inside | close |
-| hourglass | near miss (fails c3) | inside | inside | close |
-| wristwatch | near miss (fails c3) | inside | inside | close |
-| listen | near miss (fails c1) | close | inside | inside |
+| audition | verified answer | inside | inside | inside |
+| interview | verified answer | inside | inside | inside |
+| drug test | verified answer | inside | inside | inside |
+| driving test | verified answer | inside | inside | inside |
+| launch | near miss (fails c1) | close | inside | inside |
+| takeover | near miss (fails c1) | close | inside | inside |
+| rescue | near miss (fails c1) | close | inside | inside |
 
-Conditions: c1 = A real, recognizable thing — not a person, place, or action; c2 = Its name contains a silent letter; c3 = The silent letter is not the first letter of the name
+Conditions: c1 = You can pass it — clear it, succeed at it; c2 = You can fail it; c3 = It is something that happens — not a thing you could touch
 
-Clue-echo rejection sample: "real recognizable thing not a person place or action" -> echo
+Clue-echo rejection sample: "you can pass it clear it succeed at it" -> echo
 

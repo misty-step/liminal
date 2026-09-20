@@ -59,3 +59,53 @@ the distinction must be documented wherever live judging is enabled.
 
 - "The judge is calibrated." It is not.
 - "Fixture tests prove live behavior." They prove rules, not model behavior.
+
+## 2026-09-20 run 3 — calibration recovery (completed)
+
+Mechanism: every condition now ships an authored Choice rubric (yes / partly /
+no, each with a descriptive level). The judge sends one descriptive question
+per condition. A pick below the confidence floor (0.5) is refused as
+"unavailable:uncertain". Uncertainty never maps to Close. Noul remains only as
+a legacy path; no new code uses it.
+
+Rubric rewordings, with the semantic reason for each:
+
+- Article-free backticked nouns read ungrammatical to the model ("can you
+  'pass' test"). Reworded to "Consider `answer` ... can people 'pass' it?"
+  via pronoun anaphora.
+- Examples inside a question inverted the answer (the model judged the example
+  as the whole class). Examples were removed from all judge questions.
+- "can people 'fail' it" excluded events that fail themselves. Reworded to
+  "can people 'fail' it — or can it itself fail?". This change alone verified
+  rescue and takeover as near misses.
+
+Puzzle replacements, with the semantic reason for each:
+
+- Lost and Found (lose/find abstract nouns) was replaced by Pass or Fail.
+  Reason: the model splits on abstract-noun idioms at genuine coin-flips
+  (balance 0.5, sleep 0.55, voice 0.5). The idiom space is beyond the
+  model's reliable range. Pass or Fail uses school vocabulary with clean
+  pass/fail asymmetry.
+- Kept and Broken (break/keep) was replaced by Made and Taken. Reason: the
+  break+keep idiom space is symmetric. Every candidate near miss split at
+  the confidence floor. No honest near miss could exist. Made and Taken uses
+  asymmetric make/take pairs instead.
+
+Observed model limits that shaped the fixtures:
+
+- Bare polysemous nouns (stand, call, turn) split across senses. Verified
+  fixtures use multi-word phrases (phone call, wrong turn) or monosemous
+  nouns (decision, apology).
+- Idiom-absence claims ("nobody makes a rain check") hedge below the floor.
+  Near misses therefore fail a concrete condition (physical object) or rest
+  on a usage the model rejects with margin (launch, takeover, rescue:
+  nobody "passes" these).
+
+Held-out policy: held-out answers were probed fresh each round, never the
+tuned allowlist. Kitchen held-outs (tumbler, measuring cup, carafe) were
+retained from run 2; their green rows are in the raw evidence.
+
+Final state: 50/50 rows match in
+evidence/live-matrix-2026-09-20T18-59-52-242Z.json (23 answers, 17 near
+misses, 10 held-out). All four puzzles are marked "calibrated". Failed
+matrices from runs 1-2 are retained as evidence of the recovery path.

@@ -14,6 +14,12 @@ describe("launch deck", () => {
     expect(DECK_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}\.\d+$/);
   });
 
+  it("marks every puzzle with an explicit calibration status", () => {
+    for (const puzzle of DECK) {
+      expect(["calibrated", "uncalibrated"]).toContain(puzzle.judgeStatus);
+    }
+  });
+
   for (const puzzle of DECK) {
     describe(`${puzzle.id} (${puzzle.mode})`, () => {
       it("has several verified answers that win outright", () => {
@@ -72,12 +78,30 @@ describe("launch deck", () => {
           expect(clueTexts.has(normalizeAnswer(answer)), `${answer} repeats a clue`).toBe(false);
         }
       });
+
+      it("holds out valid answers from the authored allowlist", () => {
+        expect(puzzle.judgments.heldOut?.length ?? 0).toBeGreaterThanOrEqual(1);
+        const shipped = new Set([
+          ...puzzle.judgments.answers.map(normalizeAnswer),
+          ...puzzle.judgments.nearMisses.map((n) => normalizeAnswer(n.answer)),
+        ]);
+        for (const held of puzzle.judgments.heldOut ?? []) {
+          expect(
+            shipped.has(normalizeAnswer(held)),
+            `${held} must not be an authored win or near miss`,
+          ).toBe(false);
+          // Held-out answers are never authored wins: they must need the live judge.
+          const feedback = evaluateGuess(puzzle, held);
+          expect(feedback.needsJudgment, `${held} must need the live judge`).toBe(true);
+          expect(feedback.solved).toBe(false);
+        }
+      });
     });
   }
 
   it("exposes puzzles by id", () => {
-    expect(getPuzzle("hidden-measures")?.mode).toBe("wordplay");
-    expect(getPuzzle("pocket-relic")?.mode).toBe("literal");
+    expect(getPuzzle("made-and-taken")?.mode).toBe("wordplay");
+    expect(getPuzzle("bath-vessel")?.mode).toBe("literal");
     expect(getPuzzle("nope")).toBeUndefined();
   });
 });

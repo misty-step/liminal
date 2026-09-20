@@ -1,12 +1,15 @@
 import { normalizeAnswer } from "./normalize";
 import {
+  CHOICE_CONFIDENCE_FLOOR,
+  CHOICE_KEYS,
   DEFAULT_MODEL,
   JUDGE_PROMPT_VERSION,
   buildQuestions,
   judgmentKey,
+  stateFromChoice,
   stateFromNoul,
 } from "./judgment";
-import type { JudgeResult } from "./judgment";
+import type { ChoiceKey, JudgeResult } from "./judgment";
 import type { ConditionState, Puzzle } from "./types";
 
 /**
@@ -17,6 +20,11 @@ import type { ConditionState, Puzzle } from "./types";
  *
  * Credentials stay server-side. Requests are bounded, time-boxed, and cached by
  * judgment version so the same answer never rerolls a judgment.
+ *
+ * Conditions ship authored Choice levels: one descriptive rubric per condition,
+ * and the chosen level maps to outside / close / inside. A Choice answer below
+ * the confidence floor is uncertainty, not a judgment: it is reported as
+ * "uncertain" and the caller refuses without consuming a guess.
  */
 
 export interface JudgeEnv {
@@ -68,7 +76,15 @@ export function memoryCache(limit = 5000): JudgmentCache {
 }
 
 interface TypeSafeResponse {
-  answers?: Record<string, { type?: string; noul?: number }>;
+  answers?: Record<
+    string,
+    {
+      type?: string;
+      noul?: number;
+      choice?: string;
+      confidence?: number;
+    }
+  >;
 }
 
 export interface JudgeOptions {
@@ -143,12 +159,41 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
     // Validate every fresh judgment before caching any of them: a partial
     // response must not leave half a judgment behind.
     const fresh: Record<string, ConditionState> = {};
+    const confidences: Record<string, number> = {};
     for (const conditionId of uncached) {
-      const value = body.answers[conditionId]?.noul;
-      if (typeof value !== "number") {
+      const question = questions[conditionId];
+      const value = body.answers[conditionId];
+      if (!value) {
         return { status: "unavailable", reason: "invalid-response" };
       }
-      fresh[conditionId] = stateFromNoul(value);
+      if (question.type === "choice") {
+        if (
+          typeof value.choice !== "string" ||
+          !CHOICE_KEYS.includes(value.choice as ChoiceKey)
+        ) {
+          return { status: "unavailable", reason: "invalid-response" };
+        }
+        const confidence = typeof value.confidence === "number" ? value.confidence : 0;
+        if (confidence < CHOICE_CONFIDENCE_FLOOR) {
+          // Honest uncertainty: this is not a near miss and not a judgment.
+          return { status: "unavailable", reason: "uncertain" };
+        }
+        const state = stateFromChoice(value.choice);
+        if (!state) {
+          return { status: "unavailable", reason: "invalid-response" };
+        }
+        fresh[conditionId] = state;
+        confidences[conditionId] = confidence;
+      } else {
+        if (typeof value.noul !== "number") {
+          return { status: "unavailable", reason: "invalid-response" };
+        }
+        fresh[conditionId] = stateFromNoul(value.noul);
+        confidences[conditionId] =
+          typeof value.confidence === "number"
+            ? value.confidence
+            : Math.max(value.noul, 1 - value.noul);
+      }
     }
     for (const [conditionId, state] of Object.entries(fresh)) {
       states[conditionId] = state;
@@ -161,6 +206,7 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
     return {
       status: "judged",
       states,
+      confidences,
       model: env.model,
       judgmentVersion: `${JUDGE_PROMPT_VERSION}:${env.model}`,
     };

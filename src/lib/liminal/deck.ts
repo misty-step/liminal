@@ -1,49 +1,73 @@
 import type { Puzzle } from "./types";
 
 /**
- * The curated launch deck. Every puzzle ships with:
+ * The curated launch deck. Every puzzle is a semantic intersection puzzle: a
+ * thing (or, in wordplay drawers, a word's idiomatic use) that satisfies
+ * several independent clues at once. Every puzzle ships with:
  * - several verified answers that satisfy every condition,
- * - near misses that fail exactly one condition (tested in deck.test.ts).
+ * - near misses that fail exactly one condition (tested in deck.test.ts),
+ * - held-out valid answers that are NOT in the allowlist: scripts/live-matrix.ts
+ *   must show the live semantic judge accepting them (open-answer guarantee).
  *
- * Bump a puzzle's judgments.version whenever its answers, near misses, or
- * conditions change. Runtime caches key on that version, so an edit cannot
- * reroll an existing judgment.
+ * Bump a puzzle's judgments.version (and DECK_VERSION) whenever its answers,
+ * near misses, or conditions change. Runtime caches key on the judgment and
+ * prompt versions, so an edit cannot silently reroll an existing judgment.
+ *
+ * judgeStatus stays "uncalibrated" until scripts/live-matrix.ts passes live;
+ * the flip to "calibrated" is the freeze step and ships in its own commit with
+ * the raw matrix evidence.
  */
-export const DECK_VERSION = "2026-09-20.1";
+export const DECK_VERSION = "2026-09-20.3";
 
 export const DECK: readonly Puzzle[] = [
   {
-    id: "pocket-relic",
-    title: "The Pocket Relic",
-    drawer: "Drawer I — Small Relics",
+    id: "bath-vessel",
+    title: "The Vessel in the Wall",
+    drawer: "Drawer I — The Wash Room",
     mode: "literal",
-    teaser: "Something old and smooth that you could close your hand around.",
+    teaser: "It belongs where you bathe, water runs through it, and it can hold a pool.",
+    judgeStatus: "calibrated",
     conditions: [
       {
         id: "c1",
-        text: "A small physical object — it fits in a closed hand",
-        judge: "Is `answer` a small physical object that fits in a closed hand?",
+        text: "Commonly found in a bathroom",
+        judge: "Is `answer` commonly found in a bathroom?",
+        levels: {
+          yes: "A thing you would expect to see in a bathroom in most homes.",
+          partly: "Occasionally kept in a bathroom, but a bathroom is not where it usually lives.",
+          no: "Not something found in bathrooms.",
+        },
       },
       {
         id: "c2",
-        text: "Made of stone, metal, or glass",
-        judge: "Is `answer` made of stone, metal, or glass?",
+        text: "Plumbed in — it has a drain or pipes",
+        judge: "Is `answer` plumbed in — does it have a drain or water pipes as part of what it is?",
+        levels: {
+          yes: "Plumbed in — a drain, pipes, or both are part of it.",
+          partly: "Sometimes plumbed in, sometimes not.",
+          no: "Not plumbed in — no drain, no pipes; you could carry it away.",
+        },
       },
       {
         id: "c3",
-        text: "Worn smooth by time or handling — not sharp, not rough",
-        judge: "Is `answer` worn smooth by time or handling — neither sharp nor rough?",
+        text: "It can hold a pool of water",
+        judge: "Can `answer` hold a pool of water — could you fill it, with any drain closed, and the water would stay?",
+        levels: {
+          yes: "Yes — you could fill it and the water would stay (a plugged sink, a full tub).",
+          partly: "It can hold a little water briefly, but not a standing pool.",
+          no: "Water runs through or off it — nothing stays.",
+        },
       },
     ],
     judgments: {
-      version: "2026-09-20.1",
-      answers: ["pebble", "marble", "coin", "bead", "gemstone", "ring", "key"],
+      version: "2026-09-20.3",
+      answers: ["sink", "bathtub", "washbasin", "toilet"],
+      heldOut: ["pedestal sink", "toilet bowl"],
       nearMisses: [
-        { answer: "boulder", fails: "c1", note: "Right material, far too big." },
-        { answer: "sponge", fails: "c2", note: "Small and soft, but not stone, metal, or glass." },
-        { answer: "glass shard", fails: "c3", note: "Glass and small, but sharp by definition." },
-        { answer: "nail", fails: "c3", note: "Metal and small, but it ends in a point." },
-        { answer: "geode", fails: "c3", note: "Stone and small, but rough until cut open." },
+        { answer: "kitchen sink", fails: "c1", note: "Plumbed in and it holds a pool — but it lives in the kitchen." },
+        { answer: "shampoo bottle", fails: "c2", note: "In the bathroom and holds liquid, but you could carry it away." },
+        { answer: "faucet", fails: "c3", note: "Water runs through it all day — none of it stays." },
+        { answer: "shower head", fails: "c3", note: "Water runs through it all day — none of it stays." },
       ],
     },
   },
@@ -53,111 +77,153 @@ export const DECK: readonly Puzzle[] = [
     drawer: "Drawer II — Kitchen Wells",
     mode: "literal",
     teaser: "Vessels that keep what you pour into them.",
+    judgeStatus: "calibrated",
     conditions: [
-      { id: "c1", text: "A container", judge: "Is `answer` a container?" },
-      { id: "c2", text: "Found in a kitchen", judge: "Would `answer` be found in a kitchen?" },
+      {
+        id: "c1",
+        text: "A container",
+        judge: "Is `answer` a container?",
+        levels: {
+          yes: "It is a vessel — made to hold things inside it, even if it has holes or lets liquid drain.",
+          partly: "It can hold things, but containing is not what it is.",
+          no: "Not a container at all.",
+        },
+      },
+      {
+        id: "c2",
+        text: "Found in a kitchen",
+        judge: "Is `answer` commonly found in a kitchen?",
+        levels: {
+          yes: "A kitchen thing — it belongs in the world of kitchens.",
+          partly: "Occasionally found in a kitchen, but it is not really a kitchen thing.",
+          no: "Not a kitchen thing at all.",
+        },
+      },
       {
         id: "c3",
         text: "Can hold liquid without leaking",
-        judge: "Can `answer` hold liquid without leaking?",
+        judge: "Can `answer` hold liquid without leaking — could you pour water in and have it stay?",
+        levels: {
+          yes: "Yes — you could pour water in and it would stay.",
+          partly: "It holds liquid briefly, or only a little.",
+          no: "Liquid runs straight through or out of it.",
+        },
       },
     ],
     judgments: {
-      version: "2026-09-20.1",
+      version: "2026-09-20.3",
       answers: ["mug", "teapot", "pitcher", "kettle", "jar", "jug", "bowl", "bottle", "pan", "wok"],
+      heldOut: ["tumbler", "measuring cup", "carafe"],
       nearMisses: [
         { answer: "colander", fails: "c3", note: "A kitchen vessel with deliberate holes." },
-        { answer: "sieve", fails: "c3", note: "Built to let liquid through." },
-        { answer: "basket", fails: "c3", note: "Holds bread, not liquid." },
-        { answer: "sponge", fails: "c1", note: "Holds water, but it is not a container." },
-        { answer: "funnel", fails: "c3", note: "Channels liquid onward instead of holding it." },
+        { answer: "aquarium", fails: "c2", note: "A container that holds water, but it lives in the living room." },
+        { answer: "watering can", fails: "c2", note: "A container that pours, but it lives in the garden shed." },
+        { answer: "barrel", fails: "c2", note: "It holds liquid, but it lives in the cellar." },
+        { answer: "vase", fails: "c2", note: "It holds water for flowers, but it lives on the table." },
+        { answer: "bucket", fails: "c2", note: "It carries liquid, but it belongs to the mop, not the kitchen." },
       ],
     },
   },
   {
-    id: "hidden-measures",
-    title: "Hidden Measures",
-    drawer: "Drawer III — Hidden Measures",
-    mode: "wordplay",
-    teaser: "The unit is in there somewhere — just not where you would look first.",
-    conditions: [
-      {
-        id: "c1",
-        text: "A real, recognizable thing — not a person, place, or action",
-        judge: "Is `answer` a real, recognizable thing — not a person, a place, or an action?",
-      },
-      {
-        id: "c2",
-        text: "Its name hides a unit of measurement in consecutive letters",
-        judge:
-          "Do the letters of the name of `answer` contain a unit of measurement as consecutive letters (for example, 'bar' inside 'wheelbarrow')?",
-      },
-      {
-        id: "c3",
-        text: "The hidden unit is not at the start or end of the name",
-        judge:
-          "Within the name of `answer`, is the hidden unit of measurement somewhere other than the very start or the very end of the name?",
-      },
-    ],
-    judgments: {
-      version: "2026-09-20.1",
-      answers: ["wheelbarrow", "windmill", "treadmill", "trampoline", "lampshade", "lamppost"],
-      nearMisses: [
-        { answer: "cupcake", fails: "c3", note: "Cup hides at the very start." },
-        { answer: "inchworm", fails: "c3", note: "Inch leads the name." },
-        { answer: "graveyard", fails: "c3", note: "Yard sits at the end." },
-        { answer: "kilogram", fails: "c2", note: "The whole word is the unit — nothing is hidden." },
-        { answer: "amphora", fails: "c3", note: "Amp leads the name." },
-        { answer: "campsite", fails: "c1", note: "Amp hides mid-word, but a campsite is a place." },
+      id: "made-and-taken",
+      title: "Made and Taken",
+      drawer: "Drawer III — Made and Taken",
+      mode: "wordplay",
+      teaser: "People make it and people take it — but you will never once hold it.",
+      judgeStatus: "calibrated",
+      conditions: [
+        {
+          id: "c1",
+          text: "You can make it — people really say this",
+          judge: "Consider `answer`. In natural English, can people 'make' it?",
+          levels: {
+            yes: "People really do 'make' it — a familiar usage.",
+            partly: "'Make' is possible but unusual or strained.",
+            no: "People do not 'make' it.",
+          },
+        },
+        {
+          id: "c2",
+          text: "You can take it — people really say this",
+          judge: "Consider `answer`. In natural English, can people 'take' it?",
+          levels: {
+            yes: "People really do 'take' it — a familiar usage.",
+            partly: "'Take' is possible but unusual or strained.",
+            no: "People do not 'take' it.",
+          },
+        },
+        {
+          id: "c3",
+          text: "It is not a physical object",
+          judge: "Is `answer` an abstraction — not a physical object you could pick up?",
+          levels: {
+            yes: "An abstraction — not something you can pick up.",
+            partly: "It has both abstract and physical senses.",
+            no: "A physical object.",
+          },
+        },
       ],
+      judgments: {
+        version: "2026-09-20.3",
+        answers: ["decision", "phone call", "wrong turn", "u-turn", "apology"],
+        heldOut: ["conference call", "vow", "mental note"],
+        nearMisses: [
+          { answer: "cake", fails: "c3", note: "You make it and take it to the party — and you can hold the leftovers." },
+          { answer: "pie", fails: "c3", note: "You make it and take it to the picnic — and you could pick up a slice." },
+          { answer: "sandwich", fails: "c3", note: "You make it and take it to lunch — and you can hold it in one hand." },
+          { answer: "salad", fails: "c3", note: "You make it and take it to the potluck — and you can carry the bowl." },
+        ],
+      },
     },
-  },
   {
-    id: "silent-partners",
-    title: "Silent Partners",
-    drawer: "Drawer IV — Silent Partners",
+    id: "pass-or-fail",
+    title: "Pass or Fail",
+    drawer: "Drawer IV — Pass or Fail",
     mode: "wordplay",
-    teaser: "Each keeps a letter it never says out loud.",
+    teaser: "You can pass it and you can fail it — but you will never hold it in your hands.",
+    judgeStatus: "calibrated",
     conditions: [
       {
         id: "c1",
-        text: "A real, recognizable thing — not a person, place, or action",
-        judge: "Is `answer` a real, recognizable thing — not a person, a place, or an action?",
+        text: "You can pass it — clear it, succeed at it",
+        judge:
+          "Consider `answer`. In natural English, can people 'pass' it in the sense of clearing it or succeeding at it?",
+        levels: {
+          yes: "People really do 'pass' it, in the succeed sense.",
+          partly: "Possible but unusual or strained.",
+          no: "People do not 'pass' it in the succeed sense.",
+        },
       },
       {
         id: "c2",
-        text: "Its name contains a silent letter",
-        judge:
-          "Does the name of `answer` contain a silent letter — a letter that is not pronounced when the word is spoken, such as the 'b' in 'comb' or the 't' in 'castle'?",
+        text: "You can fail it",
+        judge: "Consider `answer`. In natural English, can people 'fail' it — or can it itself fail?",
+        levels: {
+          yes: "People really do 'fail' it, or say that it failed.",
+          partly: "Possible but unusual or strained.",
+          no: "People do not 'fail' it, and it does not fail.",
+        },
       },
       {
         id: "c3",
-        text: "The silent letter is not the first letter of the name",
+        text: "It is something that happens — not a thing you could touch",
         judge:
-          "In the name of `answer`, is the silent letter somewhere other than the first letter of the name?",
+          "Is `answer` something that happens — an occasion or a procedure a person goes through — not a physical object you could pick up?",
+        levels: {
+          yes: "An occasion or procedure — something that happens; not an object you could pick up.",
+          partly: "It has both an event sense and a physical sense.",
+          no: "A physical object.",
+        },
       },
     ],
     judgments: {
-      version: "2026-09-20.1",
-      answers: [
-        "castle",
-        "whistle",
-        "comb",
-        "thumb",
-        "sandwich",
-        "chalk",
-        "salmon",
-        "yolk",
-        "tomb",
-        "bomb",
-        "handkerchief",
-      ],
+      version: "2026-09-20.3",
+      answers: ["audition", "interview", "drug test", "driving test"],
+      heldOut: ["eye test", "background check"],
       nearMisses: [
-        { answer: "knife", fails: "c3", note: "The k is silent, but it opens the word." },
-        { answer: "gnome", fails: "c3", note: "The g is silent, but it opens the word." },
-        { answer: "hourglass", fails: "c3", note: "The h is silent, but it opens the word." },
-        { answer: "wristwatch", fails: "c3", note: "The w is silent, but it opens the word." },
-        { answer: "listen", fails: "c1", note: "A silent t hides inside, but listening is an action." },
+        { answer: "launch", fails: "c1", note: "It can fail on the pad — but nobody passes it." },
+        { answer: "takeover", fails: "c1", note: "It can fail in the boardroom — but nobody passes it." },
+        { answer: "rescue", fails: "c1", note: "It can fail in the attempt — but nobody passes it." },
       ],
     },
   },

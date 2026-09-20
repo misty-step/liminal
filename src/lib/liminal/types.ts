@@ -5,6 +5,21 @@ export type PuzzleMode = "literal" | "wordplay";
 /** Per-condition feedback. Three states, never a decimal dashboard. */
 export type ConditionState = "outside" | "close" | "inside";
 
+/**
+ * Descriptive rubric levels for a condition's Choice question. Each level is a
+ * plain-language description; the judge picks the one that fits, and code maps
+ * the pick to outside / close / inside. Wording is authored, versioned with the
+ * judgment set, and never shown to the player.
+ */
+export interface ChoiceLevels {
+  /** Clearly satisfies the condition. Maps to inside. */
+  yes: string;
+  /** Borderline or a stretch. Maps to close. */
+  partly: string;
+  /** Does not satisfy the condition. Maps to outside. */
+  no: string;
+}
+
 export interface Condition {
   /** Stable id used in judgments, caches, and feedback. */
   id: string;
@@ -16,6 +31,8 @@ export interface Condition {
    * back to `text` when omitted.
    */
   judge?: string;
+  /** Authored Choice rubric. Absent means the condition falls back to a Noul yes/no. */
+  levels?: ChoiceLevels;
 }
 
 /** One authored near miss: a real answer that fails exactly one condition. */
@@ -33,6 +50,12 @@ export interface AuthoredJudgment {
   answers: string[];
   /** Near misses with tested single-condition failures. */
   nearMisses: NearMiss[];
+  /**
+   * Valid answers deliberately held OUT of the authored allowlist. They are
+   * never authored wins; scripts/live-matrix.ts must show the live semantic
+   * judge accepting them. This is the open-answer guarantee.
+   */
+  heldOut?: string[];
 }
 
 export interface Puzzle {
