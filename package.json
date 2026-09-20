@@ -10,7 +10,8 @@
     "start": "next start",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "validate:live": "bun run scripts/live-matrix.ts"
   },
   "dependencies": {
     "next": "^16.3.5",

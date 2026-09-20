@@ -66,7 +66,7 @@ bun run build
 
 ## Deploy contract (for Zoe)
 
-- Cloudflare Worker + custom domain `liminal.mystystep.io` →
+- Cloudflare Worker + custom domain `liminal.mistystep.io` →
   `{ "pattern": "liminal.mistystep.io", "custom_domain": true }`.
 - Worker secrets: `OPENROUTER_API_KEY` (scoped) or `TYPESAFE_API_KEY`.
 - Worker vars: `JEV_MODEL=typesafe/jev-1.13`, `JEV_DECISIONS_URL=https://openrouter.ai/api/alpha/decisions`.
@@ -76,6 +76,11 @@ bun run build
 
 ## Known limitations (this slice)
 
+- **Live calibration is required and not yet run.** Fixture tests prove the
+  rules, not the live model. Run `scripts/live-matrix.ts` against live Jev
+  (`OPENROUTER_API_KEY` or `TYPESAFE_API_KEY`) before release and attach the
+  `evidence/live-matrix-*.json` output. The full-deck positive/near-miss matrix
+  is a release gate.
 - The semantic judge is coded and unit-tested against mocked transports; it has
   not run against the live Jev endpoint in this slice (no key in the build
   environment). Zoe owns the scoped key.
