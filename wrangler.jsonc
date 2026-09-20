@@ -28,7 +28,15 @@
       "vars": {
         "JEV_MODEL": "typesafe/jev-1.13",
         "JEV_DECISIONS_URL": "https://openrouter.ai/api/alpha/decisions"
-      }
+      },
+      // Bindings are NOT inherited from the top level: declare per environment.
+      "d1_databases": [
+        {
+          "binding": "LIMINAL_DB",
+          "database_name": "liminal-judgments",
+          "database_id": "24c4f358-7bf1-4ad6-a19a-66802509482b"
+        }
+      ]
     },
     "production": {
       "name": "liminal",
@@ -37,7 +45,14 @@
       "vars": {
         "JEV_MODEL": "typesafe/jev-1.13",
         "JEV_DECISIONS_URL": "https://openrouter.ai/api/alpha/decisions"
-      }
+      },
+      "d1_databases": [
+        {
+          "binding": "LIMINAL_DB",
+          "database_name": "liminal-judgments",
+          "database_id": "24c4f358-7bf1-4ad6-a19a-66802509482b"
+        }
+      ]
     }
   }
 }
