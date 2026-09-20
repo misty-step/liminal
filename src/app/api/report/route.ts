@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import { appendFile, mkdir } from "node:fs/promises";
-import { join } from "node:path";
 import { getPuzzle } from "@/lib/liminal/deck";
+import { reportStore } from "@/lib/liminal/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -46,19 +45,21 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, reason: "bad-request" }, { status: 400 });
   }
 
-  const line = JSON.stringify({
-    at: new Date().toISOString(),
-    puzzleId,
-    answer,
-    note,
-  });
+  const report = { at: new Date().toISOString(), puzzleId, answer, note };
 
   try {
-    // Local slice storage. Production swaps this for a durable store (KV or
-    // Convex); failures must be reported honestly to the player.
-    const dir = process.env.LIMINAL_REPORT_DIR ?? join(process.cwd(), "data", "reports");
-    await mkdir(dir, { recursive: true });
-    await appendFile(join(dir, "reports.jsonl"), `${line}\n`, "utf8");
+    const durable = await reportStore();
+    if (durable) {
+      // Workers runtime: append-only row in the D1 authority (readable back).
+      await durable.append(report);
+    } else {
+      // Local development fallback (no bindings): JSONL beside the app.
+      const { appendFile, mkdir } = await import("node:fs/promises");
+      const { join } = await import("node:path");
+      const dir = process.env.LIMINAL_REPORT_DIR ?? join(process.cwd(), "data", "reports");
+      await mkdir(dir, { recursive: true });
+      await appendFile(join(dir, "reports.jsonl"), `${JSON.stringify(report)}\n`, "utf8");
+    }
     return NextResponse.json({ ok: true }, { headers: { "cache-control": "no-store" } });
   } catch {
     return NextResponse.json({ ok: false, reason: "storage-failed" }, { status: 503 });
