@@ -27,7 +27,7 @@ export const JUDGE_THRESHOLDS = {
  */
 export const CHOICE_CONFIDENCE_FLOOR = 0.5;
 
-export const JUDGE_PROMPT_VERSION = "liminal-judge-2026-09-20.3";
+export const JUDGE_PROMPT_VERSION = "liminal-judge-2026-09-20.4";
 export const DEFAULT_MODEL = "jev-latest";
 
 /** Option keys of every Choice rubric; yes/partly/no map to inside/close/outside. */

@@ -109,3 +109,109 @@ Final state: 50/50 rows match in
 evidence/live-matrix-2026-09-20T18-59-52-242Z.json (23 answers, 17 near
 misses, 10 held-out). All four puzzles are marked "calibrated". Failed
 matrices from runs 1-2 are retained as evidence of the recovery path.
+
+## 2026-09-20 run 4 — canonical-answer hardening (card t_d6df5a4f)
+
+Trigger: independent QA (run 1053) found that the most canonical player
+guesses for Pass or Fail — "exam" and "physical" — returned
+`unavailable:uncertain`. Honest (no guess consumed), but the most likely
+day-one answers were not accepted. Also observed as uncertain: bath-vessel
+"bidet", made-and-taken "suggestion", bath-vessel "hot tub".
+
+### Diagnosis (raw probes, prompt liminal-judge-2026-09-20.3)
+
+| answer | c1 conf | c2 conf | c3 conf | reading |
+| --- | --- | --- | --- | --- |
+| exam | 1.00 | 0.94 | 0.30 | c3 splits partly 0.53 / yes 0.45 — the exam-paper artifact sense |
+| physical | 0.27 | 0.15 | 0.49 | bare word read as an adjective; c3 leans no on that reading |
+| test | 0.34 | 0.14 | 0.74 | bare polysemous noun; the model averages across senses |
+| checkup | 0.64 | 0.31 | 1.00 | c2 hedges on "fail a checkup" |
+| final exam | 1.00 | 0.96 | 0.64 | accepted |
+
+Semantic reason: the conditions assert that an idiom EXISTS ("you can pass
+it"), but the c1/c2 questions ("can people 'pass' it?") invited the model to
+average over every sense of a bare polysemous word. Averaging splits the
+probability mass and drops confidence below the 0.5 floor even when the
+idiom exists. The question form did not match the condition's semantics.
+
+### Rubric change, with the semantic reason
+
+- c1 judge: "can people 'pass' it in the sense of clearing it or succeeding
+  at it?" → "is there a common sense in which people can 'pass' it — where
+  to pass it is to clear it or succeed at it?" Existential
+  sense-selection asks exactly what the condition asserts.
+- c2 judge: same form — "is there a common sense in which people can 'fail'
+  it — or in which it itself fails?"
+- c3 was NOT changed. A candidate rewording was probed and REJECTED on
+  evidence: anchoring to "in its main noun sense" (plus a referent-level
+  partly) thinned required-label margins — test c3 0.74 → 0.37, interview
+  c3 → 0.52, launch c3 → 0.57 — and lifted neither exam nor physical above
+  the floor (exam moved to a no-lean on c3). Forcing the model to commit to
+  a "main" sense makes it hedgier, not less. The candidate was reverted.
+
+Result at the new rubrics: checkup fixed (0.79 / 0.86 / 0.99), all fixtures
+solid, all near misses still discriminated (launch c1 outside at conf 0.60,
+takeover 0.75, rescue 0.83), bar exam / entrance exam / hearing test now
+accepted with margin.
+
+### Deck change, with the semantic reason
+
+- answers += "checkup" (live-verified all-inside: 0.79 / 0.86 / 0.99).
+  "Pass a checkup" and "fail a checkup" are attested idiomatic uses; the
+  occasion clearly satisfies c3. Authored so the canonical family has an
+  outage-safe deterministic win.
+- heldOut += "entrance exam" (1.00 / 0.99 / 0.95) and "hearing test"
+  (0.93 / 0.80 / 1.00): fresh live-verified held-outs. "bar exam" also
+  verified accepted (1.00 / 0.99 / 0.98) and deliberately left out-of-deck
+  as ongoing live coverage.
+- exam / physical / test are NOT authored. Reason: the live matrix judges
+  every authored answer and expects all-inside; these three refuse below
+  the confidence floor under two independently authored rubric generations
+  (the run-3 documented limit: bare polysemous words split across senses).
+  Authoring them would either fail the matrix gate or require weakening the
+  calibration protocol. Both are dishonest. They remain honest refusals —
+  no guess consumed, report path available — and their multi-word family
+  members judge confidently.
+
+### Observed, deliberately unchanged (honest uncertainty)
+
+- bath-vessel "bidet": c1 conf 0.41 (yes 0.60 / partly 0.39) — regional
+  fixture variation is a genuine world-knowledge borderline.
+- made-and-taken "suggestion": c1 conf 0.41 — the model hedges on "make a
+  suggestion" though the usage is idiomatic.
+- bath-vessel "hot tub": judged, not refused — c1 confidently
+  not-in-a-bathroom; an honest live near-miss shape.
+- Parallel pattern noted, not touched: made-and-taken c3's partly level
+  ("It has both abstract and physical senses") describes the lexeme while
+  its yes/no describe the referent — the same incoherence rejected for
+  pass-or-fail c3. No label exercises it, so it stays.
+
+### Guess-budget policy for invented/instruction-like input (decided)
+
+Invented objects and injection strings are rejected semantically, not
+deterministically. Fresh probes at the new version: bath-vessel "zorblax"
+0.99 / 0.99 / 0.68 all-no; kitchen-well "flumbewick" 0.92 / 0.70 / 0.79
+all-no; pass-or-fail "zorblax" 0.91 / 0.90 / 0.79 all-no — no fake win, no
+instruction execution. A confidently judged guess consumes one of the five,
+exactly like a real-but-wrong answer; deterministic rejections
+(echo/empty/too-long), honest uncertainty, outage, rate limit, and the
+calibration gate consume nothing. A deterministic nonsense detector was
+rejected: any lexical rule would falsely refuse real answers (stockpot,
+washbasin, bathroom sink were all live-verified valid), and
+instruction-keyword matching misfires on legitimate answers ("take
+instructions" is idiomatic). The injection string itself now refuses as
+uncertain on one cell (c2 conf 0.41) — no states returned at all. The
+policy is pinned in AGENTS.md, README.md, and a storage test.
+
+### Gate evidence
+
+- bun run test: 61/61 (6 files); tsc --noEmit clean; bun run build clean.
+- Live matrix: 53/53 rows match, 0 failures —
+  evidence/live-matrix-2026-09-20T19-36-35-398Z.json (24 answers, 17 near
+  misses, 12 held-out; deck 2026-09-20.4; prompt
+  liminal-judge-2026-09-20.4; model typesafe/jev-1.13).
+- Versions: DECK 2026-09-20.4; pass-or-fail judgments 2026-09-20.4
+  (conditions, answers, and held-out changed; the other three puzzles keep
+  their 2026-09-20.3 authored sets); JUDGE_PROMPT_VERSION
+  liminal-judge-2026-09-20.4. Runtime caches key on the prompt version, so
+  no existing judgment can silently reroll.

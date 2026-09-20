@@ -3,7 +3,7 @@
 Generated from `src/lib/liminal/deck.ts` — the same data the executable tests assert.
 A verified answer yields Inside on every condition. A near miss yields Close on
 exactly the listed condition and Inside elsewhere. Both are enforced by
-`__tests__/deck.test.ts` (51-test suite).
+`__tests__/deck.test.ts` (61-test suite).
 
 ## The Vessel in the Wall (bath-vessel, literal)
 
@@ -73,6 +73,7 @@ Clue-echo rejection sample: "you can make it people really say this" -> echo
 | interview | verified answer | inside | inside | inside |
 | drug test | verified answer | inside | inside | inside |
 | driving test | verified answer | inside | inside | inside |
+| checkup | verified answer | inside | inside | inside |
 | launch | near miss (fails c1) | close | inside | inside |
 | takeover | near miss (fails c1) | close | inside | inside |
 | rescue | near miss (fails c1) | close | inside | inside |

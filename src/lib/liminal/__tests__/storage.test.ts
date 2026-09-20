@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getPuzzle } from "../deck";
-import { evaluateGuess } from "../evaluator";
+import { evaluateGuess, judgedFeedback } from "../evaluator";
 import {
   canGuess,
   emptyProgress,
@@ -32,6 +32,24 @@ describe("progress storage", () => {
     const progress = emptyProgress("bath-vessel", 1);
     expect(recordGuess(progress, unknownFeedback, "sundial", 2)).toBe(progress);
     expect(recordGuess(progress, evaluateGuess(vessel, "   "), "   ", 3)).toBe(progress);
+  });
+
+  it("consumes a guess on a confident all-outside judgment (invented-input policy)", () => {
+    // There is no deterministic nonsense detector: invented objects go to the
+    // live judge, and a confident rejection spends the guess exactly like a
+    // real-but-wrong answer. Only unjudged/rejected/uncertain guesses are free.
+    const rejected = judgedFeedback(
+      vessel,
+      { c1: "outside", c2: "outside", c3: "outside" },
+      "judged",
+      "v1",
+    );
+    const progress = emptyProgress("bath-vessel", 1);
+    const next = recordGuess(progress, rejected, "zorblax", 2);
+    expect(next).not.toBe(progress);
+    expect(next.guesses).toHaveLength(1);
+    expect(next.guesses[0].answer).toBe("zorblax");
+    expect(next.collected).toEqual([]);
   });
 
   it("caps guesses at five and records the win", () => {

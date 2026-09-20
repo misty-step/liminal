@@ -17,7 +17,7 @@ import type { Puzzle } from "./types";
  * the flip to "calibrated" is the freeze step and ships in its own commit with
  * the raw matrix evidence.
  */
-export const DECK_VERSION = "2026-09-20.3";
+export const DECK_VERSION = "2026-09-20.4";
 
 export const DECK: readonly Puzzle[] = [
   {
@@ -187,7 +187,7 @@ export const DECK: readonly Puzzle[] = [
         id: "c1",
         text: "You can pass it — clear it, succeed at it",
         judge:
-          "Consider `answer`. In natural English, can people 'pass' it in the sense of clearing it or succeeding at it?",
+          "Consider `answer`. In natural English, is there a common sense in which people can 'pass' it — where to pass it is to clear it or succeed at it?",
         levels: {
           yes: "People really do 'pass' it, in the succeed sense.",
           partly: "Possible but unusual or strained.",
@@ -197,7 +197,8 @@ export const DECK: readonly Puzzle[] = [
       {
         id: "c2",
         text: "You can fail it",
-        judge: "Consider `answer`. In natural English, can people 'fail' it — or can it itself fail?",
+        judge:
+          "Consider `answer`. In natural English, is there a common sense in which people can 'fail' it — or in which it itself fails?",
         levels: {
           yes: "People really do 'fail' it, or say that it failed.",
           partly: "Possible but unusual or strained.",
@@ -217,9 +218,9 @@ export const DECK: readonly Puzzle[] = [
       },
     ],
     judgments: {
-      version: "2026-09-20.3",
-      answers: ["audition", "interview", "drug test", "driving test"],
-      heldOut: ["eye test", "background check"],
+      version: "2026-09-20.4",
+      answers: ["audition", "interview", "drug test", "driving test", "checkup"],
+      heldOut: ["eye test", "background check", "entrance exam", "hearing test"],
       nearMisses: [
         { answer: "launch", fails: "c1", note: "It can fail on the pad — but nobody passes it." },
         { answer: "takeover", fails: "c1", note: "It can fail in the boardroom — but nobody passes it." },
