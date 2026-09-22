@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Check out candidate
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Install Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -41,14 +43,21 @@ jobs:
         env:
           LIMINAL_ENVIRONMENT: test
           NEXT_PUBLIC_SENTRY_ENVIRONMENT: test
-          NEXT_PUBLIC_SENTRY_RELEASE: ${{ github.sha }}
+          NEXT_PUBLIC_SENTRY_RELEASE: ${{ github.event.pull_request.head.sha || github.sha }}
           NEXT_TELEMETRY_DISABLED: "1"
           SENTRY_ENVIRONMENT: test
-          SENTRY_RELEASE: ${{ github.sha }}
+          SENTRY_RELEASE: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Record exact source identity
+        env:
+          CANDIDATE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
+          printf '%s\n' "$CANDIDATE_SHA" > .open-next/SOURCE_SHA
       - name: Retain deploy candidate
         uses: actions/upload-artifact@v4
         with:
-          name: open-next-${{ github.sha }}
+          name: open-next-${{ github.event.pull_request.head.sha || github.sha }}
           path: .open-next
           if-no-files-found: error
           retention-days: 3
+          include-hidden-files: true
