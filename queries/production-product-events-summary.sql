@@ -1,16 +1,12 @@
--- Production-only product-event analytics with exact exclusion of retained
--- supervised-release fixture sessions. This classification is intentionally
--- append-only: source rows remain unchanged and genuine traffic is retained.
+-- Production-only product-event analytics with exact exclusion of sessions
+-- bound to both a named supervised run and overlapping telemetry. Rows that do
+-- not match remain unclassified; they are not asserted to be human traffic.
+-- See docs/production-analytics-fixture-exclusions.md for the bounded inventory.
 WITH classified AS (
   SELECT
     event_name,
     CASE
       WHEN session_id IN (
-        'session_485a72b53d2c44c682e8af86eda6ced1',
-        'session_01cb1a22031a4732a13c86d3ee6041a5',
-        'session_f21f5ec5647043ad95ba54c6801db8de',
-        'session_a0643db4b79842eab5c976bb66d9e067',
-        'session_4bfa784cfbdf4601af8194436f7107b5',
         'session_c46e2092560843af9e72b14000f49400'
       ) THEN 1
       ELSE 0
@@ -22,7 +18,7 @@ summary AS (
   SELECT
     COUNT(*) AS sampled_events,
     COALESCE(SUM(is_fixture), 0) AS fixture_events_excluded,
-    COALESCE(SUM(1 - is_fixture), 0) AS genuine_events_retained
+    COALESCE(SUM(1 - is_fixture), 0) AS unclassified_events_retained
   FROM classified
 )
 SELECT
@@ -31,7 +27,9 @@ SELECT
   NULL AS event_count,
   sampled_events,
   fixture_events_excluded,
-  genuine_events_retained
+  -- Backward-compatible alias; this does not certify human traffic.
+  unclassified_events_retained AS genuine_events_retained,
+  unclassified_events_retained
 FROM summary
 UNION ALL
 SELECT
@@ -40,7 +38,8 @@ SELECT
   COUNT(*) AS event_count,
   NULL AS sampled_events,
   NULL AS fixture_events_excluded,
-  NULL AS genuine_events_retained
+  NULL AS genuine_events_retained,
+  NULL AS unclassified_events_retained
 FROM classified
 WHERE is_fixture = 0
 GROUP BY event_name
