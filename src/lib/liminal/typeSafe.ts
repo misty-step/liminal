@@ -138,6 +138,8 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
   const fetchImpl = options.fetchImpl ?? fetch;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), options.timeoutMs ?? 4000);
+  const fresh: Record<string, ConditionState> = {};
+  const confidences: Record<string, number> = {};
 
   try {
     const response = await fetchImpl(env.url, {
@@ -164,8 +166,6 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
 
     // Validate every fresh judgment before caching any of them: a partial
     // response must not leave half a judgment behind.
-    const fresh: Record<string, ConditionState> = {};
-    const confidences: Record<string, number> = {};
     for (const conditionId of uncached) {
       const question = questions[conditionId];
       const value = body.answers[conditionId];
@@ -198,26 +198,27 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
             : Math.max(value.noul, 1 - value.noul);
       }
     }
-    for (const [conditionId, state] of Object.entries(fresh)) {
-      // The store returns the retained winner: a durable authority may hold a
-      // verdict from an earlier concurrent caller; serve that instead.
-      states[conditionId] = await cache.set(
-        judgmentKey({ puzzleId: puzzle.id, conditionId, answer, model: env.model }),
-        state,
-      );
-    }
-
-    return {
-      status: "judged",
-      states,
-      confidences,
-      model: env.model,
-      judgmentVersion: `${JUDGE_PROMPT_VERSION}:${env.model}`,
-    };
   } catch (error) {
     const aborted = error instanceof Error && error.name === "AbortError";
     return { status: "unavailable", reason: aborted ? "timeout" : "upstream-error" };
   } finally {
     clearTimeout(timer);
   }
+
+  for (const [conditionId, state] of Object.entries(fresh)) {
+    // Storage mutations and their retained-winner readbacks deliberately sit
+    // outside the provider catch so the route's storage boundary owns faults.
+    states[conditionId] = await cache.set(
+      judgmentKey({ puzzleId: puzzle.id, conditionId, answer, model: env.model }),
+      state,
+    );
+  }
+
+  return {
+    status: "judged",
+    states,
+    confidences,
+    model: env.model,
+    judgmentVersion: `${JUDGE_PROMPT_VERSION}:${env.model}`,
+  };
 }

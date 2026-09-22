@@ -7,6 +7,12 @@ import { cloudBindings } from "@/lib/liminal/store";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const REQUIRED_COLUMN_PROBES = [
+  "SELECT key, state FROM judgments LIMIT 0",
+  "SELECT at, puzzle_id, answer, note FROM reports LIMIT 0",
+  "SELECT event_id, event_name, game, environment, occurred_at, session_id, actor_id, schema_version, props_json FROM product_events LIMIT 0",
+] as const;
+
 export async function GET() {
   const deckReady = DECK.length > 0 && DECK.every((puzzle) => puzzle.conditions.length >= 3);
   let configuredEnvironment: ReturnType<typeof runtimeEnvironment>;
@@ -92,6 +98,12 @@ export async function GET() {
         row.indexCount !== 2
       ) {
         throw new Error("required D1 schema is not ready");
+      }
+      // Compile every route-used column against D1 without mutating tables.
+      // Compatible additive columns remain valid because each probe names only
+      // the columns that report, judge, and event queries require.
+      for (const query of REQUIRED_COLUMN_PROBES) {
+        await db.prepare(query).first();
       }
     } catch (error) {
       Sentry.captureException(error, { tags: { route: "health", operation: "storage-probe" } });

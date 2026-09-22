@@ -71,13 +71,32 @@ const requiredSchemaObjects = [
   "product_events_session",
 ] as const;
 
+const requiredSchemaColumns = {
+  judgments: ["key", "state"],
+  reports: ["at", "puzzle_id", "answer", "note"],
+  product_events: [
+    "event_id",
+    "event_name",
+    "game",
+    "environment",
+    "occurred_at",
+    "session_id",
+    "actor_id",
+    "schema_version",
+    "props_json",
+  ],
+} as const;
+
 function schemaD1(options: {
   migrationTable: boolean;
   migrations?: readonly string[];
   objects?: readonly string[];
+  columns?: Partial<Record<keyof typeof requiredSchemaColumns, readonly string[]>>;
 }): D1Like {
   const migrations = new Set(options.migrations ?? []);
   const objects = new Set(options.objects ?? []);
+  const columnsFor = (table: keyof typeof requiredSchemaColumns): readonly string[] =>
+    options.columns?.[table] ?? requiredSchemaColumns[table];
   return {
     prepare(query) {
       return {
@@ -88,6 +107,17 @@ function schemaD1(options: {
           // The reviewed implementation's generic probe succeeds even when the
           // database is otherwise completely empty.
           if (query.includes("SELECT 1 AS ok")) return { ok: 1 } as T;
+          for (const [table, required] of Object.entries(requiredSchemaColumns)) {
+            if (!query.includes(`FROM ${table} LIMIT 0`)) continue;
+            if (
+              required.some(
+                (name) => !columnsFor(table as keyof typeof requiredSchemaColumns).includes(name),
+              )
+            ) {
+              throw new Error(`no such column in ${table}`);
+            }
+            return null as T;
+          }
           if (!query.includes("d1_migrations")) {
             throw new Error(`unexpected readiness query: ${query}`);
           }
@@ -114,7 +144,7 @@ function schemaD1(options: {
   };
 }
 
-function judgeD1(mode: "read-error" | "corrupt" | "hit" | "write") {
+function judgeD1(mode: "read-error" | "corrupt" | "hit" | "write" | "write-error" | "lost-write") {
   const rows = new Map<string, string>();
   const counters = { selects: 0, inserts: 0 };
   const db: D1Like = {
@@ -131,12 +161,14 @@ function judgeD1(mode: "read-error" | "corrupt" | "hit" | "write") {
           if (mode === "read-error") throw new Error("synthetic D1 read outage");
           if (mode === "corrupt") return { state: "banana" } as T;
           if (mode === "hit") return { state: "inside" } as T;
+          if (mode === "lost-write") return null as T | null;
           const key = String(values[0]);
           return rows.has(key) ? ({ state: rows.get(key) } as T) : null;
         },
         async run() {
           if (query.startsWith("INSERT OR IGNORE INTO judgments")) {
             counters.inserts += 1;
+            if (mode === "write-error") throw new Error("synthetic D1 write outage");
             const [key, state] = values as [string, string];
             if (!rows.has(key)) rows.set(key, state);
           }
@@ -210,13 +242,44 @@ describe("D1 readiness", () => {
     expect((await response.json()).checks.storage).toBe("failed");
   });
 
-  it("accepts the complete schema with the foundation migration receipt", async () => {
+  it.each([
+    ["judgments", "state"],
+    ["reports", "note"],
+    ["product_events", "props_json"],
+  ] as const)(
+    "rejects a named schema missing route-required %s.%s",
+    async (table, missingColumn) => {
+      process.env.LIMINAL_ENVIRONMENT = "production";
+      harness.bindings = {
+        LIMINAL_DB: schemaD1({
+          migrationTable: true,
+          migrations: ["0001_judgments_and_reports.sql", "0002_foundations.sql"],
+          objects: requiredSchemaObjects,
+          columns: {
+            [table]: requiredSchemaColumns[table].filter((name) => name !== missingColumn),
+          },
+        }),
+      };
+
+      const response = await getHealth();
+
+      expect(response.status).toBe(503);
+      expect((await response.json()).checks.storage).toBe("failed");
+    },
+  );
+
+  it("accepts the complete schema with compatible additive columns", async () => {
     process.env.LIMINAL_ENVIRONMENT = "production";
     harness.bindings = {
       LIMINAL_DB: schemaD1({
         migrationTable: true,
         migrations: ["0001_judgments_and_reports.sql", "0002_foundations.sql"],
         objects: requiredSchemaObjects,
+        columns: {
+          judgments: [...requiredSchemaColumns.judgments, "compatible_extra"],
+          reports: [...requiredSchemaColumns.reports, "compatible_extra"],
+          product_events: [...requiredSchemaColumns.product_events, "compatible_extra"],
+        },
       }),
     };
 
@@ -348,6 +411,30 @@ describe("judge storage boundary", () => {
       tags: { route: "judge", operation: "storage" },
     });
   });
+
+  it.each(["write-error", "lost-write"] as const)(
+    "turns a post-evaluation %s into the structured no-store response",
+    async (mode) => {
+      const store = judgeD1(mode);
+      harness.bindings = { LIMINAL_DB: store.db };
+      const fetchImpl = vi.fn(async () => providerResponse());
+      vi.stubGlobal("fetch", fetchImpl);
+
+      const response = await postLiveJudge(`${mode} fixture`);
+
+      expect(response.status).toBe(503);
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(await response.json()).toEqual({
+        status: "unavailable",
+        reason: "store-not-configured",
+      });
+      expect(fetchImpl).toHaveBeenCalledTimes(1);
+      expect(store.counters.inserts).toBe(1);
+      expect(harness.captureException).toHaveBeenCalledWith(expect.any(Error), {
+        tags: { route: "judge", operation: "storage" },
+      });
+    },
+  );
 
   it("still serves an ordinary complete D1 cache hit without a provider call", async () => {
     const store = judgeD1("hit");
