@@ -5,7 +5,9 @@ import { judgeAnswer, judgeEnvFrom, memoryCache } from "../typeSafe";
 
 const vessel = getPuzzle("bath-vessel")!;
 
-function okResponse(cells: Record<string, { choice?: string; noul?: number; confidence?: number }>) {
+function okResponse(
+  cells: Record<string, { choice?: string; noul?: number; confidence?: number }>,
+) {
   return {
     ok: true,
     json: async () => ({
@@ -16,7 +18,11 @@ function okResponse(cells: Record<string, { choice?: string; noul?: number; conf
   } as unknown as Response;
 }
 
-const env = { url: "https://example.test/decisions", apiKey: "test-key", model: "typesafe/jev-1.13" };
+const env = {
+  url: "https://example.test/decisions",
+  apiKey: "test-key",
+  model: "typesafe/jev-1.13",
+};
 
 describe("judgeEnvFrom", () => {
   it("prefers TypeSafe native, falls back to OpenRouter, else null", () => {
@@ -31,7 +37,12 @@ describe("judgeEnvFrom", () => {
 
 describe("judgeAnswer", () => {
   it("is unavailable without credentials and consumes nothing", async () => {
-    const result = await judgeAnswer({ puzzle: vessel, answer: "urinal", env: null, cache: memoryCache() });
+    const result = await judgeAnswer({
+      puzzle: vessel,
+      answer: "urinal",
+      env: null,
+      cache: memoryCache(),
+    });
     expect(result.status).toBe("unavailable");
     if (result.status === "unavailable") expect(result.reason).toBe("not-configured");
   });
@@ -80,7 +91,13 @@ describe("judgeAnswer", () => {
         c3: { choice: "yes", confidence: 0.9 },
       }),
     ) as unknown as typeof fetch;
-    const result = await judgeAnswer({ puzzle: vessel, answer: "urinal", env, cache, fetchImpl: unsure });
+    const result = await judgeAnswer({
+      puzzle: vessel,
+      answer: "urinal",
+      env,
+      cache,
+      fetchImpl: unsure,
+    });
     expect(result).toEqual({ status: "unavailable", reason: "uncertain" });
     expect(
       cache.get(`bath-vessel|c1|urinal|typesafe/jev-1.13|${JUDGE_PROMPT_VERSION}`),
@@ -118,7 +135,9 @@ describe("judgeAnswer", () => {
     });
     expect(timedOut).toEqual({ status: "unavailable", reason: "timeout" });
 
-    const failing = vi.fn(async () => ({ ok: false, status: 429 }) as unknown as Response) as unknown as typeof fetch;
+    const failing = vi.fn(
+      async () => ({ ok: false, status: 429 }) as unknown as Response,
+    ) as unknown as typeof fetch;
     const errored = await judgeAnswer({
       puzzle: vessel,
       answer: "urinal",
@@ -128,7 +147,9 @@ describe("judgeAnswer", () => {
     });
     expect(errored).toEqual({ status: "unavailable", reason: "upstream-error" });
 
-    const malformed = vi.fn(async () => ({ ok: true, json: async () => ({}) }) as unknown as Response) as unknown as typeof fetch;
+    const malformed = vi.fn(
+      async () => ({ ok: true, json: async () => ({}) }) as unknown as Response,
+    ) as unknown as typeof fetch;
     const invalid = await judgeAnswer({
       puzzle: vessel,
       answer: "urinal",
@@ -141,8 +162,8 @@ describe("judgeAnswer", () => {
 
   it("never writes partial judgments to cache on failure", async () => {
     const cache = memoryCache();
-    const fetchImpl = vi.fn(async () =>
-      okResponse({ c1: { choice: "yes", confidence: 0.9 } }) as unknown as Response,
+    const fetchImpl = vi.fn(
+      async () => okResponse({ c1: { choice: "yes", confidence: 0.9 } }) as unknown as Response,
     ) as unknown as typeof fetch;
     const result = await judgeAnswer({ puzzle: vessel, answer: "urinal", env, cache, fetchImpl });
     expect(result.status).toBe("unavailable");

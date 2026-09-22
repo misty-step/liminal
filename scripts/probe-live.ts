@@ -66,7 +66,10 @@ for (const [puzzleId, answers] of targets) {
         continue;
       }
       const body = (await response.json()) as {
-        answers?: Record<string, { choice?: string; probabilities?: Record<string, number>; confidence?: number }>;
+        answers?: Record<
+          string,
+          { choice?: string; probabilities?: Record<string, number>; confidence?: number }
+        >;
       };
       const cells: Record<string, unknown> = {};
       for (const [id, cell] of Object.entries(body.answers ?? {})) {

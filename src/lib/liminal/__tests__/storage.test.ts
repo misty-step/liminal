@@ -1,13 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getPuzzle } from "../deck";
 import { evaluateGuess, judgedFeedback } from "../evaluator";
-import {
-  canGuess,
-  emptyProgress,
-  parseProgress,
-  recordGuess,
-  storageKey,
-} from "../storage";
+import { canGuess, emptyProgress, parseProgress, recordGuess, storageKey } from "../storage";
 
 const vessel = getPuzzle("bath-vessel")!;
 const nearMissFeedback = evaluateGuess(vessel, "shampoo bottle");
@@ -20,7 +14,12 @@ describe("progress storage", () => {
   });
 
   it("round-trips valid progress and rejects corrupt data", () => {
-    const progress = recordGuess(emptyProgress("bath-vessel", 1), nearMissFeedback, "shampoo bottle", 2);
+    const progress = recordGuess(
+      emptyProgress("bath-vessel", 1),
+      nearMissFeedback,
+      "shampoo bottle",
+      2,
+    );
     const parsed = parseProgress(JSON.stringify(progress), "bath-vessel");
     expect(parsed?.guesses).toHaveLength(1);
     expect(parseProgress("{not json", "bath-vessel")).toBeNull();
@@ -39,7 +38,6 @@ describe("progress storage", () => {
     // live judge, and a confident rejection spends the guess exactly like a
     // real-but-wrong answer. Only unjudged/rejected/uncertain guesses are free.
     const rejected = judgedFeedback(
-      vessel,
       { c1: "outside", c2: "outside", c3: "outside" },
       "judged",
       "v1",

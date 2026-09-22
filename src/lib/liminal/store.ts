@@ -15,6 +15,8 @@
  */
 import { memoryCache } from "./typeSafe";
 import type { JudgmentCache } from "./typeSafe";
+import { runtimeEnvironment } from "./runtime";
+import type { ProductEvent } from "./runtime";
 import type { ConditionState } from "./types";
 
 /** Minimal D1 surface used here (avoids a workers-types dependency). */
@@ -33,6 +35,13 @@ export interface CloudBindings {
 }
 
 const STATE_VALUES: readonly ConditionState[] = ["inside", "close", "outside"];
+
+export class D1InvariantError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "D1InvariantError";
+  }
+}
 
 function isConditionState(value: unknown): value is ConditionState {
   return typeof value === "string" && (STATE_VALUES as readonly string[]).includes(value);
@@ -62,7 +71,11 @@ export function d1JudgeCache(db: D1Like, hot: JudgmentCache = memoryCache()): Ju
       .prepare("SELECT state FROM judgments WHERE key = ?")
       .bind(key)
       .first<{ state: string }>();
-    return row && isConditionState(row.state) ? row.state : undefined;
+    if (!row) return undefined;
+    if (!isConditionState(row.state)) {
+      throw new D1InvariantError("invalid retained judgment state");
+    }
+    return row.state;
   };
   return {
     async get(key) {
@@ -71,7 +84,8 @@ export function d1JudgeCache(db: D1Like, hot: JudgmentCache = memoryCache()): Ju
       let state: ConditionState | undefined;
       try {
         state = await selectState(key);
-      } catch {
+      } catch (error) {
+        if (error instanceof D1InvariantError) throw error;
         // Store read outage: treat the key as unclaimed. The write path below
         // is the authority, so correctness does not depend on this read.
         return undefined;
@@ -84,7 +98,8 @@ export function d1JudgeCache(db: D1Like, hot: JudgmentCache = memoryCache()): Ju
         .prepare("INSERT OR IGNORE INTO judgments (key, state) VALUES (?, ?)")
         .bind(key, candidate)
         .run();
-      const retained = (await selectState(key)) ?? candidate;
+      const retained = await selectState(key);
+      if (!retained) throw new D1InvariantError("judgment write was not retained");
       await hot.set(key, retained);
       return retained;
     },
@@ -98,6 +113,10 @@ let sharedHot: JudgmentCache | null = null;
 export async function judgeCache(): Promise<JudgmentCache> {
   const db = (await cloudBindings())?.LIMINAL_DB;
   if (!db) {
+    const environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+    if (environment === "production" || environment === "staging") {
+      throw new D1InvariantError("LIMINAL_DB binding is required");
+    }
     fallbackCache ??= memoryCache();
     return fallbackCache;
   }
@@ -119,4 +138,39 @@ export async function reportStore(): Promise<{
         .run();
     },
   };
+}
+
+export function d1ProductEventStore(db: D1Like): {
+  append(event: ProductEvent): Promise<void>;
+} {
+  return {
+    async append(event) {
+      await db
+        .prepare(
+          "INSERT OR IGNORE INTO product_events " +
+            "(event_id, event_name, game, environment, occurred_at, session_id, actor_id, schema_version, props_json) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        )
+        .bind(
+          event.event_id,
+          event.event_name,
+          event.game,
+          event.environment,
+          event.occurred_at,
+          event.session_id,
+          event.actor_id,
+          event.schema_version,
+          JSON.stringify(event.props),
+        )
+        .run();
+    },
+  };
+}
+
+/** Product-event store. Events are retained only when D1 is bound. */
+export async function productEventStore(): Promise<{
+  append(event: ProductEvent): Promise<void>;
+} | null> {
+  const db = (await cloudBindings())?.LIMINAL_DB;
+  return db ? d1ProductEventStore(db) : null;
 }

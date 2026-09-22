@@ -173,10 +173,7 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
         return { status: "unavailable", reason: "invalid-response" };
       }
       if (question.type === "choice") {
-        if (
-          typeof value.choice !== "string" ||
-          !CHOICE_KEYS.includes(value.choice as ChoiceKey)
-        ) {
+        if (typeof value.choice !== "string" || !CHOICE_KEYS.includes(value.choice as ChoiceKey)) {
           return { status: "unavailable", reason: "invalid-response" };
         }
         const confidence = typeof value.confidence === "number" ? value.confidence : 0;

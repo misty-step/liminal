@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" role="img" aria-label="Liminal keyhole">
+  <rect width="16" height="16" rx="3" fill="#11151a"/>
+  <circle cx="8" cy="5" r="2.75" fill="#d8b45f"/>
+  <path d="M6.55 7.15 4.35 13h7.3l-2.2-5.85Z" fill="#d8b45f"/>
+</svg>

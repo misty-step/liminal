@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "game": "liminal",
+  "classification": "browser-app",
+  "health": {
+    "path": "/api/health",
+    "requiredChecks": ["deck", "storage"]
+  },
+  "productEvents": {
+    "path": "/api/events",
+    "schemaVersion": 1,
+    "environmentExplicit": true,
+    "playerTextAllowed": false,
+    "actorIdentity": "anonymous-session"
+  },
+  "sentry": {
+    "projectSlug": "liminal",
+    "admittedEnvironment": "production",
+    "releaseVariable": "SENTRY_RELEASE",
+    "sourceMaps": true,
+    "sendDefaultPii": false,
+    "tracesSampled": true,
+    "triageAdapter": "game-operations/sentry",
+    "activationOwner": "t_089aca22"
+  }
+}

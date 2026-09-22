@@ -16,15 +16,13 @@ const lines: string[] = [
 
 for (const puzzle of DECK) {
   lines.push(`## ${puzzle.title} (${puzzle.id}, ${puzzle.mode})`, "");
-  lines.push("| answer | kind | " + puzzle.conditions.map((c) => c.id).join(" | ") + " |");
-  lines.push("| --- | --- | " + puzzle.conditions.map(() => "---").join(" | ") + " |");
+  lines.push(`| answer | kind | ${puzzle.conditions.map((c) => c.id).join(" | ")} |`);
+  lines.push(`| --- | --- | ${puzzle.conditions.map(() => "---").join(" | ")} |`);
   for (const answer of puzzle.judgments.answers) {
     const feedback = evaluateGuess(puzzle, answer);
     lines.push(
       `| ${answer} | verified answer | ` +
-        puzzle.conditions
-          .map((c) => feedback.states[c.id])
-          .join(" | ") +
+        puzzle.conditions.map((c) => feedback.states[c.id]).join(" | ") +
         " |",
     );
   }
@@ -32,9 +30,7 @@ for (const puzzle of DECK) {
     const feedback = evaluateGuess(puzzle, nearMiss.answer);
     lines.push(
       `| ${nearMiss.answer} | near miss (fails ${nearMiss.fails}) | ` +
-        puzzle.conditions
-          .map((c) => feedback.states[c.id])
-          .join(" | ") +
+        puzzle.conditions.map((c) => feedback.states[c.id]).join(" | ") +
         " |",
     );
   }

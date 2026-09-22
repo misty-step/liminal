@@ -26,6 +26,8 @@
       "name": "liminal-staging",
       "workers_dev": true,
       "vars": {
+        "LIMINAL_ENVIRONMENT": "staging",
+        "SENTRY_ENVIRONMENT": "staging",
         "JEV_MODEL": "typesafe/jev-1.13",
         "JEV_DECISIONS_URL": "https://openrouter.ai/api/alpha/decisions"
       },
@@ -43,6 +45,8 @@
       "workers_dev": false,
       "routes": [{ "pattern": "liminal.mistystep.io", "custom_domain": true }],
       "vars": {
+        "LIMINAL_ENVIRONMENT": "production",
+        "SENTRY_ENVIRONMENT": "production",
         "JEV_MODEL": "typesafe/jev-1.13",
         "JEV_DECISIONS_URL": "https://openrouter.ai/api/alpha/decisions"
       },

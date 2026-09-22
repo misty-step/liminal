@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">Liminal</title>
+  <desc id="desc">A brass keyhole on an ink cabinet face</desc>
+  <defs>
+    <radialGradient id="bg" cx="28%" cy="18%" r="90%">
+      <stop offset="0" stop-color="#29261f"/>
+      <stop offset="1" stop-color="#101419"/>
+    </radialGradient>
+    <linearGradient id="metal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f4d998"/>
+      <stop offset=".55" stop-color="#d0a74d"/>
+      <stop offset="1" stop-color="#8f6928"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <path d="M0 88h1200M0 542h1200" stroke="#3a3326" stroke-width="2"/>
+  <rect x="74" y="66" width="1052" height="498" rx="28" fill="none" stroke="#5f4b26" stroke-width="3"/>
+  <g transform="translate(190 170)">
+    <circle cx="120" cy="82" r="58" fill="url(#metal)"/>
+    <path d="m89 126-43 172q74 24 148 0l-43-172Z" fill="url(#metal)"/>
+  </g>
+  <g fill="#f2ead9" font-family="Iowan Old Style, Palatino Linotype, Georgia, serif">
+    <text x="500" y="278" font-size="92" letter-spacing="20">LIMINAL</text>
+    <text x="504" y="350" font-size="34" fill="#d5c9af">Find what belongs.</text>
+  </g>
+</svg>
