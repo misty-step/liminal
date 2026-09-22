@@ -32,6 +32,13 @@ export interface ProductEvent {
   props: EventProps;
 }
 
+export class RuntimeEnvironmentError extends Error {
+  constructor() {
+    super("LIMINAL_ENVIRONMENT is invalid");
+    this.name = "RuntimeEnvironmentError";
+  }
+}
+
 type ParseResult<T> = { ok: true; value: T } | { ok: false; reason: "bad-request" };
 type BodyResult =
   | { ok: true; value: unknown }
@@ -268,5 +275,7 @@ export function createProductEvent(
 }
 
 export function runtimeEnvironment(value: string | undefined): RuntimeEnvironment | null {
-  return value === "production" || value === "staging" || value === "test" ? value : null;
+  if (value === undefined || value === "" || value === "development") return null;
+  if (value === "production" || value === "staging" || value === "test") return value;
+  throw new RuntimeEnvironmentError();
 }

@@ -35,13 +35,24 @@ export async function POST(request: Request) {
 
   const report = { at: new Date().toISOString(), puzzleId, answer, note };
 
+  let environment: ReturnType<typeof runtimeEnvironment>;
+  try {
+    environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "report", operation: "runtime-config" } });
+    return NextResponse.json(
+      { ok: false, reason: "environment-not-configured" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
+
   try {
     const durable = await reportStore();
     if (durable) {
       // Workers runtime: append-only row in the D1 authority (readable back).
       await durable.append(report);
     } else {
-      if (runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT) !== null) {
+      if (environment === "production" || environment === "staging") {
         return NextResponse.json({ ok: false, reason: "store-not-configured" }, { status: 503 });
       }
       // Local development fallback (no bindings): JSONL beside the app.

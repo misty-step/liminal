@@ -9,7 +9,24 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const deckReady = DECK.length > 0 && DECK.every((puzzle) => puzzle.conditions.length >= 3);
-  const configuredEnvironment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+  let configuredEnvironment: ReturnType<typeof runtimeEnvironment>;
+  try {
+    configuredEnvironment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "health", operation: "runtime-config" } });
+    return NextResponse.json(
+      {
+        status: "unhealthy",
+        service: "liminal",
+        environment: "invalid",
+        checks: {
+          deck: deckReady ? "ok" : "failed",
+          storage: "configuration-error",
+        },
+      },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
   const environment = configuredEnvironment ?? "development";
   if (!deckReady) {
     return NextResponse.json(
@@ -37,8 +54,45 @@ export async function GET() {
   }
   if (db) {
     try {
-      const row = await db.prepare("SELECT 1 AS ok").first<{ ok: number }>();
-      if (row?.ok !== 1) throw new Error("store probe failed");
+      const row = await db
+        .prepare(
+          `SELECT
+            (SELECT COUNT(*) FROM d1_migrations
+              WHERE name = '0001_judgments_and_reports.sql') AS coreMigration,
+            (SELECT COUNT(*) FROM d1_migrations
+              WHERE name = '0002_foundations.sql') AS foundationMigration,
+            (SELECT COUNT(*) FROM sqlite_master
+              WHERE type = 'table'
+                AND name IN ('judgments', 'reports', 'product_events')) AS tableCount,
+            (SELECT COUNT(*) FROM sqlite_master
+              WHERE type = 'trigger'
+                AND name IN (
+                  'judgments_state_insert_guard',
+                  'judgments_state_update_guard'
+                )) AS triggerCount,
+            (SELECT COUNT(*) FROM sqlite_master
+              WHERE type = 'index'
+                AND name IN (
+                  'product_events_funnel',
+                  'product_events_session'
+                )) AS indexCount`,
+        )
+        .first<{
+          coreMigration: number;
+          foundationMigration: number;
+          tableCount: number;
+          triggerCount: number;
+          indexCount: number;
+        }>();
+      if (
+        row?.coreMigration !== 1 ||
+        row.foundationMigration !== 1 ||
+        row.tableCount !== 3 ||
+        row.triggerCount !== 2 ||
+        row.indexCount !== 2
+      ) {
+        throw new Error("required D1 schema is not ready");
+      }
     } catch (error) {
       Sentry.captureException(error, { tags: { route: "health", operation: "storage-probe" } });
       return NextResponse.json(

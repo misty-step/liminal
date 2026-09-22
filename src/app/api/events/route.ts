@@ -32,7 +32,16 @@ export async function POST(request: Request) {
   if (!parsed.ok) {
     return NextResponse.json({ ok: false, reason: parsed.reason }, { status: 400 });
   }
-  const environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+  let environment: ReturnType<typeof runtimeEnvironment>;
+  try {
+    environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "events", operation: "runtime-config" } });
+    return NextResponse.json(
+      { ok: false, reason: "environment-not-configured" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
   if (!environment) {
     return NextResponse.json({ ok: false, reason: "environment-not-configured" }, { status: 503 });
   }

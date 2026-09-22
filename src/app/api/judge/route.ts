@@ -51,24 +51,24 @@ export async function POST(request: Request) {
       { status: 503, headers: { "cache-control": "no-store" } },
     );
   }
-  let cache: Awaited<ReturnType<typeof judgeCache>>;
+  let result: Awaited<ReturnType<typeof judgeAnswer>>;
   try {
-    cache = await judgeCache();
+    const cache = await judgeCache();
+    result = await judgeAnswer({
+      puzzle,
+      answer,
+      env,
+      // Durable on Workers (D1 first-writer-wins); process-local elsewhere.
+      cache,
+      timeoutMs: 4000,
+    });
   } catch (error) {
-    Sentry.captureException(error, { tags: { route: "judge", operation: "storage-bind" } });
+    Sentry.captureException(error, { tags: { route: "judge", operation: "storage" } });
     return NextResponse.json(
       { status: "unavailable", reason: "store-not-configured" },
       { status: 503, headers: { "cache-control": "no-store" } },
     );
   }
-  const result = await judgeAnswer({
-    puzzle,
-    answer,
-    env,
-    // Durable on Workers (D1 first-writer-wins); process-local elsewhere.
-    cache,
-    timeoutMs: 4000,
-  });
 
   if (result.status === "judged") {
     return NextResponse.json(

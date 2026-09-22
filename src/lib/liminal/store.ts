@@ -81,15 +81,7 @@ export function d1JudgeCache(db: D1Like, hot: JudgmentCache = memoryCache()): Ju
     async get(key) {
       const cached = await hot.get(key);
       if (cached) return cached;
-      let state: ConditionState | undefined;
-      try {
-        state = await selectState(key);
-      } catch (error) {
-        if (error instanceof D1InvariantError) throw error;
-        // Store read outage: treat the key as unclaimed. The write path below
-        // is the authority, so correctness does not depend on this read.
-        return undefined;
-      }
+      const state = await selectState(key);
       if (state) await hot.set(key, state);
       return state;
     },
@@ -111,9 +103,9 @@ let sharedHot: JudgmentCache | null = null;
 
 /** Judge cache for the current runtime: D1 authority on Workers, memory elsewhere. */
 export async function judgeCache(): Promise<JudgmentCache> {
+  const environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
   const db = (await cloudBindings())?.LIMINAL_DB;
   if (!db) {
-    const environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
     if (environment === "production" || environment === "staging") {
       throw new D1InvariantError("LIMINAL_DB binding is required");
     }
