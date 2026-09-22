@@ -62,10 +62,34 @@ describe("d1JudgeCache — durable first-writer-wins", () => {
     expect(db.counters.selects).toBe(selectsAfterSet);
   });
 
-  it("ignores corrupt stored values", async () => {
+  it("fails closed when a write cannot be read back", async () => {
+    const db: D1Like = {
+      prepare() {
+        return {
+          bind() {
+            return this;
+          },
+          async first<T>() {
+            return null as T | null;
+          },
+          async run() {
+            return {};
+          },
+        };
+      },
+    };
+    await expect(d1JudgeCache(db, memoryCache()).set("lost", "inside")).rejects.toThrow(
+      "judgment write was not retained",
+    );
+  });
+
+  it("fails closed on a corrupt stored value instead of rerolling it", async () => {
     const db = fakeD1();
     db.rows.set("k3", "banana");
-    expect(await d1JudgeCache(db as unknown as D1Like, memoryCache()).get("k3")).toBeUndefined();
+    await expect(d1JudgeCache(db as unknown as D1Like, memoryCache()).get("k3")).rejects.toThrow(
+      "invalid retained judgment state",
+    );
+    expect(db.counters.inserts).toBe(0);
   });
 });
 
@@ -74,6 +98,17 @@ describe("runtime fallbacks outside Workers", () => {
     const cache = await judgeCache();
     expect(await cache.set("kx", "outside")).toBe("outside");
     expect(await cache.get("kx")).toBe("outside");
+  });
+
+  it("fails closed instead of using memory in a deployed environment", async () => {
+    const previous = process.env.LIMINAL_ENVIRONMENT;
+    process.env.LIMINAL_ENVIRONMENT = "production";
+    try {
+      await expect(judgeCache()).rejects.toThrow("LIMINAL_DB binding is required");
+    } finally {
+      if (previous === undefined) delete process.env.LIMINAL_ENVIRONMENT;
+      else process.env.LIMINAL_ENVIRONMENT = previous;
+    }
   });
 
   it("reportStore is null without bindings (route keeps the local JSONL fallback)", async () => {

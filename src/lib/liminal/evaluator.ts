@@ -72,7 +72,6 @@ export function evaluateGuess(puzzle: Puzzle, raw: string): GuessFeedback {
 
 /** Merge a semantic-service judgment into a guess result. */
 export function judgedFeedback(
-  puzzle: Puzzle,
   states: Record<string, ConditionState>,
   source: GuessFeedback["source"],
   judgmentVersion: string,

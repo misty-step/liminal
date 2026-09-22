@@ -1,52 +1,43 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
-import { getPuzzle } from "@/lib/liminal/deck";
 import { judgeEnabledFor } from "@/lib/liminal/judgment";
 import { normalizeAnswer } from "@/lib/liminal/normalize";
+import {
+  clientKey,
+  createRateLimiter,
+  parseJudgePayload,
+  readJsonPayload,
+} from "@/lib/liminal/runtime";
 import { judgeAnswer, judgeEnvFrom } from "@/lib/liminal/typeSafe";
 import { judgeCache } from "@/lib/liminal/store";
-import { MAX_ANSWER_LENGTH } from "@/lib/liminal/types";
+import { getPuzzle } from "@/lib/liminal/deck";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 // Bounded per-IP rate limit: 20 judgments per minute.
-const WINDOW_MS = 60_000;
-const LIMIT = 20;
-const hits = new Map<string, number[]>();
-
-function rateLimited(ip: string, now: number): boolean {
-  const recent = (hits.get(ip) ?? []).filter((at) => now - at < WINDOW_MS);
-  if (recent.length >= LIMIT) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return false;
-}
+const limiter = createRateLimiter({ limit: 20, windowMs: 60_000 });
 
 export async function POST(request: Request) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (rateLimited(ip, Date.now())) {
+  if (limiter.isLimited(clientKey(request), Date.now())) {
     return NextResponse.json({ status: "unavailable", reason: "rate-limited" }, { status: 429 });
   }
 
-  const raw = await request.text();
-  if (raw.length > 2048) {
-    return NextResponse.json({ status: "unavailable", reason: "payload-too-large" }, { status: 413 });
+  const body = await readJsonPayload(request, 2048);
+  if (!body.ok) {
+    return NextResponse.json(
+      { status: "unavailable", reason: body.reason },
+      { status: body.reason === "payload-too-large" ? 413 : 400 },
+    );
   }
 
-  let body: { puzzleId?: unknown; answer?: unknown };
-  try {
-    body = JSON.parse(raw) as { puzzleId?: unknown; answer?: unknown };
-  } catch {
+  const parsed = parseJudgePayload(body.value);
+  if (!parsed.ok) {
     return NextResponse.json({ status: "unavailable", reason: "bad-request" }, { status: 400 });
   }
-
-  const puzzleId = typeof body.puzzleId === "string" ? body.puzzleId : "";
-  const answer = typeof body.answer === "string" ? body.answer : "";
+  const { puzzleId, answer } = parsed.value;
   const puzzle = getPuzzle(puzzleId);
-  if (!puzzle || !answer.trim() || answer.length > MAX_ANSWER_LENGTH) {
+  if (!puzzle) {
     return NextResponse.json({ status: "unavailable", reason: "bad-request" }, { status: 400 });
   }
 
@@ -60,14 +51,24 @@ export async function POST(request: Request) {
       { status: 503, headers: { "cache-control": "no-store" } },
     );
   }
-  const result = await judgeAnswer({
-    puzzle,
-    answer,
-    env,
-    // Durable on Workers (D1 first-writer-wins); process-local elsewhere.
-    cache: await judgeCache(),
-    timeoutMs: 4000,
-  });
+  let result: Awaited<ReturnType<typeof judgeAnswer>>;
+  try {
+    const cache = await judgeCache();
+    result = await judgeAnswer({
+      puzzle,
+      answer,
+      env,
+      // Durable on Workers (D1 first-writer-wins); process-local elsewhere.
+      cache,
+      timeoutMs: 4000,
+    });
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "judge", operation: "storage" } });
+    return NextResponse.json(
+      { status: "unavailable", reason: "store-not-configured" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
 
   if (result.status === "judged") {
     return NextResponse.json(

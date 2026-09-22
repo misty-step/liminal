@@ -70,7 +70,10 @@ for (const puzzle of DECK) {
       // The failed condition must simply not be inside; close or outside both
       // count as honest per-condition discrimination.
       expected: Object.fromEntries(
-        puzzle.conditions.map((c) => [c.id, c.id === nearMiss.fails ? "outside-or-close" : "inside"]),
+        puzzle.conditions.map((c) => [
+          c.id,
+          c.id === nearMiss.fails ? "outside-or-close" : "inside",
+        ]),
       ),
     });
   }
@@ -100,7 +103,7 @@ for (const puzzle of DECK) {
       await new Promise((resolve) => setTimeout(resolve, 1500 * attempts));
     }
     const actual = result.status === "judged" ? result.states : null;
-    const confidences = result.status === "judged" ? result.confidences ?? {} : null;
+    const confidences = result.status === "judged" ? (result.confidences ?? {}) : null;
     const ok =
       actual !== null &&
       puzzle.conditions.every((c) => {

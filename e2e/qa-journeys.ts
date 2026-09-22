@@ -3,13 +3,11 @@
  * locally built candidate. Captures mobile + desktop screenshots of every
  * meaningful state and asserts the expected feedback for each journey.
  *
- * Two server instances are expected, both from the same `next build`:
- * - BASE (default http://localhost:3000): live judge configured — the scoped
- *   OpenRouter key is set server-side, so guesses are judged for real.
- * - OUTAGE_BASE (default http://localhost:3001): identical build with
- *   JEV_DECISIONS_URL pointed at an unreachable endpoint (e.g.
- *   http://127.0.0.1:9), so every judgment fails honestly as an upstream
- *   outage. The outage journey runs there and asserts no guess is consumed.
+ * BASE serves the production candidate. Authored answers and near misses are
+ * evaluated locally, so the core journeys make no paid model calls. OUTAGE_BASE
+ * may point at either a second instance from the same `next build` with an
+ * intentionally unreachable judge or BASE without judge credentials; that
+ * journey verifies a real unavailable response and asserts no guess is consumed.
  */
 import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
@@ -20,8 +18,16 @@ const OUT = process.env.OUT ?? "/home/exedev/shots";
 mkdirSync(OUT, { recursive: true });
 
 const ANSWERS: Record<string, { win: string; near: string; loss: string[] }> = {
-  "The Vessel in the Wall": { win: "sink", near: "shampoo bottle", loss: ["kitchen sink", "shampoo bottle", "shower head"] },
-  "The Kitchen Well": { win: "mug", near: "colander", loss: ["colander", "aquarium", "watering can", "barrel", "vase"] },
+  "The Vessel in the Wall": {
+    win: "sink",
+    near: "shampoo bottle",
+    loss: ["kitchen sink", "shampoo bottle", "shower head"],
+  },
+  "The Kitchen Well": {
+    win: "mug",
+    near: "colander",
+    loss: ["colander", "aquarium", "watering can", "barrel", "vase"],
+  },
   "Made and Taken": { win: "phone call", near: "cake", loss: ["cake", "pie", "sandwich", "salad"] },
   "Pass or Fail": { win: "audition", near: "rescue", loss: ["launch", "takeover", "rescue"] },
 };
@@ -34,11 +40,11 @@ function check(name: string, ok: boolean, detail = "") {
 
 async function puzzleTitle(page: import("playwright").Page): Promise<string> {
   return (
-    await page.evaluate(() => {
+    (await page.evaluate(() => {
       const h2 = document.querySelector("h2.title");
       return h2?.childNodes[0]?.textContent?.trim() ?? "";
-    })
-  ) || "";
+    })) || ""
+  );
 }
 
 async function guess(page: import("playwright").Page, text: string) {
@@ -72,13 +78,19 @@ const browser = await chromium.launch();
   await page.screenshot({ path: `${OUT}/02-desktop-near-miss.png`, fullPage: true });
 
   await guess(page, spec.win);
-  const reveal = await page.locator(".reveal h3").innerText().catch(() => "");
+  const reveal = await page
+    .locator(".reveal h3")
+    .innerText()
+    .catch(() => "");
   check("verified answer opens the drawer", reveal.toLowerCase().includes("drawer open"), reveal);
   await page.screenshot({ path: `${OUT}/04-desktop-win.png`, fullPage: true });
 
   await page.reload({ waitUntil: "networkidle" });
   const persisted = await page.locator(".history li").count();
-  const revealAfter = await page.locator(".reveal h3").innerText().catch(() => "");
+  const revealAfter = await page
+    .locator(".reveal h3")
+    .innerText()
+    .catch(() => "");
   check(
     "progress survives refresh",
     persisted >= 2 && revealAfter.toLowerCase().includes("drawer open"),
@@ -86,15 +98,18 @@ const browser = await chromium.launch();
   );
   await page.screenshot({ path: `${OUT}/05-desktop-refresh.png`, fullPage: true });
 
-  await page.click("button.link:text('Report an answer')");
+  await page.getByRole("button", { name: "Report a judging issue" }).click();
   await page.waitForTimeout(150);
   await page.fill("#report-answer", spec.win);
   await page.fill("#report-note", "QA journey: report path check.");
   await page.screenshot({ path: `${OUT}/06-desktop-report.png`, fullPage: true });
   await page.click(".report button[type=submit]");
   await page.waitForTimeout(400);
-  const reportStatus = await page.locator(".report .teaser").last().innerText().catch(() => "");
-  check("answer report is filed", reportStatus.includes("Thanks"), reportStatus);
+  const reportStatus = await page
+    .locator(".report-status")
+    .innerText()
+    .catch(() => "");
+  check("answer report is filed", reportStatus.includes("Thank you"), reportStatus);
   await page.screenshot({ path: `${OUT}/07-desktop-report-filed.png`, fullPage: true });
   await context.close();
 }
@@ -106,7 +121,10 @@ const browser = await chromium.launch();
   await page.goto(OUTAGE_BASE, { waitUntil: "networkidle" });
   const before = await page.locator(".history li").count();
   await guess(page, "sundial");
-  const notice = await page.locator(".notice").innerText().catch(() => "");
+  const notice = await page
+    .locator(".notice")
+    .innerText()
+    .catch(() => "");
   const after = await page.locator(".history li").count();
   check(
     "judge outage is honest and consumes no guess",
@@ -128,11 +146,22 @@ const browser = await chromium.launch();
   check("wordplay drawer opens in practice", title === "Made and Taken", title);
   await guess(page, spec.near);
   const closeMarks = await page.locator(".history .marks .state.close").count();
-  check("wordplay near miss shows exactly one Close", closeMarks === 1, `close marks=${closeMarks}`);
+  check(
+    "wordplay near miss shows exactly one Close",
+    closeMarks === 1,
+    `close marks=${closeMarks}`,
+  );
   await page.screenshot({ path: `${OUT}/15-wordplay-near.png`, fullPage: true });
   await guess(page, spec.win);
-  const reveal = await page.locator(".reveal h3").innerText().catch(() => "");
-  check("wordplay verified answer opens the drawer", reveal.toLowerCase().includes("drawer open"), reveal);
+  const reveal = await page
+    .locator(".reveal h3")
+    .innerText()
+    .catch(() => "");
+  check(
+    "wordplay verified answer opens the drawer",
+    reveal.toLowerCase().includes("drawer open"),
+    reveal,
+  );
   await page.screenshot({ path: `${OUT}/16-wordplay-win.png`, fullPage: true });
   await context.close();
 }
@@ -146,7 +175,10 @@ const browser = await chromium.launch();
     return document.querySelector(".conditions .condition-text")?.textContent?.trim() ?? "";
   });
   await guess(page, conditionText);
-  const notice = await page.locator(".notice").innerText().catch(() => "");
+  const notice = await page
+    .locator(".notice")
+    .innerText()
+    .catch(() => "");
   const rows = await page.locator(".history li").count();
   const rejected = notice.toLowerCase().includes("repeats");
   check("clue echo is rejected without consuming a guess", rejected && rows === 0, `rows=${rows}`);
@@ -165,9 +197,16 @@ const browser = await chromium.launch();
   for (const answer of ANSWERS["The Kitchen Well"].loss) {
     await guess(page, answer);
   }
-  const reveal = await page.locator(".reveal h3").innerText().catch(() => "");
+  const reveal = await page
+    .locator(".reveal h3")
+    .innerText()
+    .catch(() => "");
   const pips = await page.locator(".pip.used").count();
-  check("five guesses close the drawer", reveal.includes("stays closed") && pips === 5, `${reveal} pips=${pips}`);
+  check(
+    "five guesses close the drawer",
+    reveal.includes("stays closed") && pips === 5,
+    `${reveal} pips=${pips}`,
+  );
   await page.screenshot({ path: `${OUT}/09-desktop-loss.png`, fullPage: true });
 
   // The cabinet grid is already visible in practice mode (screenshot 09 shows
@@ -196,7 +235,10 @@ const browser = await chromium.launch();
   await page.screenshot({ path: `${OUT}/12-mobile-near-miss.png`, fullPage: true });
   await guess(page, spec.win);
   await page.screenshot({ path: `${OUT}/13-mobile-win.png`, fullPage: true });
-  const reveal = await page.locator(".reveal h3").innerText().catch(() => "");
+  const reveal = await page
+    .locator(".reveal h3")
+    .innerText()
+    .catch(() => "");
   check("mobile win journey", reveal.toLowerCase().includes("drawer open"), reveal);
   await context.close();
 }
@@ -213,13 +255,16 @@ const browser = await chromium.launch();
   const transition = await page.evaluate(
     () => getComputedStyle(document.querySelector(".drawer-card")!).transitionDuration,
   );
-  check("reduced motion disables transitions", transition === "0s", transition);
+  check("reduced motion minimizes transitions", Number.parseFloat(transition) <= 0.001, transition);
   await context.close();
 }
 
 await browser.close();
 
 const failed = results.filter((row) => !row.ok);
-writeFileSync(`${OUT}/journeys.json`, JSON.stringify({ at: new Date().toISOString(), results }, null, 2));
+writeFileSync(
+  `${OUT}/journeys.json`,
+  JSON.stringify({ at: new Date().toISOString(), results }, null, 2),
+);
 console.log(`\n${results.length - failed.length}/${results.length} checks passed`);
 process.exit(failed.length > 0 ? 1 : 0);

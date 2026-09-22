@@ -56,13 +56,9 @@ export function judgmentKey(input: {
   answer: string;
   model: string;
 }): string {
-  return [
-    input.puzzleId,
-    input.conditionId,
-    input.answer,
-    input.model,
-    JUDGE_PROMPT_VERSION,
-  ].join("|");
+  return [input.puzzleId, input.conditionId, input.answer, input.model, JUDGE_PROMPT_VERSION].join(
+    "|",
+  );
 }
 
 export type JudgeQuestion =
@@ -108,10 +104,7 @@ export function buildQuestions(puzzle: Puzzle): Record<string, JudgeQuestion> {
   return questions;
 }
 
-export function judgeEnabledFor(
-  puzzle: Puzzle,
-  env: Record<string, string | undefined>,
-): boolean {
+export function judgeEnabledFor(puzzle: Puzzle, env: Record<string, string | undefined>): boolean {
   return puzzle.judgeStatus === "calibrated" || env.JEV_ALLOW_UNCALIBRATED === "1";
 }
 
@@ -126,12 +119,7 @@ export interface JudgeOutcome {
 
 export type JudgeFailure = {
   status: "unavailable";
-  reason:
-    | "not-configured"
-    | "timeout"
-    | "upstream-error"
-    | "invalid-response"
-    | "uncertain";
+  reason: "not-configured" | "timeout" | "upstream-error" | "invalid-response" | "uncertain";
 };
 
 export type JudgeResult = JudgeOutcome | JudgeFailure;

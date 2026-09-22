@@ -49,9 +49,9 @@ describe("evaluateGuess", () => {
 
 describe("judgedFeedback and helpers", () => {
   it("derives solved from judged states", () => {
-    const win = judgedFeedback(vessel, { c1: "inside", c2: "inside", c3: "inside" }, "judged", "v1");
+    const win = judgedFeedback({ c1: "inside", c2: "inside", c3: "inside" }, "judged", "v1");
     expect(win.solved).toBe(true);
-    const miss = judgedFeedback(vessel, { c1: "inside", c2: "close", c3: "inside" }, "judged", "v1");
+    const miss = judgedFeedback({ c1: "inside", c2: "close", c3: "inside" }, "judged", "v1");
     expect(miss.solved).toBe(false);
   });
 

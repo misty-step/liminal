@@ -41,7 +41,8 @@ export const DECK: readonly Puzzle[] = [
       {
         id: "c2",
         text: "Plumbed in — it has a drain or pipes",
-        judge: "Is `answer` plumbed in — does it have a drain or water pipes as part of what it is?",
+        judge:
+          "Is `answer` plumbed in — does it have a drain or water pipes as part of what it is?",
         levels: {
           yes: "Plumbed in — a drain, pipes, or both are part of it.",
           partly: "Sometimes plumbed in, sometimes not.",
@@ -51,7 +52,8 @@ export const DECK: readonly Puzzle[] = [
       {
         id: "c3",
         text: "It can hold a pool of water",
-        judge: "Can `answer` hold a pool of water — could you fill it, with any drain closed, and the water would stay?",
+        judge:
+          "Can `answer` hold a pool of water — could you fill it, with any drain closed, and the water would stay?",
         levels: {
           yes: "Yes — you could fill it and the water would stay (a plugged sink, a full tub).",
           partly: "It can hold a little water briefly, but not a standing pool.",
@@ -64,10 +66,26 @@ export const DECK: readonly Puzzle[] = [
       answers: ["sink", "bathtub", "washbasin", "toilet"],
       heldOut: ["pedestal sink", "toilet bowl"],
       nearMisses: [
-        { answer: "kitchen sink", fails: "c1", note: "Plumbed in and it holds a pool — but it lives in the kitchen." },
-        { answer: "shampoo bottle", fails: "c2", note: "In the bathroom and holds liquid, but you could carry it away." },
-        { answer: "faucet", fails: "c3", note: "Water runs through it all day — none of it stays." },
-        { answer: "shower head", fails: "c3", note: "Water runs through it all day — none of it stays." },
+        {
+          answer: "kitchen sink",
+          fails: "c1",
+          note: "Plumbed in and it holds a pool — but it lives in the kitchen.",
+        },
+        {
+          answer: "shampoo bottle",
+          fails: "c2",
+          note: "In the bathroom and holds liquid, but you could carry it away.",
+        },
+        {
+          answer: "faucet",
+          fails: "c3",
+          note: "Water runs through it all day — none of it stays.",
+        },
+        {
+          answer: "shower head",
+          fails: "c3",
+          note: "Water runs through it all day — none of it stays.",
+        },
       ],
     },
   },
@@ -102,7 +120,8 @@ export const DECK: readonly Puzzle[] = [
       {
         id: "c3",
         text: "Can hold liquid without leaking",
-        judge: "Can `answer` hold liquid without leaking — could you pour water in and have it stay?",
+        judge:
+          "Can `answer` hold liquid without leaking — could you pour water in and have it stay?",
         levels: {
           yes: "Yes — you could pour water in and it would stay.",
           partly: "It holds liquid briefly, or only a little.",
@@ -116,65 +135,97 @@ export const DECK: readonly Puzzle[] = [
       heldOut: ["tumbler", "measuring cup", "carafe"],
       nearMisses: [
         { answer: "colander", fails: "c3", note: "A kitchen vessel with deliberate holes." },
-        { answer: "aquarium", fails: "c2", note: "A container that holds water, but it lives in the living room." },
-        { answer: "watering can", fails: "c2", note: "A container that pours, but it lives in the garden shed." },
+        {
+          answer: "aquarium",
+          fails: "c2",
+          note: "A container that holds water, but it lives in the living room.",
+        },
+        {
+          answer: "watering can",
+          fails: "c2",
+          note: "A container that pours, but it lives in the garden shed.",
+        },
         { answer: "barrel", fails: "c2", note: "It holds liquid, but it lives in the cellar." },
-        { answer: "vase", fails: "c2", note: "It holds water for flowers, but it lives on the table." },
-        { answer: "bucket", fails: "c2", note: "It carries liquid, but it belongs to the mop, not the kitchen." },
+        {
+          answer: "vase",
+          fails: "c2",
+          note: "It holds water for flowers, but it lives on the table.",
+        },
+        {
+          answer: "bucket",
+          fails: "c2",
+          note: "It carries liquid, but it belongs to the mop, not the kitchen.",
+        },
       ],
     },
   },
   {
-      id: "made-and-taken",
-      title: "Made and Taken",
-      drawer: "Drawer III — Made and Taken",
-      mode: "wordplay",
-      teaser: "People make it and people take it — but you will never once hold it.",
-      judgeStatus: "calibrated",
-      conditions: [
+    id: "made-and-taken",
+    title: "Made and Taken",
+    drawer: "Drawer III — Made and Taken",
+    mode: "wordplay",
+    teaser: "People make it and people take it — but you will never once hold it.",
+    judgeStatus: "calibrated",
+    conditions: [
+      {
+        id: "c1",
+        text: "You can make it — people really say this",
+        judge: "Consider `answer`. In natural English, can people 'make' it?",
+        levels: {
+          yes: "People really do 'make' it — a familiar usage.",
+          partly: "'Make' is possible but unusual or strained.",
+          no: "People do not 'make' it.",
+        },
+      },
+      {
+        id: "c2",
+        text: "You can take it — people really say this",
+        judge: "Consider `answer`. In natural English, can people 'take' it?",
+        levels: {
+          yes: "People really do 'take' it — a familiar usage.",
+          partly: "'Take' is possible but unusual or strained.",
+          no: "People do not 'take' it.",
+        },
+      },
+      {
+        id: "c3",
+        text: "It is not a physical object",
+        judge: "Is `answer` an abstraction — not a physical object you could pick up?",
+        levels: {
+          yes: "An abstraction — not something you can pick up.",
+          partly: "It has both abstract and physical senses.",
+          no: "A physical object.",
+        },
+      },
+    ],
+    judgments: {
+      version: "2026-09-20.3",
+      answers: ["decision", "phone call", "wrong turn", "u-turn", "apology"],
+      heldOut: ["conference call", "vow", "mental note"],
+      nearMisses: [
         {
-          id: "c1",
-          text: "You can make it — people really say this",
-          judge: "Consider `answer`. In natural English, can people 'make' it?",
-          levels: {
-            yes: "People really do 'make' it — a familiar usage.",
-            partly: "'Make' is possible but unusual or strained.",
-            no: "People do not 'make' it.",
-          },
+          answer: "cake",
+          fails: "c3",
+          note: "You make it and take it to the party — and you can hold the leftovers.",
         },
         {
-          id: "c2",
-          text: "You can take it — people really say this",
-          judge: "Consider `answer`. In natural English, can people 'take' it?",
-          levels: {
-            yes: "People really do 'take' it — a familiar usage.",
-            partly: "'Take' is possible but unusual or strained.",
-            no: "People do not 'take' it.",
-          },
+          answer: "pie",
+          fails: "c3",
+          note: "You make it and take it to the picnic — and you could pick up a slice.",
         },
         {
-          id: "c3",
-          text: "It is not a physical object",
-          judge: "Is `answer` an abstraction — not a physical object you could pick up?",
-          levels: {
-            yes: "An abstraction — not something you can pick up.",
-            partly: "It has both abstract and physical senses.",
-            no: "A physical object.",
-          },
+          answer: "sandwich",
+          fails: "c3",
+          note: "You make it and take it to lunch — and you can hold it in one hand.",
+        },
+        {
+          answer: "salad",
+          fails: "c3",
+          note: "You make it and take it to the potluck — and you can carry the bowl.",
         },
       ],
-      judgments: {
-        version: "2026-09-20.3",
-        answers: ["decision", "phone call", "wrong turn", "u-turn", "apology"],
-        heldOut: ["conference call", "vow", "mental note"],
-        nearMisses: [
-          { answer: "cake", fails: "c3", note: "You make it and take it to the party — and you can hold the leftovers." },
-          { answer: "pie", fails: "c3", note: "You make it and take it to the picnic — and you could pick up a slice." },
-          { answer: "sandwich", fails: "c3", note: "You make it and take it to lunch — and you can hold it in one hand." },
-          { answer: "salad", fails: "c3", note: "You make it and take it to the potluck — and you can carry the bowl." },
-        ],
-      },
     },
+  },
   {
     id: "pass-or-fail",
     title: "Pass or Fail",
@@ -223,8 +274,16 @@ export const DECK: readonly Puzzle[] = [
       heldOut: ["eye test", "background check", "entrance exam", "hearing test"],
       nearMisses: [
         { answer: "launch", fails: "c1", note: "It can fail on the pad — but nobody passes it." },
-        { answer: "takeover", fails: "c1", note: "It can fail in the boardroom — but nobody passes it." },
-        { answer: "rescue", fails: "c1", note: "It can fail in the attempt — but nobody passes it." },
+        {
+          answer: "takeover",
+          fails: "c1",
+          note: "It can fail in the boardroom — but nobody passes it.",
+        },
+        {
+          answer: "rescue",
+          fails: "c1",
+          note: "It can fail in the attempt — but nobody passes it.",
+        },
       ],
     },
   },

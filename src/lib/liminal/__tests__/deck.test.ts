@@ -52,7 +52,9 @@ describe("launch deck", () => {
             if (condition.id === nearMiss.fails) {
               expect(state, `${nearMiss.answer} should be close on ${condition.id}`).toBe("close");
             } else {
-              expect(state, `${nearMiss.answer} should be inside on ${condition.id}`).toBe("inside");
+              expect(state, `${nearMiss.answer} should be inside on ${condition.id}`).toBe(
+                "inside",
+              );
             }
           }
         }

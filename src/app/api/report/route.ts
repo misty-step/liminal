@@ -1,51 +1,50 @@
+import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
-import { getPuzzle } from "@/lib/liminal/deck";
+import {
+  clientKey,
+  createRateLimiter,
+  parseReportPayload,
+  readJsonPayload,
+  runtimeEnvironment,
+} from "@/lib/liminal/runtime";
 import { reportStore } from "@/lib/liminal/store";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const WINDOW_MS = 60_000;
-const LIMIT = 5;
-const hits = new Map<string, number[]>();
-
-function rateLimited(ip: string, now: number): boolean {
-  const recent = (hits.get(ip) ?? []).filter((at) => now - at < WINDOW_MS);
-  if (recent.length >= LIMIT) {
-    hits.set(ip, recent);
-    return true;
-  }
-  recent.push(now);
-  hits.set(ip, recent);
-  return false;
-}
+const limiter = createRateLimiter({ limit: 5, windowMs: 60_000 });
 
 export async function POST(request: Request) {
-  const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  if (rateLimited(ip, Date.now())) {
+  if (limiter.isLimited(clientKey(request), Date.now())) {
     return NextResponse.json({ ok: false, reason: "rate-limited" }, { status: 429 });
   }
 
-  const raw = await request.text();
-  if (raw.length > 2048) {
-    return NextResponse.json({ ok: false, reason: "payload-too-large" }, { status: 413 });
+  const body = await readJsonPayload(request, 2048);
+  if (!body.ok) {
+    return NextResponse.json(
+      { ok: false, reason: body.reason },
+      { status: body.reason === "payload-too-large" ? 413 : 400 },
+    );
   }
 
-  let body: { puzzleId?: unknown; answer?: unknown; note?: unknown };
-  try {
-    body = JSON.parse(raw) as { puzzleId?: unknown; answer?: unknown; note?: unknown };
-  } catch {
+  const parsed = parseReportPayload(body.value);
+  if (!parsed.ok) {
     return NextResponse.json({ ok: false, reason: "bad-request" }, { status: 400 });
   }
-
-  const puzzleId = typeof body.puzzleId === "string" ? body.puzzleId.slice(0, 64) : "";
-  const answer = typeof body.answer === "string" ? body.answer.slice(0, 120) : "";
-  const note = typeof body.note === "string" ? body.note.slice(0, 500) : "";
-  if (!getPuzzle(puzzleId) || !answer.trim()) {
-    return NextResponse.json({ ok: false, reason: "bad-request" }, { status: 400 });
-  }
+  const { puzzleId, answer, note } = parsed.value;
 
   const report = { at: new Date().toISOString(), puzzleId, answer, note };
+
+  let environment: ReturnType<typeof runtimeEnvironment>;
+  try {
+    environment = runtimeEnvironment(process.env.LIMINAL_ENVIRONMENT);
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "report", operation: "runtime-config" } });
+    return NextResponse.json(
+      { ok: false, reason: "environment-not-configured" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
 
   try {
     const durable = await reportStore();
@@ -53,6 +52,9 @@ export async function POST(request: Request) {
       // Workers runtime: append-only row in the D1 authority (readable back).
       await durable.append(report);
     } else {
+      if (environment === "production" || environment === "staging") {
+        return NextResponse.json({ ok: false, reason: "store-not-configured" }, { status: 503 });
+      }
       // Local development fallback (no bindings): JSONL beside the app.
       const { appendFile, mkdir } = await import("node:fs/promises");
       const { join } = await import("node:path");
@@ -61,7 +63,8 @@ export async function POST(request: Request) {
       await appendFile(join(dir, "reports.jsonl"), `${JSON.stringify(report)}\n`, "utf8");
     }
     return NextResponse.json({ ok: true }, { headers: { "cache-control": "no-store" } });
-  } catch {
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "report", operation: "append" } });
     return NextResponse.json({ ok: false, reason: "storage-failed" }, { status: 503 });
   }
 }

@@ -60,27 +60,55 @@ nothing — a refused guess is never spent.
   instructions.
 - `/api/report` is size-capped and rate-limited; failures are reported honestly.
 
+## Production foundations
+
+- `GET /api/health` checks the deck and the D1 binding. Staging and production
+  fail closed when durable storage is missing; local development reports that
+  storage is intentionally not configured.
+- `POST /api/events` accepts a strict, versioned first-party event taxonomy.
+  Events contain an anonymous session ID and bounded enums/counts only. Player
+  answers, report notes, IP addresses, and joinable actor IDs are not events.
+- Sentry is disabled unless a DSN is supplied. Server, edge, and browser
+  capture use explicit environment and release values, sampled traces, source
+  maps for release builds, `sendDefaultPii: false`, and a scrubber that removes
+  request data, headers, query strings, identity, extras, and breadcrumb text.
+- `ops/production-foundations.json` registers health, events, and the `liminal`
+  Sentry project for the approved production-only game-operations triage path.
+- `bun run foundation:check` executes the repository-owned brand, health,
+  telemetry, storage, Sentry, and CI contract.
+
 ## Development
 
 ```sh
 bun install
 bun run dev        # local
-bun run test       # vitest: engine, deck matrix, daily, storage, judge
+bun run format:check
+bun run lint
+bun run foundation:check
+bun run test       # vitest: engine, deck, boundaries, storage, routes, privacy
 bun run type-check
-bun run build
+bun run build:cf   # reproducible OpenNext/Cloudflare deploy artifact
 ```
 
 ## Deploy contract (for Zoe)
 
 - Cloudflare Worker + custom domain `liminal.mistystep.io` →
   `{ "pattern": "liminal.mistystep.io", "custom_domain": true }`.
-- Worker secrets: `OPENROUTER_API_KEY` (scoped) or `TYPESAFE_API_KEY`.
-- Worker vars: `JEV_MODEL=typesafe/jev-1.13`, `JEV_DECISIONS_URL=https://openrouter.ai/api/alpha/decisions`.
+- Worker secrets: `OPENROUTER_API_KEY` (scoped) or `TYPESAFE_API_KEY`, plus
+  `SENTRY_DSN` when monitoring is activated.
+- Worker vars: `LIMINAL_ENVIRONMENT`, `SENTRY_ENVIRONMENT`,
+  `JEV_MODEL=typesafe/jev-1.13`, and
+  `JEV_DECISIONS_URL=https://openrouter.ai/api/alpha/decisions`.
+- Release build vars: `SENTRY_RELEASE` and `NEXT_PUBLIC_SENTRY_RELEASE` are the
+  exact candidate SHA; client Sentry activation also needs the public DSN and
+  explicit environment. Source-map upload uses scoped `SENTRY_AUTH_TOKEN`,
+  `SENTRY_ORG`, and `SENTRY_PROJECT=liminal` in release CI only.
 - Build: `bun run build:cf` (OpenNext, `open-next.config.ts`); deploy:
   `bun run deploy:cf` (wrangler `--env production`).
 - Durable store: D1 `liminal-judgments` (binding `LIMINAL_DB`) retains
   first-writer-wins judgments keyed by the versioned judgment keys and holds
-  append-only answer reports; schema lives in `migrations/`.
+  append-only answer reports and privacy-safe product events; additive schema
+  lives in `migrations/`.
 
 ## Known limitations (this slice)
 
@@ -102,10 +130,10 @@ bun run build
   members judge confidently and are accepted: checkup (authored), bar exam,
   entrance exam, hearing test, final exam, eye test, background check.
 - **The authored layer is the launch-deck authority.** It is deterministic,
-  offline, and enforced by the 61-test suite plus `evidence/validation-matrix.md`.
+  offline, and enforced by the test suite plus `evidence/validation-matrix.md`.
 - **"Close" has two meanings** once the judge is enabled: authored near miss
   vs model uncertainty. See the findings doc before enabling.
 - The semantic judge is unit-tested against mocked transports; live behavior
   is proven by the live matrix at every deck/prompt version bump.
-- Practice-mode drawer browsing is a list, not an elaborate cabinet animation.
-- No analytics, no accounts, no multiplayer (by design).
+- No accounts and no multiplayer (by design). Product events are anonymous,
+  first-party, and intentionally exclude player-entered text.

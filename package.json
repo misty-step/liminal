@@ -11,17 +11,24 @@
     "preview:cf": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy:cf": "wrangler deploy --env production",
     "start": "next start",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "lint": "biome lint .",
+    "foundation:check": "bun run scripts/foundation-check.ts",
     "type-check": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "check": "bun run format:check && bun run lint && bun run foundation:check && bun run type-check && bun run test",
     "validate:live": "bun run scripts/live-matrix.ts"
   },
   "dependencies": {
+    "@sentry/nextjs": "10.75.1",
     "next": "^16.3.5",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.5.14",
     "@opennextjs/cloudflare": "^1.20.6",
     "@types/node": "^26.6.2",
     "@types/react": "^19.3.0",
@@ -30,5 +37,8 @@
     "typescript": "^7.0.2",
     "vitest": "^5.0.1",
     "wrangler": "^4.134.0"
-  }
+  },
+  "trustedDependencies": [
+    "@sentry/cli"
+  ]
 }
