@@ -5,6 +5,11 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+# One run at a time: two runs would race for the same date and the loser
+# would burn its night's budget on a primary-key conflict. Queue, never cancel.
+concurrency:
+  group: daily-puzzles
+  cancel-in-progress: false
 jobs:
   publish:
     runs-on: ubuntu-latest
