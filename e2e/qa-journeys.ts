@@ -340,6 +340,48 @@ const browser = await chromium.launch();
   await dismissHowto(page);
   const label = await puzzleLabel(page);
   check("mobile board shows the scheduled puzzle", label === TODAY.label, label);
+  const soundToggle = page.getByRole("button", { name: "Turn sounds on" });
+  check("sound is opt-in", (await soundToggle.count()) === 1);
+  await soundToggle.click();
+  await page.reload({ waitUntil: "networkidle" });
+  check(
+    "sound preference survives reload",
+    (await page.getByRole("button", { name: "Turn sounds off" }).count()) === 1,
+  );
+  await page.getByRole("button", { name: "Turn sounds off" }).click();
+  await page.locator("#guess").focus();
+  // Chromium does not expose a native phone keyboard. A shortened visual
+  // viewport exercises the layout contract; device QA remains separate.
+  await page.evaluate(() => {
+    if (!window.visualViewport) throw new Error("visualViewport unavailable");
+    Object.defineProperty(window.visualViewport, "height", { configurable: true, value: 520 });
+    window.visualViewport.dispatchEvent(new Event("resize"));
+  });
+  const keyboard = await page.evaluate(() => {
+    const bounds = (selector: string) =>
+      document.querySelector(selector)?.getBoundingClientRect() ?? null;
+    const board = bounds(".board");
+    const labels = [".label-c1", ".label-c2", ".label-c3"].map(bounds);
+    const input = bounds("#guess");
+    const place = bounds(".guess button");
+    const status = bounds(".status");
+    return {
+      fits:
+        board !== null &&
+        labels.every((label) => label !== null && label.top >= 0 && label.bottom <= 520) &&
+        input !== null &&
+        input.bottom <= 520 &&
+        place !== null &&
+        place.bottom <= 520 &&
+        status !== null &&
+        status.bottom <= 520,
+      inputBottom: input?.bottom,
+      lastLabelBottom: labels[2]?.bottom,
+    };
+  });
+  check("keyboard keeps puzzle and composer visible", keyboard.fits, JSON.stringify(keyboard));
+  await page.screenshot({ path: `${OUT}/mobile-keyboard.png` });
+  await page.locator("#guess").blur();
   await fillBoard(page, label, "mobile");
   await context.close();
 }
