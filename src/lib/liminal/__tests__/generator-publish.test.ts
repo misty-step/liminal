@@ -77,7 +77,7 @@ function fixture(): { report: CriticReport; calibration: Calibration } {
   return { report, calibration: { puzzle, rows } };
 }
 
-describe("daily publish bar", () => {
+describe("daily publish bar (US-002, US-008)", () => {
   it("accepts exact boundaries only with every live answer accounted for", () => {
     const { report, calibration } = fixture();
     expect(meetsPublishBar(report, calibration, []).ok).toBe(true);

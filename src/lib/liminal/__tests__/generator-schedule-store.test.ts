@@ -122,7 +122,7 @@ describe("D1HttpScheduleStore", () => {
 
 // A date that has begun is being played from the deck fallback. Scheduling it
 // would swap puzzle #N mid-day, so every layer refuses it.
-describe("the mid-day swap cutoff", () => {
+describe("the mid-day swap cutoff (US-005, US-008)", () => {
   it("the nightly window starts tomorrow, however late today is", () => {
     expect(publishWindow(new Date("2026-09-23T00:00:00.000Z"), 3)).toEqual([
       "2026-09-24",

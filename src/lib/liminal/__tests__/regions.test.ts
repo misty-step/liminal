@@ -13,7 +13,7 @@ const SINGLE = s("inside", "outside", "outside");
 const NOWHERE = s("outside", "outside", "outside");
 const ON_LINE = s("inside", "inside", "close");
 
-describe("landingOf", () => {
+describe("landingOf (US-001)", () => {
   it("names the target a clean landing fills", () => {
     expect(landingOf(CENTER.states)).toEqual({ kind: "target", key: "center" });
     expect(landingOf(NOT_C3.states)).toEqual({ kind: "target", key: "c3" });
@@ -29,7 +29,7 @@ describe("landingOf", () => {
   });
 });
 
-describe("boardState", () => {
+describe("boardState (US-001)", () => {
   it("lets the first clean landing fill a region and keeps it", () => {
     const board = boardState([NOT_C3, NOT_C3, CENTER]);
     expect(board.fills).toEqual({ c3: 0, center: 2 });

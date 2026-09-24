@@ -261,6 +261,72 @@ const browser = await chromium.launch();
   await context.close();
 }
 
+// ---------- Thinking-time clock (US-003) ----------
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
+  const page = await context.newPage();
+  // A slow judge that ends in an outage: the wait must not reach the score.
+  await page.route("**/api/judge", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 2500));
+    await route.fulfill({
+      status: 503,
+      contentType: "application/json",
+      body: JSON.stringify({ status: "unavailable", reason: "upstream" }),
+    });
+  });
+  await page.goto(BASE, { waitUntil: "networkidle" });
+  // Seconds on the clock. Held over a 2.5 s pause means at most 1 s of drift
+  // (the steps around the pause still count); running means at least 2 s.
+  const clock = async () => {
+    const [m, sec] = (await page.locator(".meter-clock").innerText()).trim().split(":");
+    return Number(m) * 60 + Number(sec);
+  };
+  const idle = async () => new Promise((resolve) => setTimeout(resolve, 2500));
+
+  const start = await clock();
+  await idle();
+  const thinking = await clock();
+  check("clock runs while the player thinks", thinking - start >= 2, `${start} -> ${thinking}`);
+
+  await page.fill("#guess", "sundial");
+  await page.click(".guess button[type=submit]");
+  const status = await awaitStatus(page, "No guess used");
+  const afterJudge = await clock();
+  check(
+    "clock holds while the judge considers a word",
+    afterJudge - thinking <= 1 && (await guessCount(page)) === 0,
+    `${thinking} -> ${afterJudge}; ${status}`,
+  );
+
+  await page.getByRole("button", { name: "How to play" }).click();
+  await idle();
+  await dismissHowto(page);
+  const afterHowto = await clock();
+  check(
+    "clock holds while the how-to is open",
+    afterHowto - afterJudge <= 1,
+    `${afterJudge} -> ${afterHowto}`,
+  );
+
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "hidden" });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  await idle();
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", { configurable: true, value: "visible" });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+  const afterHidden = await clock();
+  check(
+    "clock holds while the tab is hidden",
+    afterHidden - afterHowto <= 1,
+    `${afterHowto} -> ${afterHidden}`,
+  );
+  await context.close();
+}
+
 // ---------- Mobile completion ----------
 {
   const context = await browser.newContext({

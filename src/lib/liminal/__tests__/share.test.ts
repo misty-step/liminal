@@ -16,7 +16,7 @@ function result(number: number, words: typeof mixed, elapsedMs = 84_000) {
   return { number, guesses: words, elapsedMs, origin: "https://liminal.mistystep.io" };
 }
 
-describe("share text", () => {
+describe("share text (US-007)", () => {
   it("uses exactly four lines, with first-fill squares and no answer words", () => {
     const text = shareText(result(12, mixed));
     const code = encodeReveal({ number: 12, elapsedMs: 84_000, words: mixed });
@@ -60,7 +60,7 @@ describe("share text", () => {
   });
 });
 
-describe("reveal code", () => {
+describe("reveal code (US-007)", () => {
   it("round trips Unicode words, first fills, landing positions and whole seconds", () => {
     const code = encodeReveal({ number: 12, elapsedMs: 84_999, words: mixed });
     expect(decodeReveal(code)).toEqual({
