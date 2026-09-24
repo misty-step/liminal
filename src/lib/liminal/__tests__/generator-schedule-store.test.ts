@@ -169,4 +169,23 @@ describe("the mid-day swap cutoff", () => {
     insert("date('now', '+1 day')", 3, "tomorrow");
     expect(db.prepare("SELECT puzzle_id FROM schedule").all()).toEqual([{ puzzle_id: "tomorrow" }]);
   });
+
+  it("the D1 trigger refuses unpublishing a date that has begun, not a future one", () => {
+    const db = new DatabaseSync(":memory:");
+    const migration = (name: string) =>
+      db.exec(readFileSync(join(process.cwd(), "migrations", name), "utf8"));
+    migration("0003_schedule.sql");
+    // Seed a row that aired today, as the fallback-free past would hold.
+    db.exec("DROP TRIGGER schedule_future_only");
+    db.exec(`INSERT INTO schedule (date, number, puzzle_id, puzzle_json, source) VALUES
+      (date('now'), 1, 'today', '{}', 'manual'),
+      (date('now', '+1 day'), 2, 'tomorrow', '{}', 'manual')`);
+    migration("0003_schedule.sql");
+    migration("0004_schedule_started_immutable.sql");
+    expect(() => db.exec("DELETE FROM schedule WHERE puzzle_id = 'today'")).toThrow(
+      "cannot be unpublished",
+    );
+    db.exec("DELETE FROM schedule WHERE puzzle_id = 'tomorrow'");
+    expect(db.prepare("SELECT puzzle_id FROM schedule").all()).toEqual([{ puzzle_id: "today" }]);
+  });
 });

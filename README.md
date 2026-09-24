@@ -138,9 +138,10 @@ bun run validate:live -- --only <id> --mark-calibrated
 Publishing is automatic. `.github/workflows/daily-puzzles.yml` runs
 `puzzles:daily --store d1` nightly: it fills missing dates from tomorrow up to
 a week ahead, publishing only puzzles that clear the publish bar and a
-zero-miss live calibration. Scheduled rows are insert-only and only future
-dates can be inserted, so the puzzle for a day never changes once that day has
-begun. A date nobody filled in time stays on the deck fallback all day. See
+zero-miss live calibration. Scheduled rows are never updated, and a date that
+has begun can be neither inserted nor deleted (D1 triggers), so the puzzle for
+a day never changes once that day has begun; a future puzzle can still be
+pulled before it airs. A date nobody filled in time stays on the deck fallback all day. See
 `AGENTS.md` for the gates.
 
 ## Deploy contract (for Zoe)
@@ -161,11 +162,14 @@ begun. A date nobody filled in time stays on the deck fallback all day. See
 - Durable store: D1 `liminal-judgments` (binding `LIMINAL_DB`) retains
   first-writer-wins judgments keyed by the versioned judgment keys, holds
   append-only answer reports and privacy-safe product events, and the
-  insert-only daily `schedule` (migration `0003_schedule.sql`, required by
-  `/api/health`). Additive schema lives in `migrations/`.
+  daily `schedule` (migrations `0003_schedule.sql` and
+  `0004_schedule_started_immutable.sql`, required by `/api/health`). Additive
+  schema lives in `migrations/`. Apply migrations before deploying.
 - Daily generation (GitHub Actions): repository secrets
   `LIMINAL_JUDGE_API_KEY`, `LIMINAL_GENERATOR_API_KEY` (must differ), and
-  `CLOUDFLARE_API_TOKEN` (D1 edit), plus variable `CLOUDFLARE_ACCOUNT_ID`.
+  `CLOUDFLARE_API_TOKEN`, plus variable `CLOUDFLARE_ACCOUNT_ID`. The token is
+  the account-owned `liminal-daily-d1` (D1 Write only; local copy in pass at
+  `workstation/LIMINAL_DAILY_D1_TOKEN`), never the workstation admin token.
 
 ## Known limitations (this slice)
 

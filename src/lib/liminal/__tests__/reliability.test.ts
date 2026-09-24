@@ -70,6 +70,7 @@ const requiredSchemaObjects = [
   "judgments_state_update_guard",
   "schedule_no_update",
   "schedule_future_only",
+  "schedule_no_started_delete",
   "product_events_funnel",
   "product_events_session",
 ] as const;
@@ -78,6 +79,7 @@ const ALL_MIGRATIONS = [
   "0001_judgments_and_reports.sql",
   "0002_foundations.sql",
   "0003_schedule.sql",
+  "0004_schedule_started_immutable.sql",
 ] as const;
 
 const requiredSchemaColumns = {
@@ -144,6 +146,7 @@ function schemaD1(options: {
               "judgments_state_update_guard",
               "schedule_no_update",
               "schedule_future_only",
+              "schedule_no_started_delete",
             ].filter((name) => objects.has(name)).length,
             indexCount: ["product_events_funnel", "product_events_session"].filter((name) =>
               objects.has(name),
