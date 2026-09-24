@@ -9,7 +9,7 @@ import {
 } from "../daily";
 import { DECK } from "../deck";
 
-describe("daily rotation", () => {
+describe("daily rotation (US-005)", () => {
   it("keys dates in UTC", () => {
     expect(dateKeyUTC(new Date("2026-09-20T23:59:59Z"))).toBe("2026-09-20");
     expect(dateKeyUTC(new Date("2026-09-21T00:00:01Z"))).toBe("2026-09-21");

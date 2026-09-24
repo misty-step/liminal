@@ -22,7 +22,7 @@ function jsonRequest(path: string, body: unknown): Request {
   });
 }
 
-describe("production route boundaries", () => {
+describe("production route boundaries (US-002, US-004, US-005, US-006)", () => {
   it("keeps local health meaningful without claiming a bound store", async () => {
     delete process.env.LIMINAL_ENVIRONMENT;
     const response = await getHealth();

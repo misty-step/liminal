@@ -14,7 +14,7 @@ describe("normalizeAnswer", () => {
   });
 });
 
-describe("evaluateGuess", () => {
+describe("evaluateGuess (US-001, US-002)", () => {
   it("places center answers inside every circle", () => {
     const feedback = evaluateGuess(vessel, "The Sink");
     expect(feedback.states).toEqual({ c1: "inside", c2: "inside", c3: "inside" });

@@ -19,7 +19,7 @@ function inTrueRegion(p: { x: number; y: number }, states: Record<ConditionId, C
   });
 }
 
-describe("placeWords", () => {
+describe("placeWords (US-001)", () => {
   it("puts every verdict in its true region, or flags it inexact", () => {
     for (const states of combos) {
       const [spot] = placeWords([{ states, width: 12 }], 6);

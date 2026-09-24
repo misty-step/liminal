@@ -202,8 +202,9 @@ Contract:
   ("Disagree?" on any word) is the escape valve.
 - **Crowding.** A second word for an already-filled pair region can be pushed
   off it; such words show explicit marks rather than a misleading position.
-- **A stuck player has no way out.** With no guess limit there is no reveal
-  or give-up; the board stays open until all four places are filled.
+- **No give-up, by decision.** With no guess limit there is no reveal or
+  show-answers path (operator decision, 2026-09-24; US-001); the board stays
+  open until all four places are filled.
 - The semantic judge is unit-tested against mocked transports; live behavior
   is proven by the live matrix at every deck/prompt version bump.
 - No accounts and no multiplayer (by design). Product events are anonymous,

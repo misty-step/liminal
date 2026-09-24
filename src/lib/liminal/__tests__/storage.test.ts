@@ -6,7 +6,7 @@ import { canGuess, emptyProgress, parseProgress, recordGuess, storageKey } from 
 const vessel = getPuzzle("bath-vessel")!;
 const miss = judgedFeedback({ c1: "outside", c2: "outside", c3: "outside" }, "judged", "v");
 
-describe("progress storage", () => {
+describe("progress storage (US-001, US-002, US-003)", () => {
   it("uses a versioned key that ignores five-guess v1 progress", () => {
     expect(storageKey("bath-vessel")).toBe("liminal.v2.puzzle.bath-vessel");
     const v1 = {
