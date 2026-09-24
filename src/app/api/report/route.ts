@@ -7,6 +7,7 @@ import {
   readJsonPayload,
   runtimeEnvironment,
 } from "@/lib/liminal/runtime";
+import { puzzleById } from "@/lib/liminal/scheduleSource";
 import { reportStore } from "@/lib/liminal/store";
 
 export const runtime = "nodejs";
@@ -32,6 +33,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: false, reason: "bad-request" }, { status: 400 });
   }
   const { puzzleId, answer, note } = parsed.value;
+  let known: boolean;
+  try {
+    known = Boolean(await puzzleById(puzzleId));
+  } catch (error) {
+    Sentry.captureException(error, { tags: { route: "report", operation: "schedule" } });
+    return NextResponse.json(
+      { ok: false, reason: "schedule-unavailable" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
+  if (!known) {
+    return NextResponse.json({ ok: false, reason: "bad-request" }, { status: 400 });
+  }
 
   const report = { at: new Date().toISOString(), puzzleId, answer, note };
 

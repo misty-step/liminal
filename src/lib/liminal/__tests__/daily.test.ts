@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
+import {
+  dailyPuzzle,
+  dailyPuzzleIndex,
+  dateForNumber,
+  dateKeyUTC,
+  dayNumber,
+  FALLBACK_ROTATION,
+} from "../daily";
 import { DECK } from "../deck";
-import { dailyPuzzle, dailyPuzzleIndex, dateKeyUTC, dayNumber } from "../daily";
 
 describe("daily rotation", () => {
   it("keys dates in UTC", () => {
@@ -14,22 +21,30 @@ describe("daily rotation", () => {
     expect(dayNumber("2026-09-20") - dayNumber("2026-09-19")).toBe(1);
   });
 
-  it("is deterministic for a given date", () => {
-    const a = dailyPuzzle("2026-09-20", DECK);
-    const b = dailyPuzzle("2026-09-20", DECK);
-    expect(a.id).toBe(b.id);
+  // Past fallback dates are recomputed on every archive request, so the dates
+  // players have already seen must keep their puzzle forever.
+  it("keeps launch fallback assignments", () => {
+    expect(dailyPuzzle(dateForNumber(1), DECK).id).toBe("shell-water-eat");
+    expect(dailyPuzzle(dateForNumber(2), DECK).id).toBe("wheels-motor-ride");
   });
 
-  it("rotates through the deck across consecutive days", () => {
-    const ids = ["2026-09-20", "2026-09-21", "2026-09-22", "2026-09-23"].map(
-      (key) => dailyPuzzle(key, DECK).id,
-    );
-    expect(new Set(ids).size).toBe(DECK.length);
+  it("an appended deck puzzle leaves every fallback date unchanged", () => {
+    const grown = [...DECK, { ...DECK[0], id: "appended-later" }];
+    for (let number = 1; number <= 90; number++) {
+      const date = dateForNumber(number);
+      expect(dailyPuzzle(date, grown).id).toBe(dailyPuzzle(date, DECK).id);
+    }
+  });
+
+  it("names only bundled puzzles and visits each once per cycle", () => {
+    const ids = FALLBACK_ROTATION.map((_, day) => dailyPuzzle(dateForNumber(day + 1), DECK).id);
+    expect(new Set(ids).size).toBe(FALLBACK_ROTATION.length);
+    expect(() => dailyPuzzle(dateForNumber(1), [])).toThrow("missing puzzle");
   });
 
   it("wraps cleanly and never returns a negative index", () => {
-    const index = dailyPuzzleIndex("1969-12-31", DECK.length);
+    const index = dailyPuzzleIndex("1969-12-31");
     expect(index).toBeGreaterThanOrEqual(0);
-    expect(index).toBeLessThan(DECK.length);
+    expect(index).toBeLessThan(FALLBACK_ROTATION.length);
   });
 });

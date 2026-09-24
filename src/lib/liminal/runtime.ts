@@ -1,5 +1,10 @@
-import { getPuzzle } from "./deck";
-import { GUESS_LIMIT, MAX_ANSWER_LENGTH } from "./types";
+import { MAX_ANSWER_LENGTH } from "./types";
+
+/**
+ * A puzzle id's shape. Puzzles also come from the runtime schedule, so request
+ * parsing checks shape only; routes resolve the id and refuse unknown ones.
+ */
+const PUZZLE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export type RuntimeEnvironment = "production" | "staging" | "test";
 export type ProductEventName =
@@ -146,7 +151,7 @@ export function parseJudgePayload(
   if (!isRecord(input) || !hasOnlyKeys(input, ["puzzleId", "answer"])) return badRequest;
   const puzzleId = boundedText(input.puzzleId, 64);
   const answer = boundedText(input.answer, MAX_ANSWER_LENGTH);
-  if (!puzzleId || !answer || !getPuzzle(puzzleId)) return badRequest;
+  if (!puzzleId || !answer || !isPuzzleId(puzzleId)) return badRequest;
   return { ok: true, value: { puzzleId, answer } };
 }
 
@@ -159,7 +164,7 @@ export function parseReportPayload(
   const puzzleId = boundedText(input.puzzleId, 64);
   const answer = boundedText(input.answer, MAX_ANSWER_LENGTH);
   const note = boundedText(input.note, 500, true);
-  if (!puzzleId || !answer || note === null || !getPuzzle(puzzleId)) return badRequest;
+  if (!puzzleId || !answer || note === null || !isPuzzleId(puzzleId)) return badRequest;
   return { ok: true, value: { puzzleId, answer, note } };
 }
 
@@ -172,12 +177,14 @@ const eventNames = new Set<ProductEventName>([
   "report_submitted",
 ]);
 const modes = new Set(["today", "practice"]);
+// There is no guess limit; this only bounds what an event may claim.
+const MAX_REPORTED_GUESSES = 1000;
 const results = new Set(["inside", "close", "outside"]);
 const sources = new Set(["authored", "live"]);
-const refusalReasons = new Set(["uncertainty", "outage", "ratelimit", "calibration", "rejection"]);
+const refusalReasons = new Set(["outage", "ratelimit", "calibration", "rejection"]);
 
 function isPuzzleId(value: unknown): value is string {
-  return typeof value === "string" && value.length <= 64 && Boolean(getPuzzle(value));
+  return typeof value === "string" && value.length <= 64 && PUZZLE_ID.test(value);
 }
 
 function propsMatch(
@@ -223,7 +230,7 @@ function propsMatch(
         Number.isInteger(props.guesses_used) &&
         typeof props.guesses_used === "number" &&
         props.guesses_used >= 1 &&
-        props.guesses_used <= GUESS_LIMIT
+        props.guesses_used <= MAX_REPORTED_GUESSES
       );
     case "report_submitted":
       return hasOnlyKeys(props, ["puzzle_id"]) && isPuzzleId(props.puzzle_id);

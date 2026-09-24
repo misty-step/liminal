@@ -1,0 +1,45 @@
+name: Publish daily puzzles
+on:
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    # Measured about 45 minutes per $1 of generator spend; the cap is $2.
+    timeout-minutes: 180
+    env:
+      OPENROUTER_API_KEY: ${{ secrets.LIMINAL_JUDGE_API_KEY }}
+      LIMINAL_GENERATOR_API_KEY: ${{ secrets.LIMINAL_GENERATOR_API_KEY }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+      LIMINAL_D1_DATABASE_ID: 24c4f358-7bf1-4ad6-a19a-66802509482b
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+      - name: Check required credentials
+        run: |
+          for name in OPENROUTER_API_KEY LIMINAL_GENERATOR_API_KEY CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID LIMINAL_D1_DATABASE_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing $name. Configure repository secrets and CLOUDFLARE_ACCOUNT_ID variable."
+              exit 1
+            fi
+          done
+          if [ "$OPENROUTER_API_KEY" = "$LIMINAL_GENERATOR_API_KEY" ]; then
+            echo "::error::Judge and generator keys must differ."
+            exit 1
+          fi
+      - run: bun install --frozen-lockfile
+      - name: Publish schedule
+        run: bun run puzzles:daily -- --store d1 --buffer 7 --budget 2
+      - name: Upload run report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: daily-puzzles-report
+          path: content/daily/
+          if-no-files-found: warn

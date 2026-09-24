@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { getPuzzle } from "../deck";
-import { evaluateGuess, guessesRemaining, isSolved, judgedFeedback } from "../evaluator";
+import { evaluateGuess } from "../evaluator";
 import { normalizeAnswer } from "../normalize";
 
 const vessel = getPuzzle("bath-vessel")!;
-const kept = getPuzzle("made-and-taken")!;
+const headFoot = getPuzzle("head-and-foot")!;
 
 describe("normalizeAnswer", () => {
   it("normalizes case, articles, punctuation, and whitespace", () => {
@@ -15,56 +15,49 @@ describe("normalizeAnswer", () => {
 });
 
 describe("evaluateGuess", () => {
-  it("accepts verified answers as full wins", () => {
-    const feedback = evaluateGuess(vessel, "Sink");
-    expect(feedback.solved).toBe(true);
+  it("places center answers inside every circle", () => {
+    const feedback = evaluateGuess(vessel, "The Sink");
     expect(feedback.states).toEqual({ c1: "inside", c2: "inside", c3: "inside" });
     expect(feedback.source).toBe("authored");
+    expect(feedback.needsJudgment).toBeUndefined();
   });
 
-  it("marks the failed condition close on tested near misses", () => {
-    const feedback = evaluateGuess(vessel, "shampoo bottle");
-    expect(feedback.solved).toBe(false);
-    expect(feedback.states).toEqual({ c1: "inside", c2: "close", c3: "inside" });
+  it("places pair answers outside exactly the circle their region excludes", () => {
+    expect(evaluateGuess(vessel, "faucet").states).toEqual({
+      c1: "inside",
+      c2: "inside",
+      c3: "outside",
+    });
+    expect(evaluateGuess(vessel, "baby bath").states).toEqual({
+      c1: "inside",
+      c2: "outside",
+      c3: "inside",
+    });
+    expect(evaluateGuess(vessel, "kitchen sink").states).toEqual({
+      c1: "outside",
+      c2: "inside",
+      c3: "inside",
+    });
   });
 
-  it("rejects guesses that repeat the clues", () => {
-    const feedback = evaluateGuess(vessel, "It can hold a pool of water");
-    expect(feedback.rejected).toBe("echo");
-    expect(Object.values(feedback.states).every((s) => s === "outside")).toBe(true);
+  it("refuses circle labels and their clarifiers", () => {
+    expect(evaluateGuess(vessel, "Holds a pool of water").rejected).toBe("echo");
+    expect(evaluateGuess(headFoot, "or a part called one").rejected).toBe("echo");
   });
 
-  it("rejects empty and oversized guesses", () => {
+  it("refuses a word already on the board, after normalization", () => {
+    expect(evaluateGuess(vessel, "the Faucet", ["faucet"]).rejected).toBe("repeat");
+    expect(evaluateGuess(vessel, "tap", ["faucet"]).rejected).toBeUndefined();
+  });
+
+  it("refuses empty and oversized guesses", () => {
     expect(evaluateGuess(vessel, "   ").rejected).toBe("empty");
     expect(evaluateGuess(vessel, "x".repeat(200)).rejected).toBe("too-long");
   });
 
-  it("flags unknown answers for the semantic service without scoring them", () => {
-    const feedback = evaluateGuess(kept, "sundial");
+  it("sends unknown answers to the semantic service without scoring them", () => {
+    const feedback = evaluateGuess(vessel, "sundial");
     expect(feedback.needsJudgment).toBe(true);
-    expect(feedback.solved).toBe(false);
-    expect(Object.values(feedback.states).every((s) => s === "outside")).toBe(true);
-  });
-});
-
-describe("judgedFeedback and helpers", () => {
-  it("derives solved from judged states", () => {
-    const win = judgedFeedback({ c1: "inside", c2: "inside", c3: "inside" }, "judged", "v1");
-    expect(win.solved).toBe(true);
-    const miss = judgedFeedback({ c1: "inside", c2: "close", c3: "inside" }, "judged", "v1");
-    expect(miss.solved).toBe(false);
-  });
-
-  it("counts remaining guesses", () => {
-    expect(guessesRemaining(0)).toBe(5);
-    expect(guessesRemaining(4)).toBe(1);
-    expect(guessesRemaining(5)).toBe(0);
-    expect(guessesRemaining(9)).toBe(0);
-  });
-
-  it("treats only all-inside states as solved", () => {
-    expect(isSolved({ c1: "inside", c2: "inside" })).toBe(true);
-    expect(isSolved({ c1: "inside", c2: "close" })).toBe(false);
-    expect(isSolved({})).toBe(true);
+    expect(feedback.rejected).toBeUndefined();
   });
 });

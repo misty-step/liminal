@@ -48,11 +48,15 @@ requireSquareSvg("public/brand/liminal-mark-16.svg", 16);
 requireSquareSvg("public/brand/liminal-mark-32.svg", 32);
 requireSquareSvg("public/brand/liminal-mark.svg", 256);
 requireText("public/brand/liminal-share.svg", ['viewBox="0 0 1200 630"']);
+// Social cards need a raster image: most platforms do not render SVG previews.
+if (!existsSync(join(root, "public/brand/liminal-share.png"))) {
+  failures.push("public/brand/liminal-share.png is required for link previews");
+}
 requireText("src/app/layout.tsx", [
   "/brand/liminal-mark-16.svg",
   "/brand/liminal-mark-32.svg",
   "/brand/liminal-mark.svg",
-  "/brand/liminal-share.svg",
+  "/brand/liminal-share.png",
   "openGraph",
 ]);
 
@@ -148,7 +152,7 @@ requireText(".github/workflows/ci.yml", [
   "bun run test",
   "bun run build:cf",
 ]);
-requireText("DESIGN.md", ["The Cabinet, Sharper", "16 px", "32 px", "256 px"]);
+requireText("DESIGN.md", ["16 px", "32 px", "256 px"]);
 
 if (failures.length > 0) {
   for (const failure of failures) console.error(`foundation-check: ${failure}`);

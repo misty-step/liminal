@@ -1,0 +1,58 @@
+{
+  "id": "shell-water-eat",
+  "mode": "literal",
+  "judgeStatus": "calibrated",
+  "conditions": [
+    {
+      "id": "c1",
+      "text": "Has a shell",
+      "judge": "Consider `answer`. Does it have a shell, a hard outer covering that is part of it?",
+      "levels": {
+        "yes": "It has a hard shell.",
+        "partly": "Only some kinds, or the covering is only somewhat hard.",
+        "no": "It has no shell."
+      }
+    },
+    {
+      "id": "c2",
+      "text": "Lives in water",
+      "judge": "Consider `answer`. Does it live in water, in the sea, a lake, or a river?",
+      "levels": {
+        "yes": "It lives in water.",
+        "partly": "It spends only part of its life in water.",
+        "no": "It does not live in water, or it is not alive."
+      }
+    },
+    {
+      "id": "c3",
+      "text": "You can eat it",
+      "judge": "Consider `answer`. Do people commonly eat it?",
+      "levels": {
+        "yes": "People commonly eat it.",
+        "partly": "People eat it only rarely, or only in some places.",
+        "no": "People don't eat it."
+      }
+    }
+  ],
+  "judgments": {
+    "version": "2026-09-23.1",
+    "center": {
+      "answers": ["crab", "lobster", "oyster", "clam", "mussel"],
+      "heldOut": ["shrimp", "scallop"]
+    },
+    "pairs": {
+      "c1": {
+        "answers": ["salmon", "tuna", "squid", "seaweed"],
+        "heldOut": ["eel"]
+      },
+      "c2": {
+        "answers": ["egg", "walnut", "peanut", "coconut"],
+        "heldOut": ["pistachio", "almond"]
+      },
+      "c3": {
+        "answers": ["sea turtle", "nautilus"],
+        "heldOut": ["barnacle"]
+      }
+    }
+  }
+}

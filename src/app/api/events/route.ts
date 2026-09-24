@@ -2,8 +2,8 @@ import * as Sentry from "@sentry/nextjs";
 import { NextResponse } from "next/server";
 import {
   clientKey,
-  createRateLimiter,
   createProductEvent,
+  createRateLimiter,
   parseProductEventPayload,
   readJsonPayload,
   runtimeEnvironment,

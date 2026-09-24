@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { d1ProductEventStore } from "../store";
-import type { D1Like } from "../store";
 import type { ProductEvent } from "../runtime";
+import type { D1Like } from "../store";
+import { d1ProductEventStore } from "../store";
 
 function eventFixture(): ProductEvent {
   return {

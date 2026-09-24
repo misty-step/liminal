@@ -11,6 +11,7 @@ const REQUIRED_COLUMN_PROBES = [
   "SELECT key, state FROM judgments LIMIT 0",
   "SELECT at, puzzle_id, answer, note FROM reports LIMIT 0",
   "SELECT event_id, event_name, game, environment, occurred_at, session_id, actor_id, schema_version, props_json FROM product_events LIMIT 0",
+  "SELECT date, number, puzzle_id, puzzle_json, source FROM schedule LIMIT 0",
 ] as const;
 
 export async function GET() {
@@ -67,14 +68,18 @@ export async function GET() {
               WHERE name = '0001_judgments_and_reports.sql') AS coreMigration,
             (SELECT COUNT(*) FROM d1_migrations
               WHERE name = '0002_foundations.sql') AS foundationMigration,
+            (SELECT COUNT(*) FROM d1_migrations
+              WHERE name = '0003_schedule.sql') AS scheduleMigration,
             (SELECT COUNT(*) FROM sqlite_master
               WHERE type = 'table'
-                AND name IN ('judgments', 'reports', 'product_events')) AS tableCount,
+                AND name IN ('judgments', 'reports', 'product_events', 'schedule')) AS tableCount,
             (SELECT COUNT(*) FROM sqlite_master
               WHERE type = 'trigger'
                 AND name IN (
                   'judgments_state_insert_guard',
-                  'judgments_state_update_guard'
+                  'judgments_state_update_guard',
+                  'schedule_no_update',
+                  'schedule_future_only'
                 )) AS triggerCount,
             (SELECT COUNT(*) FROM sqlite_master
               WHERE type = 'index'
@@ -86,6 +91,7 @@ export async function GET() {
         .first<{
           coreMigration: number;
           foundationMigration: number;
+          scheduleMigration: number;
           tableCount: number;
           triggerCount: number;
           indexCount: number;
@@ -93,8 +99,9 @@ export async function GET() {
       if (
         row?.coreMigration !== 1 ||
         row.foundationMigration !== 1 ||
-        row.tableCount !== 3 ||
-        row.triggerCount !== 2 ||
+        row.scheduleMigration !== 1 ||
+        row.tableCount !== 4 ||
+        row.triggerCount !== 4 ||
         row.indexCount !== 2
       ) {
         throw new Error("required D1 schema is not ready");

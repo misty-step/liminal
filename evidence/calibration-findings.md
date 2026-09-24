@@ -215,3 +215,46 @@ policy is pinned in AGENTS.md, README.md, and a storage test.
   their 2026-09-20.3 authored sets); JUDGE_PROMPT_VERSION
   liminal-judge-2026-09-20.4. Runtime caches key on the prompt version, so
   no existing judgment can silently reroll.
+
+## 2026-09-23 — banded rule and the in-between deck
+
+### Why the confidence floor was removed
+
+Probing obvious guesses against the live judge under the run-4 rule refused 18
+of 19 common words, many of them right: test, exam, bet, note, break, guess,
+bidet, basin, thermos. The judge had an opinion on each (bet leans yes at
+0.61 / 0.75 / 0.63; bidet at 0.63 / 0.98 / 0.61) but one condition below the
+0.5 confidence floor refused the whole guess. The same run also refused the
+calibrated near miss "pie", so the floor was failing its own gate.
+
+Candidate rule, scored on the same responses: `score = P(yes) + P(partly) / 2`,
+banded with the existing Noul thresholds (inside >= 0.65, close >= 0.35). It
+matched the floor rule on every calibrated row the floor still judged and
+placed every common word sensibly (test, exam, bet, bidet, basin, thermos
+inside all three; note on the "can't hold it" line; promise on the "take"
+line). Hostile input never landed inside all three. Operator decision
+(2026-09-23): adopt banding; a torn condition now lands a word on the line and
+the guess is spent. `JUDGE_PROMPT_VERSION` became liminal-judge-2026-09-23.1.
+
+### Why the deck changed
+
+The game became "fill the in-between": four regions per puzzle, three of them
+needing a clean "no" on one condition. Region probes with the live judge:
+kitchen-well had no clean answer for "kitchen and holds liquid, not a
+container" (the judge counts spoons and ladles as containers); made-and-taken
+had none for "make it, can't hold it, can't take it" (the judge rates "take a
+mistake" as partly); pass-or-fail had none for "pass it, it happens, can't fail
+it". All three were retired. Five new puzzles were drafted with clear property
+conditions and probed region by region before authoring: wheels-motor-ride,
+shell-water-eat, keys-music-carry, tail-fly-alive, head-and-foot (wordplay).
+
+### Gate evidence
+
+- Run 1: evidence/live-matrix-2026-09-23T20-16-30-296Z.json, 132/133; the
+  miss was head-and-foot "sock" (head close). Removed from the deck.
+- Run 2: evidence/live-matrix-2026-09-23T20-17-24-426Z.json, 132/132 (84
+  answers, 36 held-out, 12 hostile), deck 2026-09-23.1, prompt
+  liminal-judge-2026-09-23.1, model typesafe/jev-1.13.
+- Observed noise between runs: single words occasionally come back all-no
+  (horse, sparrow, octopus in probes) and later judge normally. Players reach
+  the report path through "Disagree?" on any word.

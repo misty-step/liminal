@@ -4,87 +4,72 @@ import { evaluateGuess, judgedFeedback } from "../evaluator";
 import { canGuess, emptyProgress, parseProgress, recordGuess, storageKey } from "../storage";
 
 const vessel = getPuzzle("bath-vessel")!;
-const nearMissFeedback = evaluateGuess(vessel, "shampoo bottle");
-const winFeedback = evaluateGuess(vessel, "sink");
-const unknownFeedback = evaluateGuess(vessel, "sundial");
+const miss = judgedFeedback({ c1: "outside", c2: "outside", c3: "outside" }, "judged", "v");
 
 describe("progress storage", () => {
-  it("uses a versioned key", () => {
-    expect(storageKey("bath-vessel")).toBe("liminal.v1.puzzle.bath-vessel");
+  it("uses a versioned key that ignores five-guess v1 progress", () => {
+    expect(storageKey("bath-vessel")).toBe("liminal.v2.puzzle.bath-vessel");
+    const v1 = {
+      schemaVersion: 1,
+      puzzleId: "bath-vessel",
+      guesses: [],
+      solved: false,
+      collected: [],
+    };
+    expect(parseProgress(JSON.stringify(v1), "bath-vessel")).toBeNull();
   });
 
-  it("round-trips valid progress and rejects corrupt data", () => {
+  it("round-trips valid progress and rejects corrupt or foreign data", () => {
     const progress = recordGuess(
       emptyProgress("bath-vessel", 1),
-      nearMissFeedback,
-      "shampoo bottle",
+      evaluateGuess(vessel, "faucet"),
+      "faucet",
       2,
     );
-    const parsed = parseProgress(JSON.stringify(progress), "bath-vessel");
-    expect(parsed?.guesses).toHaveLength(1);
+    expect(parseProgress(JSON.stringify(progress), "bath-vessel")).toEqual(progress);
     expect(parseProgress("{not json", "bath-vessel")).toBeNull();
-    expect(parseProgress(JSON.stringify(progress), "kitchen-well")).toBeNull();
-    expect(parseProgress(JSON.stringify({ schemaVersion: 9 }), "bath-vessel")).toBeNull();
+    expect(parseProgress(JSON.stringify(progress), "shell-water-eat")).toBeNull();
+    const broken = { ...progress, guesses: [{ answer: "faucet", states: { c1: "inside" } }] };
+    expect(parseProgress(JSON.stringify(broken), "bath-vessel")).toBeNull();
   });
 
-  it("never records an unjudged or rejected guess", () => {
+  it("never records an unjudged or refused guess", () => {
     const progress = emptyProgress("bath-vessel", 1);
-    expect(recordGuess(progress, unknownFeedback, "sundial", 2)).toBe(progress);
+    expect(recordGuess(progress, evaluateGuess(vessel, "sundial"), "sundial", 2)).toBe(progress);
     expect(recordGuess(progress, evaluateGuess(vessel, "   "), "   ", 3)).toBe(progress);
+    const placed = recordGuess(progress, evaluateGuess(vessel, "tap"), "tap", 4);
+    expect(recordGuess(placed, evaluateGuess(vessel, "tap", ["tap"]), "tap", 5)).toBe(placed);
   });
 
-  it("consumes a guess on a confident all-outside judgment (invented-input policy)", () => {
-    // There is no deterministic nonsense detector: invented objects go to the
-    // live judge, and a confident rejection spends the guess exactly like a
-    // real-but-wrong answer. Only unjudged/rejected/uncertain guesses are free.
-    const rejected = judgedFeedback(
-      { c1: "outside", c2: "outside", c3: "outside" },
-      "judged",
-      "v1",
-    );
-    const progress = emptyProgress("bath-vessel", 1);
-    const next = recordGuess(progress, rejected, "zorblax", 2);
-    expect(next).not.toBe(progress);
+  it("spends a guess on a confident miss (invented-input policy)", () => {
+    const next = recordGuess(emptyProgress("bath-vessel", 1), miss, "zorblax", 2);
     expect(next.guesses).toHaveLength(1);
-    expect(next.guesses[0].answer).toBe("zorblax");
-    expect(next.collected).toEqual([]);
   });
 
-  it("caps guesses at five and records the win", () => {
+  it("stops taking guesses once all four regions are filled", () => {
     let progress = emptyProgress("bath-vessel", 1);
-    for (let i = 0; i < 4; i += 1) {
-      progress = recordGuess(progress, nearMissFeedback, `shampoo bottle ${i}`, 10 + i);
+    for (const answer of ["faucet", "baby bath", "kitchen sink"]) {
+      progress = recordGuess(progress, evaluateGuess(vessel, answer), answer, 2);
     }
-    expect(progress.guesses).toHaveLength(4);
     expect(canGuess(progress)).toBe(true);
-
-    const win = recordGuess(progress, winFeedback, "sink", 100);
-    expect(win.solved).toBe(true);
-    expect(win.solvedAnswer).toBe("sink");
-    expect(win.guesses).toHaveLength(5);
-    expect(canGuess(win)).toBe(false);
-    expect(recordGuess(win, winFeedback, "toilet", 101).guesses).toHaveLength(5);
-  });
-
-  it("refuses a sixth guess after the cap", () => {
-    let progress = emptyProgress("bath-vessel", 1);
-    for (let i = 0; i < 5; i += 1) {
-      progress = recordGuess(progress, nearMissFeedback, `shampoo bottle ${i}`, 10 + i);
-    }
-    expect(progress.guesses).toHaveLength(5);
+    progress = recordGuess(progress, evaluateGuess(vessel, "sink"), "sink", 3);
     expect(canGuess(progress)).toBe(false);
-    const afterCap = recordGuess(progress, winFeedback, "sink", 99);
-    expect(afterCap.guesses).toHaveLength(5);
-    expect(afterCap.solved).toBe(false);
+    expect(recordGuess(progress, miss, "rock", 4).guesses).toHaveLength(4);
   });
 
-  it("collects concepts the player discovered", () => {
+  it("takes any number of guesses until the board is complete", () => {
     let progress = emptyProgress("bath-vessel", 1);
-    progress = recordGuess(progress, nearMissFeedback, "shampoo bottle", 2);
-    expect(progress.collected).toEqual(["shampoo bottle"]);
-    progress = recordGuess(progress, winFeedback, "sink", 3);
-    expect(progress.collected).toEqual(["shampoo bottle", "sink"]);
-    progress = recordGuess(progress, winFeedback, "sink", 4);
-    expect(progress.collected).toEqual(["shampoo bottle", "sink"]);
+    for (let i = 0; i < 30; i += 1) progress = recordGuess(progress, miss, `rock ${i}`, i);
+    expect(canGuess(progress)).toBe(true);
+    expect(progress.guesses).toHaveLength(30);
+  });
+
+  it("keeps saved clock time and treats missing or bad time as zero", () => {
+    const saved = { ...emptyProgress("bath-vessel", 1), elapsedMs: 84_000 };
+    expect(parseProgress(JSON.stringify(saved), "bath-vessel")?.elapsedMs).toBe(84_000);
+    const { elapsedMs: _drop, ...older } = saved;
+    expect(parseProgress(JSON.stringify(older), "bath-vessel")?.elapsedMs).toBe(0);
+    const negative = { ...saved, elapsedMs: -3 };
+    expect(parseProgress(JSON.stringify(negative), "bath-vessel")?.elapsedMs).toBe(0);
   });
 });

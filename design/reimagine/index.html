@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Liminal prototypes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400..700&family=Schibsted+Grotesk:wght@400..700&display=swap"
+    />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body class="index">
+    <h1>Liminal prototypes</h1>
+    <p>
+      Real deck. Without a judge only the sample answers are judged; set
+      <code>LIMINAL_JUDGE_URL</code> to a local app for open play. Add <code>?reset</code> to clear
+      a puzzle.
+    </p>
+    <ol>
+      <li><a href="/quiet.html">Quiet list</a>: the current game with the chrome removed.</li>
+      <li><a href="/venn.html">Venn</a>: every guess lands where it belongs.</li>
+      <li><a href="/narrowing.html">Narrowing</a>: circles arrive one at a time.</li>
+      <li>
+        <a href="/reach.html">Reach</a>: Narrowing, then keep going for a way in nobody listed.
+      </li>
+    </ol>
+    <h2>Puzzles</h2>
+    <ul id="puzzles"></ul>
+    <script type="module">
+      const deck = await (await fetch("/deck.json")).json();
+      document.querySelector("#puzzles").innerHTML = deck.puzzles
+        .map(
+          (p) =>
+            `<li>${p.id}${p.id === deck.todayId ? " (today)" : ""}: ` +
+            ["quiet", "venn", "narrowing", "reach"].map((v) => `<a href="/${v}.html?p=${p.id}">${v}</a>`).join(", ") +
+            "</li>",
+        )
+        .join("");
+    </script>
+  </body>
+</html>

@@ -8,9 +8,9 @@ import {
   parseJudgePayload,
   readJsonPayload,
 } from "@/lib/liminal/runtime";
-import { judgeAnswer, judgeEnvFrom } from "@/lib/liminal/typeSafe";
+import { puzzleById } from "@/lib/liminal/scheduleSource";
 import { judgeCache } from "@/lib/liminal/store";
-import { getPuzzle } from "@/lib/liminal/deck";
+import { judgeAnswer, judgeEnvFrom } from "@/lib/liminal/typeSafe";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,7 +36,17 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "unavailable", reason: "bad-request" }, { status: 400 });
   }
   const { puzzleId, answer } = parsed.value;
-  const puzzle = getPuzzle(puzzleId);
+  let puzzle: Awaited<ReturnType<typeof puzzleById>>;
+  try {
+    puzzle = await puzzleById(puzzleId);
+  } catch (error) {
+    // Schedule unreadable: an outage, never "unknown puzzle". No guess is spent.
+    Sentry.captureException(error, { tags: { route: "judge", operation: "schedule" } });
+    return NextResponse.json(
+      { status: "unavailable", reason: "schedule-unavailable" },
+      { status: 503, headers: { "cache-control": "no-store" } },
+    );
+  }
   if (!puzzle) {
     return NextResponse.json({ status: "unavailable", reason: "bad-request" }, { status: 400 });
   }
@@ -60,7 +70,7 @@ export async function POST(request: Request) {
       env,
       // Durable on Workers (D1 first-writer-wins); process-local elsewhere.
       cache,
-      timeoutMs: 4000,
+      timeoutMs: 8000,
     });
   } catch (error) {
     Sentry.captureException(error, { tags: { route: "judge", operation: "storage" } });

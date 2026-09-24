@@ -3,56 +3,31 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 const root = process.cwd();
-const read = (path: string) => readFileSync(join(root, path), "utf8");
 
-describe("Cabinet, Sharper identity contract", () => {
-  it("ships editable square keyhole artwork for 16, 32, and large use", () => {
-    for (const path of [
-      "public/brand/liminal-mark-16.svg",
-      "public/brand/liminal-mark-32.svg",
-      "public/brand/liminal-mark.svg",
-      "src/app/icon.svg",
-    ]) {
-      const svg = read(path);
+describe("brand image assets", () => {
+  it("ships square, text-free marks for all icon sizes", () => {
+    for (const [path, size] of [
+      ["public/brand/liminal-mark-16.svg", 16],
+      ["public/brand/liminal-mark-32.svg", 32],
+      ["public/brand/liminal-mark.svg", 256],
+      ["src/app/icon.svg", 32],
+    ] as const) {
+      const svg = readFileSync(join(root, path), "utf8");
       expect(svg).toContain("<svg");
-      expect(svg).toMatch(/viewBox="0 0 (16|32|256) (16|32|256)"/);
+      expect(svg).toContain(`viewBox="0 0 ${size} ${size}"`);
       expect(svg).not.toMatch(/<text\b/i);
     }
   });
 
-  it("wires canonical, favicon, Open Graph, and Twitter metadata", () => {
-    const layout = read("src/app/layout.tsx");
-    expect(layout).toContain("metadataBase");
-    expect(layout).toContain("alternates");
-    expect(layout).toContain("liminal-mark-16.svg");
-    expect(layout).toContain("liminal-mark-32.svg");
-    expect(layout).toContain("openGraph");
-    expect(layout).toContain("twitter");
-  });
-
-  it("keeps player copy concise and free of internal vocabulary", () => {
-    const copy = `${read("src/app/page.tsx")}\n${read("src/app/layout.tsx")}`;
-    expect(copy).not.toMatch(/[—–]|&(?:mdash|ndash);/i);
-    expect(copy).not.toMatch(/\b(decimal dashboard|backend|schema|webhook)\b/i);
-    expect(copy).toContain("Find what belongs");
-    expect(copy).toContain("guesses left");
-    expect(copy).toContain('state ? STATE_LABEL[state] : "Waiting"');
-    expect(copy).not.toContain('state ? STATE_LABEL[state] : "Untested"');
-    expect(copy).toContain("Judging is unavailable. Your guess remains.");
-    expect(copy).toContain("Report filed. Thank you for the note.");
-    expect(copy).toContain('"Answer required"');
-    expect(copy).toContain("Report a judging issue");
-    expect(copy).not.toContain("mini-keyhole");
-    expect(copy).not.toContain('className="drawer-hardware"');
-  });
-
-  it("retains a concise maintenance spec for design and copy", () => {
-    const spec = read("DESIGN.md");
-    expect(spec).toContain("The Cabinet, Sharper");
-    expect(spec).toContain("16 px");
-    expect(spec).toContain("Iowan Old Style");
-    expect(spec).toContain("Outside");
-    expect(spec).toContain("Close");
-    expect(spec).toContain("Inside");
+  it("ships raster icons at the dimensions consumers require", () => {
+    for (const [path, width, height] of [
+      ["src/app/apple-icon.png", 180, 180],
+      ["public/brand/liminal-share.png", 1200, 630],
+    ] as const) {
+      const png = readFileSync(join(root, path));
+      expect(png.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))).toBe(true);
+      expect(png.readUInt32BE(16)).toBe(width);
+      expect(png.readUInt32BE(20)).toBe(height);
+    }
   });
 });
