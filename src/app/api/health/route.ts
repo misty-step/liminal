@@ -79,7 +79,8 @@ export async function GET() {
                   'judgments_state_insert_guard',
                   'judgments_state_update_guard',
                   'schedule_no_update',
-                  'schedule_future_only'
+                  'schedule_future_only',
+                  'schedule_no_started_delete'
                 )) AS triggerCount,
             (SELECT COUNT(*) FROM sqlite_master
               WHERE type = 'index'
@@ -101,7 +102,7 @@ export async function GET() {
         row.foundationMigration !== 1 ||
         row.scheduleMigration !== 1 ||
         row.tableCount !== 4 ||
-        row.triggerCount !== 4 ||
+        row.triggerCount !== 5 ||
         row.indexCount !== 2
       ) {
         throw new Error("required D1 schema is not ready");
