@@ -1,0 +1,1036 @@
+{
+  "at": "2026-09-23T21:02:03.246Z",
+  "playerModel": "google/gemini-3-flash-preview",
+  "spentUsd": 0.002921,
+  "reports": [
+    {
+      "puzzleId": "bath-vessel",
+      "regions": [
+        {
+          "target": "c3",
+          "confirmed": [
+            "faucet",
+            "shower head",
+            "tap",
+            "heated towel rail",
+            "shower valve"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "faucet",
+            "spigot"
+          ],
+          "naturalMisses": [
+            {
+              "word": "shower",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "close"
+              }
+            },
+            {
+              "word": "handle",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "towel",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "close"
+              }
+            },
+            {
+              "word": "mirror",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "outside"
+              }
+            }
+          ],
+          "findability": 0.3333333333333333
+        },
+        {
+          "target": "c2",
+          "confirmed": [
+            "baby bath",
+            "toothbrush cup",
+            "tooth mug",
+            "rinse cup"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "glass",
+            "bottle"
+          ],
+          "naturalMisses": [
+            {
+              "word": "cup",
+              "states": {
+                "c1": "close",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "bucket",
+              "states": {
+                "c1": "close",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "bowl",
+              "states": {
+                "c1": "close",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "jug",
+              "states": {
+                "c1": "outside",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.3333333333333333
+        },
+        {
+          "target": "c1",
+          "confirmed": [
+            "kitchen sink",
+            "hot tub",
+            "swimming pool",
+            "washing machine",
+            "laundry tub",
+            "dishwasher"
+          ],
+          "rejected": [],
+          "naturalHits": [],
+          "naturalMisses": [
+            {
+              "word": "sink",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "fountain",
+              "states": {
+                "c1": "outside",
+                "c2": "inside",
+                "c3": "close"
+              }
+            },
+            {
+              "word": "trough",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "basin",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "pond",
+              "states": {
+                "c1": "outside",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "well",
+              "states": {
+                "c1": "outside",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0
+        },
+        {
+          "target": "center",
+          "confirmed": [
+            "sink",
+            "bathtub",
+            "washbasin",
+            "toilet",
+            "pedestal sink",
+            "toilet bowl"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "tub",
+            "toilet",
+            "sink",
+            "basin",
+            "bidet",
+            "bath"
+          ],
+          "naturalMisses": [],
+          "findability": 1
+        }
+      ],
+      "hostileSafe": true,
+      "taste": {
+        "probability": 0.705,
+        "weakest": "Plumbed in (a drain or pipes) AND Holds a pool of water BUT NOT Found in a bathroom"
+      },
+      "failures": [
+        "findability: Found in a bathroom AND Plumbed in (a drain or pipes) BUT NOT Holds a pool of water landed 2/6 natural guesses",
+        "findability: Found in a bathroom AND Holds a pool of water BUT NOT Plumbed in (a drain or pipes) landed 2/6 natural guesses",
+        "findability: Plumbed in (a drain or pipes) AND Holds a pool of water BUT NOT Found in a bathroom landed 0/6 natural guesses"
+      ],
+      "accepted": false
+    },
+    {
+      "puzzleId": "shell-water-eat",
+      "regions": [
+        {
+          "target": "c3",
+          "confirmed": [
+            "sea turtle",
+            "nautilus",
+            "barnacle"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "barnacle",
+            "nautilus"
+          ],
+          "naturalMisses": [
+            {
+              "word": "turtle",
+              "states": {
+                "c1": "inside",
+                "c2": "close",
+                "c3": "close"
+              }
+            },
+            {
+              "word": "tortoise",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "terrapin",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "close"
+              }
+            },
+            {
+              "word": "cowrie",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "close"
+              }
+            }
+          ],
+          "findability": 0.3333333333333333
+        },
+        {
+          "target": "c2",
+          "confirmed": [
+            "egg",
+            "walnut",
+            "peanut",
+            "coconut",
+            "pistachio",
+            "almond"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "egg",
+            "walnut",
+            "peanut",
+            "almond",
+            "hazelnut"
+          ],
+          "naturalMisses": [
+            {
+              "word": "snail",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "close"
+              }
+            }
+          ],
+          "findability": 0.8333333333333334
+        },
+        {
+          "target": "c1",
+          "confirmed": [
+            "salmon",
+            "tuna",
+            "squid",
+            "seaweed",
+            "eel"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "salmon",
+            "tuna",
+            "trout",
+            "cod",
+            "bass"
+          ],
+          "naturalMisses": [
+            {
+              "word": "shrimp",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.8333333333333334
+        },
+        {
+          "target": "center",
+          "confirmed": [
+            "crab",
+            "lobster",
+            "oyster",
+            "clam",
+            "mussel",
+            "shrimp",
+            "scallop"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "crab",
+            "lobster",
+            "clam",
+            "oyster",
+            "mussel",
+            "scallop"
+          ],
+          "naturalMisses": [],
+          "findability": 1
+        }
+      ],
+      "hostileSafe": true,
+      "taste": {
+        "probability": 0.635,
+        "weakest": "Has a shell AND Lives in water BUT NOT You can eat it"
+      },
+      "failures": [
+        "findability: Has a shell AND Lives in water BUT NOT You can eat it landed 2/6 natural guesses"
+      ],
+      "accepted": false
+    },
+    {
+      "puzzleId": "wheels-motor-ride",
+      "regions": [
+        {
+          "target": "c3",
+          "confirmed": [
+            "robot vacuum",
+            "remote-control car",
+            "robot lawnmower",
+            "delivery robot"
+          ],
+          "rejected": [],
+          "naturalHits": [],
+          "naturalMisses": [
+            {
+              "word": "blender",
+              "states": {
+                "c1": "outside",
+                "c2": "inside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "fan",
+              "states": {
+                "c1": "outside",
+                "c2": "inside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "drill",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "clock",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "pump",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "mixer",
+              "states": {
+                "c1": "outside",
+                "c2": "inside",
+                "c3": "outside"
+              }
+            }
+          ],
+          "findability": 0
+        },
+        {
+          "target": "c2",
+          "confirmed": [
+            "bicycle",
+            "skateboard",
+            "wagon",
+            "roller skates",
+            "tricycle"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "bicycle",
+            "skateboard",
+            "tricycle",
+            "wagon",
+            "unicycle"
+          ],
+          "naturalMisses": [
+            {
+              "word": "scooter",
+              "states": {
+                "c1": "inside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.8333333333333334
+        },
+        {
+          "target": "c1",
+          "confirmed": [
+            "jet ski",
+            "snowmobile",
+            "motorboat",
+            "elevator",
+            "hovercraft"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "jetski",
+            "snowmobile",
+            "ferry",
+            "elevator"
+          ],
+          "naturalMisses": [
+            {
+              "word": "boat",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "escalator",
+              "states": {
+                "c1": "close",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.6666666666666666
+        },
+        {
+          "target": "center",
+          "confirmed": [
+            "car",
+            "motorcycle",
+            "bus",
+            "tractor",
+            "go-kart",
+            "moped",
+            "golf cart"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "car",
+            "truck",
+            "bus",
+            "motorcycle",
+            "van",
+            "tractor"
+          ],
+          "naturalMisses": [],
+          "findability": 1
+        }
+      ],
+      "hostileSafe": true,
+      "taste": {
+        "probability": 0.7,
+        "weakest": "Has wheels AND Has a motor BUT NOT You can ride it"
+      },
+      "failures": [
+        "findability: Has wheels AND Has a motor BUT NOT You can ride it landed 0/6 natural guesses"
+      ],
+      "accepted": false
+    },
+    {
+      "puzzleId": "keys-music-carry",
+      "regions": [
+        {
+          "target": "c3",
+          "confirmed": [
+            "piano",
+            "organ",
+            "harpsichord",
+            "grand piano",
+            "church organ"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "piano",
+            "organ"
+          ],
+          "naturalMisses": [
+            {
+              "word": "keyboard",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "synth",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "clavier",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "close"
+              }
+            },
+            {
+              "word": "console",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "close"
+              }
+            }
+          ],
+          "findability": 0.3333333333333333
+        },
+        {
+          "target": "c2",
+          "confirmed": [
+            "calculator",
+            "computer keyboard",
+            "remote control"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "remote",
+            "pager"
+          ],
+          "naturalMisses": [
+            {
+              "word": "laptop",
+              "states": {
+                "c1": "inside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "phone",
+              "states": {
+                "c1": "inside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "tablet",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "beeper",
+              "states": {
+                "c1": "close",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.3333333333333333
+        },
+        {
+          "target": "c1",
+          "confirmed": [
+            "guitar",
+            "harmonica",
+            "violin",
+            "ukulele",
+            "tambourine"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "kazoo",
+            "mp3",
+            "harmonica",
+            "shaker"
+          ],
+          "naturalMisses": [
+            {
+              "word": "flute",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "radio",
+              "states": {
+                "c1": "close",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.6666666666666666
+        },
+        {
+          "target": "center",
+          "confirmed": [
+            "accordion",
+            "melodica",
+            "keytar",
+            "toy piano",
+            "flute",
+            "clarinet",
+            "saxophone"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "keytar",
+            "melodica",
+            "accordian",
+            "synth"
+          ],
+          "naturalMisses": [
+            {
+              "word": "ipad",
+              "states": {
+                "c1": "close",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "casio",
+              "states": {
+                "c1": "inside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.6666666666666666
+        }
+      ],
+      "hostileSafe": true,
+      "taste": {
+        "probability": 0.685,
+        "weakest": "Has keys (ones you press) AND Made for music BUT NOT Easy to carry"
+      },
+      "failures": [
+        "findability: Has keys (ones you press) AND Made for music BUT NOT Easy to carry landed 2/6 natural guesses",
+        "findability: Has keys (ones you press) AND Easy to carry BUT NOT Made for music landed 2/6 natural guesses"
+      ],
+      "accepted": false
+    },
+    {
+      "puzzleId": "head-and-foot",
+      "regions": [
+        {
+          "target": "c3",
+          "confirmed": [
+            "person",
+            "dog",
+            "bird",
+            "chicken",
+            "cat",
+            "horse"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "dog",
+            "cat",
+            "bird",
+            "horse",
+            "lion",
+            "frog"
+          ],
+          "naturalMisses": [],
+          "findability": 1
+        },
+        {
+          "target": "c2",
+          "confirmed": [
+            "nail",
+            "hammer",
+            "pin",
+            "coin",
+            "screw",
+            "arrow"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "nail",
+            "bolt",
+            "screw"
+          ],
+          "naturalMisses": [
+            {
+              "word": "cabbage",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "lettuce",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "match",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.5
+        },
+        {
+          "target": "c1",
+          "confirmed": [
+            "footstool",
+            "ladder",
+            "tights"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "sock"
+          ],
+          "naturalMisses": [
+            {
+              "word": "shoe",
+              "states": {
+                "c1": "inside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "boot",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "ruler",
+              "states": {
+                "c1": "outside",
+                "c2": "outside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "pedal",
+              "states": {
+                "c1": "outside",
+                "c2": "close",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "brake",
+              "states": {
+                "c1": "close",
+                "c2": "close",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.16666666666666666
+        },
+        {
+          "target": "center",
+          "confirmed": [
+            "bed",
+            "page",
+            "column",
+            "bedstead"
+          ],
+          "rejected": [
+            {
+              "word": "table",
+              "states": {
+                "c1": "close",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "naturalHits": [
+            "bed",
+            "mountain",
+            "hill",
+            "statue"
+          ],
+          "naturalMisses": [
+            {
+              "word": "ladder",
+              "states": {
+                "c1": "outside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "stairs",
+              "states": {
+                "c1": "close",
+                "c2": "close",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0.6666666666666666
+        }
+      ],
+      "hostileSafe": true,
+      "taste": {
+        "probability": 0.5700000000000001,
+        "weakest": "Has a foot (or a part called one) AND Isn't alive BUT NOT Has a head (or a part called one)"
+      },
+      "failures": [
+        "findability: Has a foot (or a part called one) AND Isn't alive BUT NOT Has a head (or a part called one) landed 1/6 natural guesses",
+        "taste: editor score 0.57"
+      ],
+      "accepted": false
+    },
+    {
+      "puzzleId": "tail-fly-alive",
+      "regions": [
+        {
+          "target": "c3",
+          "confirmed": [
+            "kite",
+            "airplane",
+            "rocket",
+            "jet"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "kite",
+            "plane",
+            "rocket",
+            "glider"
+          ],
+          "naturalMisses": [
+            {
+              "word": "comet",
+              "states": {
+                "c1": "inside",
+                "c2": "outside",
+                "c3": "outside"
+              }
+            },
+            {
+              "word": "dart",
+              "states": {
+                "c1": "close",
+                "c2": "inside",
+                "c3": "outside"
+              }
+            }
+          ],
+          "findability": 0.6666666666666666
+        },
+        {
+          "target": "c2",
+          "confirmed": [
+            "dog",
+            "cat",
+            "cow",
+            "lion",
+            "fish"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "dog",
+            "cat",
+            "mouse",
+            "horse",
+            "tiger",
+            "monkey"
+          ],
+          "naturalMisses": [],
+          "findability": 1
+        },
+        {
+          "target": "c1",
+          "confirmed": [
+            "moth",
+            "mosquito",
+            "ladybug"
+          ],
+          "rejected": [],
+          "naturalHits": [],
+          "naturalMisses": [
+            {
+              "word": "bee",
+              "states": {
+                "c1": "close",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "wasp",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "fly",
+              "states": {
+                "c1": "close",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "owl",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "crow",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            },
+            {
+              "word": "bat",
+              "states": {
+                "c1": "inside",
+                "c2": "inside",
+                "c3": "inside"
+              }
+            }
+          ],
+          "findability": 0
+        },
+        {
+          "target": "center",
+          "confirmed": [
+            "bird",
+            "bat",
+            "parrot",
+            "eagle",
+            "dragonfly"
+          ],
+          "rejected": [],
+          "naturalHits": [
+            "bird",
+            "eagle",
+            "hawk",
+            "robin",
+            "parrot",
+            "sparrow"
+          ],
+          "naturalMisses": [],
+          "findability": 1
+        }
+      ],
+      "hostileSafe": true,
+      "taste": {
+        "probability": 0.58,
+        "weakest": "Can fly AND Is alive BUT NOT Has a tail"
+      },
+      "failures": [
+        "findability: Can fly AND Is alive BUT NOT Has a tail landed 0/6 natural guesses",
+        "taste: editor score 0.58"
+      ],
+      "accepted": false
+    }
+  ]
+}

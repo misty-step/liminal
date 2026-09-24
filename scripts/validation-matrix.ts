@@ -2,45 +2,42 @@
 /** Print the puzzle validation matrix as markdown (deck ground truth + test coverage). */
 import { DECK } from "../src/lib/liminal/deck";
 import { evaluateGuess } from "../src/lib/liminal/evaluator";
-import { normalizeAnswer } from "../src/lib/liminal/normalize";
+import { landingOf, TARGETS } from "../src/lib/liminal/regions";
+
+const REGION_NAME = { center: "center", c1: "outside c1", c2: "outside c2", c3: "outside c3" };
 
 const lines: string[] = [
   "# Puzzle validation matrix",
   "",
   "Generated from `src/lib/liminal/deck.ts` — the same data the executable tests assert.",
-  "A verified answer yields Inside on every condition. A near miss yields Close on",
-  "exactly the listed condition and Inside elsewhere. Both are enforced by",
-  "`__tests__/deck.test.ts` (51-test suite).",
+  "A center answer yields Inside on every condition. A pair answer yields Outside on",
+  "exactly the condition its region excludes and Inside elsewhere, so it fills that",
+  "region. Both are enforced by `__tests__/deck.test.ts`.",
   "",
 ];
 
 for (const puzzle of DECK) {
-  lines.push(`## ${puzzle.title} (${puzzle.id}, ${puzzle.mode})`, "");
-  lines.push(`| answer | kind | ${puzzle.conditions.map((c) => c.id).join(" | ")} |`);
-  lines.push(`| --- | --- | ${puzzle.conditions.map(() => "---").join(" | ")} |`);
-  for (const answer of puzzle.judgments.answers) {
-    const feedback = evaluateGuess(puzzle, answer);
-    lines.push(
-      `| ${answer} | verified answer | ` +
-        puzzle.conditions.map((c) => feedback.states[c.id]).join(" | ") +
-        " |",
-    );
+  const { conditions } = puzzle;
+  lines.push(`## ${puzzle.id} (${puzzle.mode})`, "");
+  lines.push(`Circles: ${conditions.map((c) => `${c.id} = ${c.text}`).join("; ")}`, "");
+  lines.push(`| answer | region | ${conditions.map((c) => c.id).join(" | ")} | lands in |`);
+  lines.push(`| --- | --- | ${conditions.map(() => "---").join(" | ")} | --- |`);
+  for (const target of TARGETS) {
+    const region = target === "center" ? puzzle.judgments.center : puzzle.judgments.pairs[target];
+    for (const answer of region.answers) {
+      const { states } = evaluateGuess(puzzle, answer);
+      const landing = landingOf(states);
+      lines.push(
+        `| ${answer} | ${REGION_NAME[target]} | ${conditions.map((c) => states[c.id]).join(" | ")} | ${landing.kind === "target" ? REGION_NAME[landing.key] : landing.kind} |`,
+      );
+    }
   }
-  for (const nearMiss of puzzle.judgments.nearMisses) {
-    const feedback = evaluateGuess(puzzle, nearMiss.answer);
-    lines.push(
-      `| ${nearMiss.answer} | near miss (fails ${nearMiss.fails}) | ` +
-        puzzle.conditions.map((c) => feedback.states[c.id]).join(" | ") +
-        " |",
-    );
-  }
-  lines.push("");
-  lines.push(`Conditions: ${puzzle.conditions.map((c) => `${c.id} = ${c.text}`).join("; ")}`);
-  lines.push("");
-  const echo = normalizeAnswer(puzzle.conditions[0].text);
-  const echoCheck = evaluateGuess(puzzle, puzzle.conditions[0].text);
-  lines.push(`Clue-echo rejection sample: "${echo}" -> ${echoCheck.rejected ?? "not rejected"}`);
-  lines.push("");
+  const echoCheck = evaluateGuess(puzzle, conditions[0].text);
+  lines.push(
+    "",
+    `Label-echo refusal sample: "${conditions[0].text}" -> ${echoCheck.rejected ?? "not refused"}`,
+    "",
+  );
 }
 
 console.log(lines.join("\n"));

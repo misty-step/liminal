@@ -4,33 +4,26 @@ import type { ConditionState, Puzzle } from "./types";
  * TypeSafe "Jev" supplies typed judgments, one per condition.
  *
  * Every launch-deck condition carries authored descriptive levels (a Choice
- * question): the judge picks the level that fits, and code maps the pick to
- * outside / close / inside. A Noul yes/no is reserved for genuinely binary
- * conditions. A probability or confidence is never an intensity dial, and
- * uncertainty below the confidence floor is surfaced honestly as "uncertain"
- * instead of being dressed up as a near miss.
+ * question). Choice answers are scored from their probability distribution:
+ * yes counts fully and partly counts half, then JUDGE_THRESHOLDS bands the
+ * score into outside / close / inside. A Noul yes/no is reserved for genuinely
+ * binary conditions and uses the same bands. A probability is never shown as
+ * an intensity.
  *
  * Thresholds, keys, and rubric wording are versioned with the model and prompt
  * so a judgment can never be rerolled by resubmitting the same answer.
  */
 export const JUDGE_THRESHOLDS = {
-  /** Noul only: p >= 0.65 -> inside (yes). */
+  /** Noul probability or Choice score >= 0.65 -> inside. */
   inside: 0.65,
-  /** Noul only: 0.35 <= p < 0.65 -> close (the model is genuinely unsure). */
+  /** Noul probability or Choice score from 0.35 to below 0.65 -> close. */
   close: 0.35,
 } as const;
 
-/**
- * A Choice pick below this confidence is uncertainty, not a judgment. The
- * caller refuses honestly and consumes no guess. Principled default: the pick
- * must carry the majority of the probability mass.
- */
-export const CHOICE_CONFIDENCE_FLOOR = 0.5;
-
-export const JUDGE_PROMPT_VERSION = "liminal-judge-2026-09-20.4";
+export const JUDGE_PROMPT_VERSION = "liminal-judge-2026-09-23.1";
 export const DEFAULT_MODEL = "jev-latest";
 
-/** Option keys of every Choice rubric; yes/partly/no map to inside/close/outside. */
+/** Option keys of every Choice rubric. */
 export const CHOICE_KEYS = ["yes", "partly", "no"] as const;
 export type ChoiceKey = (typeof CHOICE_KEYS)[number];
 
@@ -41,12 +34,26 @@ export function stateFromNoul(probability: number): ConditionState {
   return "outside";
 }
 
-/** Maps a Choice option key to a feedback state. Unknown keys are invalid. */
-export function stateFromChoice(choice: string): ConditionState | null {
-  if (choice === "yes") return "inside";
-  if (choice === "partly") return "close";
-  if (choice === "no") return "outside";
-  return null;
+/** Score a validated Choice distribution with the same bands as Noul. */
+export function stateFromChoiceProbabilities(p: Record<string, unknown>): ConditionState | null {
+  const { yes, partly, no } = p;
+  if (
+    typeof yes !== "number" ||
+    !Number.isFinite(yes) ||
+    yes < 0 ||
+    yes > 1 ||
+    typeof partly !== "number" ||
+    !Number.isFinite(partly) ||
+    partly < 0 ||
+    partly > 1 ||
+    typeof no !== "number" ||
+    !Number.isFinite(no) ||
+    no < 0 ||
+    no > 1
+  ) {
+    return null;
+  }
+  return stateFromNoul(yes + partly / 2);
 }
 
 /** Cache key: answer + condition + judgment identity. Any change rerolls deliberately. */
@@ -119,7 +126,7 @@ export interface JudgeOutcome {
 
 export type JudgeFailure = {
   status: "unavailable";
-  reason: "not-configured" | "timeout" | "upstream-error" | "invalid-response" | "uncertain";
+  reason: "not-configured" | "timeout" | "upstream-error" | "invalid-response";
 };
 
 export type JudgeResult = JudgeOutcome | JudgeFailure;

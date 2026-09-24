@@ -1,0 +1,59 @@
+{
+  "id": "bath-vessel",
+  "mode": "literal",
+  "judgeStatus": "calibrated",
+  "conditions": [
+    {
+      "id": "c1",
+      "text": "Found in a bathroom",
+      "judge": "Is `answer` commonly found in a bathroom?",
+      "levels": {
+        "yes": "A thing you would expect to see in a bathroom in most homes.",
+        "partly": "Occasionally kept in a bathroom, but a bathroom is not where it usually lives.",
+        "no": "Not something found in bathrooms."
+      }
+    },
+    {
+      "id": "c2",
+      "text": "Plumbed in",
+      "detail": "a drain or pipes",
+      "judge": "Is `answer` plumbed in — does it have a drain or water pipes as part of what it is?",
+      "levels": {
+        "yes": "Plumbed in — a drain, pipes, or both are part of it.",
+        "partly": "Sometimes plumbed in, sometimes not.",
+        "no": "Not plumbed in — no drain, no pipes; you could carry it away."
+      }
+    },
+    {
+      "id": "c3",
+      "text": "Holds a pool of water",
+      "judge": "Can `answer` hold a pool of water — could you fill it, with any drain closed, and the water would stay?",
+      "levels": {
+        "yes": "Yes — you could fill it and the water would stay (a plugged sink, a full tub).",
+        "partly": "It can hold a little water briefly, but not a standing pool.",
+        "no": "Water runs through or off it — nothing stays."
+      }
+    }
+  ],
+  "judgments": {
+    "version": "2026-09-23.1",
+    "center": {
+      "answers": ["sink", "bathtub", "washbasin", "toilet"],
+      "heldOut": ["pedestal sink", "toilet bowl"]
+    },
+    "pairs": {
+      "c1": {
+        "answers": ["kitchen sink", "hot tub", "swimming pool"],
+        "heldOut": ["washing machine", "laundry tub", "dishwasher"]
+      },
+      "c2": {
+        "answers": ["baby bath", "toothbrush cup", "tooth mug"],
+        "heldOut": ["rinse cup"]
+      },
+      "c3": {
+        "answers": ["faucet", "shower head", "tap"],
+        "heldOut": ["heated towel rail", "shower valve"]
+      }
+    }
+  }
+}

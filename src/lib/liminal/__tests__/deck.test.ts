@@ -1,108 +1,73 @@
 import { describe, expect, it } from "vitest";
 import { DECK, DECK_VERSION, getPuzzle } from "../deck";
-import { evaluateGuess } from "../evaluator";
+import { echoTexts, evaluateGuess } from "../evaluator";
 import { normalizeAnswer } from "../normalize";
+import { landingOf, TARGETS } from "../regions";
 
-describe("launch deck", () => {
-  it("ships four puzzles with stable ids and versions", () => {
+describe("in-between deck", () => {
+  it("ships distinct puzzles with versions and explicit calibration status", () => {
     expect(DECK.length).toBeGreaterThanOrEqual(4);
     expect(new Set(DECK.map((p) => p.id)).size).toBe(DECK.length);
+    expect(DECK_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}\.\d+$/);
     for (const puzzle of DECK) {
       expect(puzzle.judgments.version.length).toBeGreaterThan(0);
-      expect(puzzle.conditions.length).toBeGreaterThanOrEqual(3);
-    }
-    expect(DECK_VERSION).toMatch(/^\d{4}-\d{2}-\d{2}\.\d+$/);
-  });
-
-  it("marks every puzzle with an explicit calibration status", () => {
-    for (const puzzle of DECK) {
       expect(["calibrated", "uncalibrated"]).toContain(puzzle.judgeStatus);
+      expect(puzzle.conditions.map((c) => c.id)).toEqual(["c1", "c2", "c3"]);
     }
   });
 
   for (const puzzle of DECK) {
+    const regionOf = (target: (typeof TARGETS)[number]) =>
+      target === "center" ? puzzle.judgments.center : puzzle.judgments.pairs[target];
+
     describe(`${puzzle.id} (${puzzle.mode})`, () => {
-      it("has several verified answers that win outright", () => {
-        expect(puzzle.judgments.answers.length).toBeGreaterThanOrEqual(3);
-        for (const answer of puzzle.judgments.answers) {
-          const feedback = evaluateGuess(puzzle, answer);
-          expect(feedback.solved, `${answer} should solve ${puzzle.id}`).toBe(true);
-          expect(Object.values(feedback.states).every((s) => s === "inside")).toBe(true);
-          expect(feedback.needsJudgment).toBeUndefined();
+      it("gives every region several verified answers and a held-out answer", () => {
+        for (const target of TARGETS) {
+          const region = regionOf(target);
+          expect(region.answers.length, target).toBeGreaterThanOrEqual(target === "center" ? 3 : 2);
+          expect(region.heldOut.length, target).toBeGreaterThanOrEqual(1);
         }
       });
 
-      it("keeps accepted answers distinct after normalization", () => {
-        const normalized = puzzle.judgments.answers.map(normalizeAnswer);
-        expect(new Set(normalized).size).toBe(normalized.length);
-      });
-
-      it("has near misses that fail exactly one condition", () => {
-        expect(puzzle.judgments.nearMisses.length).toBeGreaterThanOrEqual(3);
-        for (const nearMiss of puzzle.judgments.nearMisses) {
-          expect(
-            puzzle.conditions.some((c) => c.id === nearMiss.fails),
-            `${nearMiss.answer} must fail a real condition id`,
-          ).toBe(true);
-          const feedback = evaluateGuess(puzzle, nearMiss.answer);
-          expect(feedback.solved, `${nearMiss.answer} must not win`).toBe(false);
-          expect(feedback.needsJudgment, `${nearMiss.answer} must be known`).toBeUndefined();
-          for (const condition of puzzle.conditions) {
-            const state = feedback.states[condition.id];
-            if (condition.id === nearMiss.fails) {
-              expect(state, `${nearMiss.answer} should be close on ${condition.id}`).toBe("close");
-            } else {
-              expect(state, `${nearMiss.answer} should be inside on ${condition.id}`).toBe(
-                "inside",
-              );
-            }
+      it("places every authored answer in the region it is filed under", () => {
+        for (const target of TARGETS) {
+          for (const answer of regionOf(target).answers) {
+            expect(landingOf(evaluateGuess(puzzle, answer).states), answer).toEqual({
+              kind: "target",
+              key: target,
+            });
           }
         }
       });
 
-      it("never accepts a near miss as a win or a win as a near miss", () => {
-        const answerSet = new Set(puzzle.judgments.answers.map(normalizeAnswer));
-        for (const nearMiss of puzzle.judgments.nearMisses) {
-          expect(answerSet.has(normalizeAnswer(nearMiss.answer))).toBe(false);
-        }
-      });
-
-      it("keeps clue text out of the answer lists", () => {
-        const clueTexts = new Set(
-          [puzzle.title, puzzle.drawer, puzzle.teaser, ...puzzle.conditions.map((c) => c.text)].map(
-            normalizeAnswer,
-          ),
+      it("files each answer once across the whole puzzle", () => {
+        const all = TARGETS.flatMap((t) => [...regionOf(t).answers, ...regionOf(t).heldOut]).map(
+          normalizeAnswer,
         );
-        for (const answer of [
-          ...puzzle.judgments.answers,
-          ...puzzle.judgments.nearMisses.map((n) => n.answer),
-        ]) {
-          expect(clueTexts.has(normalizeAnswer(answer)), `${answer} repeats a clue`).toBe(false);
+        expect(new Set(all).size).toBe(all.length);
+      });
+
+      it("keeps held-out answers off the authored path", () => {
+        for (const target of TARGETS) {
+          for (const held of regionOf(target).heldOut) {
+            expect(evaluateGuess(puzzle, held).needsJudgment, held).toBe(true);
+          }
         }
       });
 
-      it("holds out valid answers from the authored allowlist", () => {
-        expect(puzzle.judgments.heldOut?.length ?? 0).toBeGreaterThanOrEqual(1);
-        const shipped = new Set([
-          ...puzzle.judgments.answers.map(normalizeAnswer),
-          ...puzzle.judgments.nearMisses.map((n) => normalizeAnswer(n.answer)),
-        ]);
-        for (const held of puzzle.judgments.heldOut ?? []) {
-          expect(
-            shipped.has(normalizeAnswer(held)),
-            `${held} must not be an authored win or near miss`,
-          ).toBe(false);
-          // Held-out answers are never authored wins: they must need the live judge.
-          const feedback = evaluateGuess(puzzle, held);
-          expect(feedback.needsJudgment, `${held} must need the live judge`).toBe(true);
-          expect(feedback.solved).toBe(false);
+      it("keeps circle labels out of the answers", () => {
+        const labels = new Set(echoTexts(puzzle));
+        for (const target of TARGETS) {
+          for (const answer of regionOf(target).answers) {
+            expect(labels.has(normalizeAnswer(answer)), answer).toBe(false);
+          }
         }
       });
     });
   }
 
   it("exposes puzzles by id", () => {
-    expect(getPuzzle("made-and-taken")?.mode).toBe("wordplay");
+    expect(getPuzzle("head-and-foot")?.mode).toBe("wordplay");
     expect(getPuzzle("bath-vessel")?.mode).toBe("literal");
     expect(getPuzzle("nope")).toBeUndefined();
   });

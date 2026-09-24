@@ -1,19 +1,7 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-label="Liminal keyhole">
-  <defs>
-    <radialGradient id="ink" cx="50%" cy="22%" r="90%">
-      <stop offset="0" stop-color="#25231f"/>
-      <stop offset="1" stop-color="#11151a"/>
-    </radialGradient>
-    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#f2d58d"/>
-      <stop offset="0.52" stop-color="#d8b45f"/>
-      <stop offset="1" stop-color="#9e7932"/>
-    </linearGradient>
-  </defs>
-  <rect width="256" height="256" rx="44" fill="url(#ink)"/>
-  <rect x="9" y="9" width="238" height="238" rx="36" fill="none" stroke="#5f4b26" stroke-width="3"/>
-  <path d="M28 57h200M28 199h200" stroke="#312c22" stroke-width="2"/>
-  <circle cx="128" cy="83" r="40" fill="url(#brass)"/>
-  <path d="M107 114 77 207q51 19 102 0l-30-93Z" fill="url(#brass)"/>
-  <circle cx="116" cy="70" r="9" fill="#fff3c7" opacity=".24"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <style>@media (prefers-color-scheme: dark) { .center { fill: #fafaf8; } }</style>
+  <circle cx="94.72" cy="99.65" r="66.56" fill="none" stroke="#2a8fa3" stroke-width="2.816"/>
+  <circle cx="161.28" cy="99.65" r="66.56" fill="none" stroke="#d0487f" stroke-width="2.816"/>
+  <circle cx="128" cy="157.336" r="66.56" fill="none" stroke="#b98310" stroke-width="2.816"/>
+  <path class="center" d="M 94.72 99.693 A 66.56 66.56 0 0 1 161.28 99.693 A 66.56 66.56 0 0 1 128 157.293 A 66.56 66.56 0 0 1 94.72 99.693 Z" fill="#1e2126"/>
 </svg>

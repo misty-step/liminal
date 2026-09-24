@@ -13,10 +13,11 @@
  * Outside a Workers runtime (vitest, `next dev`) bindings are absent; callers
  * fall back to the legacy process-local cache and a local JSONL file.
  */
-import { memoryCache } from "./typeSafe";
-import type { JudgmentCache } from "./typeSafe";
-import { runtimeEnvironment } from "./runtime";
+
 import type { ProductEvent } from "./runtime";
+import { runtimeEnvironment } from "./runtime";
+import type { JudgmentCache } from "./typeSafe";
+import { memoryCache } from "./typeSafe";
 import type { ConditionState } from "./types";
 
 /** Minimal D1 surface used here (avoids a workers-types dependency). */

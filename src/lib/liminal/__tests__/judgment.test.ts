@@ -1,14 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { getPuzzle } from "../deck";
 import {
-  CHOICE_CONFIDENCE_FLOOR,
+  buildQuestions,
   CHOICE_KEYS,
   DEFAULT_MODEL,
   JUDGE_PROMPT_VERSION,
-  buildQuestions,
   judgeEnabledFor,
   judgmentKey,
-  stateFromChoice,
+  stateFromChoiceProbabilities,
   stateFromNoul,
 } from "../judgment";
 
@@ -25,16 +24,24 @@ describe("judgment mapping", () => {
     expect(stateFromNoul(Number.NaN)).toBe("outside");
   });
 
-  it("maps descriptive choice levels to feedback states and rejects unknown keys", () => {
-    expect(stateFromChoice("yes")).toBe("inside");
-    expect(stateFromChoice("partly")).toBe("close");
-    expect(stateFromChoice("no")).toBe("outside");
-    expect(stateFromChoice("maybe")).toBeNull();
+  it("bands Choice scores at the same thresholds as Noul", () => {
+    expect(stateFromChoiceProbabilities({ yes: 0.65, partly: 0, no: 0.35 })).toBe("inside");
+    expect(stateFromChoiceProbabilities({ yes: 0.649, partly: 0, no: 0.351 })).toBe("close");
+    expect(stateFromChoiceProbabilities({ yes: 0.35, partly: 0, no: 0.65 })).toBe("close");
+    expect(stateFromChoiceProbabilities({ yes: 0.349, partly: 0, no: 0.651 })).toBe("outside");
   });
 
-  it("keeps the uncertainty floor inside (0, 1) and away from the state mapping", () => {
-    expect(CHOICE_CONFIDENCE_FLOOR).toBeGreaterThan(0);
-    expect(CHOICE_CONFIDENCE_FLOOR).toBeLessThan(1);
+  it("counts partly as half a yes", () => {
+    expect(stateFromChoiceProbabilities({ yes: 0.4, partly: 0.5, no: 0.1 })).toBe("inside");
+    expect(stateFromChoiceProbabilities({ yes: 0.2, partly: 0.3, no: 0.5 })).toBe("close");
+    expect(stateFromChoiceProbabilities({ yes: 0.19, partly: 0.3, no: 0.51 })).toBe("outside");
+  });
+
+  it("rejects missing, nonnumeric, nonfinite, and out-of-range Choice probabilities", () => {
+    expect(stateFromChoiceProbabilities({ yes: 0.7, partly: 0.2 })).toBeNull();
+    expect(stateFromChoiceProbabilities({ yes: "0.7", partly: 0.2, no: 0.1 })).toBeNull();
+    expect(stateFromChoiceProbabilities({ yes: 0.7, partly: Infinity, no: 0.1 })).toBeNull();
+    expect(stateFromChoiceProbabilities({ yes: 0.7, partly: 0.2, no: -0.1 })).toBeNull();
   });
 
   it("builds one authored Choice question per launch-deck condition", () => {

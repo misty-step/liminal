@@ -17,9 +17,10 @@ describe("request boundaries", () => {
     });
   });
 
-  it("rejects malformed, unknown, and oversized judge input", () => {
+  it("rejects malformed and oversized judge input", () => {
     expect(parseJudgePayload([]).ok).toBe(false);
-    expect(parseJudgePayload({ puzzleId: "not-a-drawer", answer: "mug" }).ok).toBe(false);
+    expect(parseJudgePayload({ puzzleId: "Not A Slug!", answer: "mug" }).ok).toBe(false);
+    expect(parseJudgePayload({ puzzleId: "x".repeat(65), answer: "mug" }).ok).toBe(false);
     expect(parseJudgePayload({ puzzleId: "bath-vessel", answer: "x".repeat(121) }).ok).toBe(false);
   });
 

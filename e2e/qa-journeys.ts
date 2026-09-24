@@ -1,36 +1,52 @@
 /**
  * Liminal candidate QA journeys — runs ON the ephemeral QA VM against the
- * locally built candidate. Captures mobile + desktop screenshots of every
- * meaningful state and asserts the expected feedback for each journey.
+ * locally built candidate. Captures mobile + desktop screenshots of meaningful
+ * states and asserts the expected feedback for each journey.
  *
- * BASE serves the production candidate. Authored answers and near misses are
- * evaluated locally, so the core journeys make no paid model calls. OUTAGE_BASE
- * may point at either a second instance from the same `next build` with an
- * intentionally unreachable judge or BASE without judge credentials; that
- * journey verifies a real unavailable response and asserts no guess is consumed.
+ * BASE serves the production candidate. Authored answers are evaluated locally,
+ * so only the OUTAGE_BASE journey reaches the judge. OUTAGE_BASE may point at a
+ * second instance with an unreachable judge or BASE without judge credentials.
  */
-import { chromium } from "playwright";
 import { mkdirSync, writeFileSync } from "node:fs";
+import { chromium } from "playwright";
+import type { Page } from "playwright";
 
 const BASE = process.env.BASE ?? "http://localhost:3000";
 const OUTAGE_BASE = process.env.OUTAGE_BASE ?? "http://localhost:3001";
 const OUT = process.env.OUT ?? "/home/exedev/shots";
 mkdirSync(OUT, { recursive: true });
 
-const ANSWERS: Record<string, { win: string; near: string; loss: string[] }> = {
-  "The Vessel in the Wall": {
-    win: "sink",
-    near: "shampoo bottle",
-    loss: ["kitchen sink", "shampoo bottle", "shower head"],
-  },
-  "The Kitchen Well": {
-    win: "mug",
-    near: "colander",
-    loss: ["colander", "aquarium", "watering can", "barrel", "vase"],
-  },
-  "Made and Taken": { win: "phone call", near: "cake", loss: ["cake", "pie", "sandwich", "salad"] },
-  "Pass or Fail": { win: "audition", near: "rescue", loss: ["launch", "takeover", "rescue"] },
-};
+type PairKey = "c1" | "c2" | "c3";
+type TargetKey = PairKey | "center";
+type PuzzleAnswers = { center: string; pairs: Record<PairKey, readonly string[]> };
+
+// Today's authored answers come from the app itself (/api/today), so the
+// journeys work for any scheduled puzzle without calling the judge. The first
+// answer per region drives the four-fill journeys; the rest drive no-limit.
+async function loadToday(): Promise<{ label: string; answers: PuzzleAnswers }> {
+  const response = await fetch(`${BASE}/api/today`);
+  if (!response.ok) throw new Error(`/api/today returned ${response.status}`);
+  const payload: unknown = await response.json();
+  const puzzle = payload && typeof payload === "object" ? Reflect.get(payload, "puzzle") : null;
+  const conditions =
+    puzzle && typeof puzzle === "object" ? Reflect.get(puzzle, "conditions") : null;
+  const judgments = puzzle && typeof puzzle === "object" ? Reflect.get(puzzle, "judgments") : null;
+  const words = (region: unknown): string[] => {
+    const answers = region && typeof region === "object" ? Reflect.get(region, "answers") : null;
+    return Array.isArray(answers) ? answers.filter((a): a is string => typeof a === "string") : [];
+  };
+  const pairs = judgments && typeof judgments === "object" ? Reflect.get(judgments, "pairs") : null;
+  const pair = (key: PairKey) =>
+    words(pairs && typeof pairs === "object" ? Reflect.get(pairs, key) : null);
+  const label = Array.isArray(conditions) ? String(Reflect.get(conditions[0] ?? {}, "text")) : "";
+  const center = words(
+    judgments && typeof judgments === "object" ? Reflect.get(judgments, "center") : null,
+  )[0];
+  if (!label || !center) throw new Error("/api/today returned no authored answers");
+  return { label, answers: { center, pairs: { c1: pair("c1"), c2: pair("c2"), c3: pair("c3") } } };
+}
+
+const TODAY = await loadToday();
 
 const results: { name: string; ok: boolean; detail?: string }[] = [];
 function check(name: string, ok: boolean, detail = "") {
@@ -38,187 +54,214 @@ function check(name: string, ok: boolean, detail = "") {
   console.log(`${ok ? "PASS" : "FAIL"} ${name}${detail ? ` — ${detail}` : ""}`);
 }
 
-async function puzzleTitle(page: import("playwright").Page): Promise<string> {
-  return (
-    (await page.evaluate(() => {
-      const h2 = document.querySelector("h2.title");
-      return h2?.childNodes[0]?.textContent?.trim() ?? "";
-    })) || ""
-  );
+async function puzzleLabel(page: Page): Promise<string> {
+  return (await page.locator(".label-c1 .label-main").innerText()).trim();
 }
 
-async function guess(page: import("playwright").Page, text: string) {
+function answersFor(label: string): PuzzleAnswers {
+  if (label !== TODAY.label) {
+    throw new Error(`Board shows "${label}", /api/today says "${TODAY.label}"`);
+  }
+  return TODAY.answers;
+}
+
+async function dismissHowto(page: Page) {
+  await page.locator("dialog.howto button[type=submit]").click();
+  await page.locator("dialog.howto").waitFor({ state: "hidden" });
+}
+
+async function guess(page: Page, text: string, expectedWords?: number) {
   await page.fill("#guess", text);
-  await page.click(".guess-form button[type=submit]");
-  await page.waitForTimeout(350);
+  await page.click(".guess button[type=submit]");
+  if (expectedWords !== undefined) {
+    await page
+      .locator(".board .word-layer .word")
+      .nth(expectedWords - 1)
+      .waitFor();
+  }
 }
 
-async function openDrawer(page: import("playwright").Page, title: string) {
-  await page.click(`.tabs button:text("Practice")`);
-  await page.waitForTimeout(150);
-  await page.click(`.cabinet-grid button:has-text("${title}")`);
-  await page.waitForTimeout(150);
+async function guessCount(page: Page): Promise<number> {
+  const text = await page.locator(".meter-count").innerText();
+  return Number.parseInt(text, 10);
+}
+
+async function awaitStatus(page: Page, text: string) {
+  await page.waitForFunction(
+    (fragment) => document.querySelector("p.status")?.textContent?.includes(fragment),
+    text,
+  );
+  return (await page.locator("p.status").innerText()).trim();
+}
+
+async function fillBoard(page: Page, label: string, screenshotPrefix: string) {
+  const answers = answersFor(label);
+  await page.screenshot({ path: `${OUT}/${screenshotPrefix}-idle.png`, fullPage: true });
+  const order: { key: TargetKey; answer: string }[] = [
+    { key: "c3", answer: answers.pairs.c3[0] },
+    { key: "c2", answer: answers.pairs.c2[0] },
+    { key: "c1", answer: answers.pairs.c1[0] },
+    { key: "center", answer: answers.center },
+  ];
+  for (const [index, { key, answer }] of order.entries()) {
+    await guess(page, answer, index + 1);
+    const filledWord = await page.locator(`.board .word-layer .word.filled.filled-${key}`).count();
+    const filledTargets = await page.locator(".target.filled").count();
+    check(
+      `${screenshotPrefix} fill ${key}`,
+      filledWord === 1 && filledTargets === index + 1,
+      `word=${filledWord}, targets=${filledTargets}, answer=${answer}`,
+    );
+    if (index === 0) {
+      await page.screenshot({ path: `${OUT}/${screenshotPrefix}-first-fill.png`, fullPage: true });
+    }
+  }
+  await page.locator("h2.end-title").waitFor();
+  const title = (await page.locator("h2.end-title").innerText()).trim();
+  const clock = (await page.locator("p.end-sub").innerText()).trim();
+  check(
+    `${screenshotPrefix} completed in four with a time`,
+    title === "Filled in 4 guesses" && /^\d+:\d{2} on the clock$/.test(clock),
+    `${title} / ${clock}`,
+  );
+  await page.screenshot({ path: `${OUT}/${screenshotPrefix}-end.png`, fullPage: true });
 }
 
 const browser = await chromium.launch();
 
-// ---------- Desktop journeys ----------
+// ---------- Desktop completion, persistence, report, practice ----------
 {
   const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
   const page = await context.newPage();
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.screenshot({ path: `${OUT}/01-desktop-daily.png`, fullPage: true });
-  const title = await puzzleTitle(page);
-  const spec = ANSWERS[title];
-  check("daily puzzle is a deck drawer", Boolean(spec), title);
-
-  await guess(page, spec.near);
-  const closeMarks = await page.locator(".history .marks .state.close").count();
-  check("near miss shows exactly one Close", closeMarks === 1, `close marks=${closeMarks}`);
-  await page.screenshot({ path: `${OUT}/02-desktop-near-miss.png`, fullPage: true });
-
-  await guess(page, spec.win);
-  const reveal = await page
-    .locator(".reveal h3")
-    .innerText()
-    .catch(() => "");
-  check("verified answer opens the drawer", reveal.toLowerCase().includes("drawer open"), reveal);
-  await page.screenshot({ path: `${OUT}/04-desktop-win.png`, fullPage: true });
+  await dismissHowto(page);
+  const todayLabel = await puzzleLabel(page);
+  check("board shows the scheduled puzzle", todayLabel === TODAY.label, todayLabel);
+  await fillBoard(page, todayLabel, "desktop");
 
   await page.reload({ waitUntil: "networkidle" });
-  const persisted = await page.locator(".history li").count();
-  const revealAfter = await page
-    .locator(".reveal h3")
-    .innerText()
-    .catch(() => "");
+  const persistedWords = await page.locator(".board .word-layer .word").count();
+  const persistedTitle = (await page.locator("h2.end-title").innerText()).trim();
   check(
-    "progress survives refresh",
-    persisted >= 2 && revealAfter.toLowerCase().includes("drawer open"),
-    `history=${persisted}`,
+    "four fills survive refresh",
+    persistedWords === 4 && persistedTitle === "Filled in 4 guesses",
+    `words=${persistedWords}, title=${persistedTitle}`,
   );
-  await page.screenshot({ path: `${OUT}/05-desktop-refresh.png`, fullPage: true });
+  await page.screenshot({ path: `${OUT}/desktop-refresh.png`, fullPage: true });
 
-  await page.getByRole("button", { name: "Report a judging issue" }).click();
-  await page.waitForTimeout(150);
-  await page.fill("#report-answer", spec.win);
-  await page.fill("#report-note", "QA journey: report path check.");
-  await page.screenshot({ path: `${OUT}/06-desktop-report.png`, fullPage: true });
-  await page.click(".report button[type=submit]");
-  await page.waitForTimeout(400);
-  const reportStatus = await page
-    .locator(".report-status")
-    .innerText()
-    .catch(() => "");
-  check("answer report is filed", reportStatus.includes("Thank you"), reportStatus);
-  await page.screenshot({ path: `${OUT}/07-desktop-report-filed.png`, fullPage: true });
+  await page.locator(".board .word-layer .word").first().click();
+  const verdicts = await page.locator(".detail .verdicts li").count();
+  check("word detail has three verdicts", verdicts === 3, `verdicts=${verdicts}`);
+  await page.getByRole("button", { name: "Disagree?" }).click();
+  await page.fill("#report-note", "QA journey: region verdict report check.");
+  await page.locator("form.report button[type=submit]").click();
+  await page.locator(".report-status").waitFor();
+  const reportStatus = (await page.locator(".report-status").innerText()).trim();
+  check("word verdict report is filed", reportStatus === "Noted. Thanks.", reportStatus);
+  await page.screenshot({ path: `${OUT}/desktop-report.png`, fullPage: true });
+
+  // Archive: "Play #N" opens the previous day's puzzle. Puzzle #1 has none.
+  const previous = page.getByRole("button", { name: /^Play #\d+$/ });
+  if ((await previous.count()) === 0) {
+    check("archive opens an earlier puzzle", true, "skipped: today is puzzle #1");
+  } else {
+    await previous.click();
+    await page.getByRole("button", { name: "Back to today" }).waitFor();
+    const archiveLabel = await puzzleLabel(page);
+    check(
+      "archive opens an earlier puzzle",
+      archiveLabel !== todayLabel,
+      `today=${todayLabel}, archive=${archiveLabel}`,
+    );
+    await page.screenshot({ path: `${OUT}/desktop-archive.png`, fullPage: true });
+    await page.getByRole("button", { name: "Back to today" }).click();
+    await page.getByRole("button", { name: "Back to today" }).waitFor({ state: "detached" });
+    const returnedLabel = await puzzleLabel(page);
+    check("back to today restores daily puzzle", returnedLabel === todayLabel, returnedLabel);
+  }
+  await context.close();
+}
+
+// ---------- Local refusals, fresh progress ----------
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
+  const page = await context.newPage();
+  await page.goto(BASE, { waitUntil: "networkidle" });
+  const label = await puzzleLabel(page);
+  const answer = answersFor(label).pairs.c3[0];
+  await guess(page, label);
+  const echo = await awaitStatus(page, "repeats a circle");
+  const echoWords = await page.locator(".board .word-layer .word").count();
+  const echoDots = await guessCount(page);
+  check(
+    "circle label echo spends nothing",
+    echo.includes("repeats a circle") && echoWords === 0 && echoDots === 0,
+    `words=${echoWords}, guesses=${echoDots}, status=${echo}`,
+  );
+  await page.screenshot({ path: `${OUT}/desktop-echo-refused.png`, fullPage: true });
+
+  await guess(page, answer, 1);
+  await guess(page, answer.toUpperCase());
+  const repeat = await awaitStatus(page, "already on the board");
+  const repeatWords = await page.locator(".board .word-layer .word").count();
+  const repeatDots = await guessCount(page);
+  check(
+    "case-insensitive repeat spends nothing",
+    repeat.includes("already on the board") && repeatWords === 1 && repeatDots === 1,
+    `words=${repeatWords}, guesses=${repeatDots}, status=${repeat}`,
+  );
+  await page.screenshot({ path: `${OUT}/desktop-repeat-refused.png`, fullPage: true });
+  await context.close();
+}
+
+// ---------- No guess limit: many misses, center never filled ----------
+{
+  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
+  const page = await context.newPage();
+  await page.goto(BASE, { waitUntil: "networkidle" });
+  const label = await puzzleLabel(page);
+  const { pairs } = answersFor(label);
+  const pairAnswers = [...new Set([...pairs.c2, ...pairs.c3, ...pairs.c1])];
+  for (const [index, answer] of pairAnswers.entries()) {
+    await guess(page, answer, index + 1);
+  }
+  const count = await guessCount(page);
+  const stillPlaying = await page.locator("#guess").isEnabled();
+  const ended = await page.locator("section.end").count();
+  check(
+    "no guess limit: the board stays open until complete",
+    count === pairAnswers.length && stillPlaying && ended === 0,
+    `guesses=${count}, field enabled=${stillPlaying}, end panels=${ended}`,
+  );
+  await page.screenshot({ path: `${OUT}/desktop-no-limit.png`, fullPage: true });
   await context.close();
 }
 
 // ---------- Judge outage (dedicated instance with an unreachable judge) ----------
 {
   const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
   await page.goto(OUTAGE_BASE, { waitUntil: "networkidle" });
-  const before = await page.locator(".history li").count();
   await guess(page, "sundial");
-  const notice = await page
-    .locator(".notice")
-    .innerText()
-    .catch(() => "");
-  const after = await page.locator(".history li").count();
+  const status = await awaitStatus(page, "No guess used");
+  const words = await page.locator(".board .word-layer .word").count();
+  const usedDots = await guessCount(page);
   check(
-    "judge outage is honest and consumes no guess",
-    notice.includes("unavailable") && before === after,
-    `notice="${notice.slice(0, 60)}" guesses ${before}->${after}`,
+    "judge outage is honest and spends nothing",
+    status.includes("Couldn’t reach the judge") &&
+      status.includes("No guess used") &&
+      words === 0 &&
+      usedDots === 0,
+    `status=${status}, words=${words}, guesses=${usedDots}`,
   );
-  await page.screenshot({ path: `${OUT}/03-desktop-judge-outage.png`, fullPage: true });
+  await page.screenshot({ path: `${OUT}/desktop-judge-outage.png`, fullPage: true });
   await context.close();
 }
 
-// ---------- Wordplay practice journey (rebuilt wordplay deck) ----------
-{
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
-  const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
-  const spec = ANSWERS["Made and Taken"];
-  await openDrawer(page, "Made and Taken");
-  const title = await puzzleTitle(page);
-  check("wordplay drawer opens in practice", title === "Made and Taken", title);
-  await guess(page, spec.near);
-  const closeMarks = await page.locator(".history .marks .state.close").count();
-  check(
-    "wordplay near miss shows exactly one Close",
-    closeMarks === 1,
-    `close marks=${closeMarks}`,
-  );
-  await page.screenshot({ path: `${OUT}/15-wordplay-near.png`, fullPage: true });
-  await guess(page, spec.win);
-  const reveal = await page
-    .locator(".reveal h3")
-    .innerText()
-    .catch(() => "");
-  check(
-    "wordplay verified answer opens the drawer",
-    reveal.toLowerCase().includes("drawer open"),
-    reveal,
-  );
-  await page.screenshot({ path: `${OUT}/16-wordplay-win.png`, fullPage: true });
-  await context.close();
-}
-
-// ---------- Echo rejection (fresh context) ----------
-{
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
-  const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
-  const conditionText = await page.evaluate(() => {
-    return document.querySelector(".conditions .condition-text")?.textContent?.trim() ?? "";
-  });
-  await guess(page, conditionText);
-  const notice = await page
-    .locator(".notice")
-    .innerText()
-    .catch(() => "");
-  const rows = await page.locator(".history li").count();
-  const rejected = notice.toLowerCase().includes("repeats");
-  check("clue echo is rejected without consuming a guess", rejected && rows === 0, `rows=${rows}`);
-  await page.screenshot({ path: `${OUT}/08-desktop-echo-rejected.png`, fullPage: true });
-  await context.close();
-}
-
-// ---------- Loss journey on The Kitchen Well ----------
-{
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
-  const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
-  await openDrawer(page, "The Kitchen Well");
-  const title = await puzzleTitle(page);
-  check("practice opens the chosen drawer", title === "The Kitchen Well", title);
-  for (const answer of ANSWERS["The Kitchen Well"].loss) {
-    await guess(page, answer);
-  }
-  const reveal = await page
-    .locator(".reveal h3")
-    .innerText()
-    .catch(() => "");
-  const pips = await page.locator(".pip.used").count();
-  check(
-    "five guesses close the drawer",
-    reveal.includes("stays closed") && pips === 5,
-    `${reveal} pips=${pips}`,
-  );
-  await page.screenshot({ path: `${OUT}/09-desktop-loss.png`, fullPage: true });
-
-  // The cabinet grid is already visible in practice mode (screenshot 09 shows
-  // it above the finished drawer). Switch back to the daily view to capture
-  // that distinct state instead of re-shooting the same pixels.
-  await page.click(".tabs button:text('Today')");
-  await page.waitForTimeout(200);
-  await page.screenshot({ path: `${OUT}/10-desktop-daily-view.png`, fullPage: true });
-  await context.close();
-}
-
-// ---------- Mobile journeys ----------
+// ---------- Mobile completion ----------
 {
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
@@ -228,18 +271,10 @@ const browser = await chromium.launch();
   });
   const page = await context.newPage();
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.screenshot({ path: `${OUT}/11-mobile-daily.png`, fullPage: true });
-  const title = await puzzleTitle(page);
-  const spec = ANSWERS[title];
-  await guess(page, spec.near);
-  await page.screenshot({ path: `${OUT}/12-mobile-near-miss.png`, fullPage: true });
-  await guess(page, spec.win);
-  await page.screenshot({ path: `${OUT}/13-mobile-win.png`, fullPage: true });
-  const reveal = await page
-    .locator(".reveal h3")
-    .innerText()
-    .catch(() => "");
-  check("mobile win journey", reveal.toLowerCase().includes("drawer open"), reveal);
+  await dismissHowto(page);
+  const label = await puzzleLabel(page);
+  check("mobile board shows the scheduled puzzle", label === TODAY.label, label);
+  await fillBoard(page, label, "mobile");
   await context.close();
 }
 
@@ -249,13 +284,29 @@ const browser = await chromium.launch();
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
   });
+  await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.screenshot({ path: `${OUT}/14-mobile-reduced-motion.png`, fullPage: true });
-  const transition = await page.evaluate(
-    () => getComputedStyle(document.querySelector(".drawer-card")!).transitionDuration,
+  const label = await puzzleLabel(page);
+  await guess(page, answersFor(label).pairs.c3[0], 1);
+  const transition = await page
+    .locator(".board .word-layer .word")
+    .first()
+    .evaluate((word) => {
+      return getComputedStyle(word).transitionDuration;
+    });
+  const durations = transition.split(",").map((value) => {
+    const duration = value.trim();
+    const seconds = Number.parseFloat(duration);
+    return duration.endsWith("ms") ? seconds / 1000 : seconds;
+  });
+  check(
+    "reduced motion minimizes word transitions",
+    durations.length > 0 &&
+      durations.every((seconds) => Number.isFinite(seconds) && seconds <= 0.001),
+    transition,
   );
-  check("reduced motion minimizes transitions", Number.parseFloat(transition) <= 0.001, transition);
+  await page.screenshot({ path: `${OUT}/mobile-reduced-motion.png`, fullPage: true });
   await context.close();
 }
 

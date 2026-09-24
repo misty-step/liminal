@@ -1,0 +1,60 @@
+{
+  "id": "head-and-foot",
+  "mode": "wordplay",
+  "judgeStatus": "calibrated",
+  "conditions": [
+    {
+      "id": "c1",
+      "text": "Has a head",
+      "detail": "or a part called one",
+      "judge": "Consider `answer`. Does it have a head, or a part that people call its head?",
+      "levels": {
+        "yes": "It has a head, or a part people commonly call its head.",
+        "partly": "Only in a strained or rare usage.",
+        "no": "Nothing about it is called a head."
+      }
+    },
+    {
+      "id": "c2",
+      "text": "Has a foot",
+      "detail": "or a part called one",
+      "judge": "Consider `answer`. Does it have a foot, or a part that people call its foot?",
+      "levels": {
+        "yes": "It has a foot, or a part people commonly call its foot.",
+        "partly": "Only in a strained or rare usage.",
+        "no": "Nothing about it is called a foot."
+      }
+    },
+    {
+      "id": "c3",
+      "text": "Isn't alive",
+      "judge": "Consider `answer`. Is it a non-living thing: not a living creature or plant?",
+      "levels": {
+        "yes": "It is not alive: an object, a place, or a thing people made.",
+        "partly": "It was once alive, or is only partly living.",
+        "no": "It is a living creature or plant."
+      }
+    }
+  ],
+  "judgments": {
+    "version": "2026-09-23.1",
+    "center": {
+      "answers": ["bed", "table", "page", "column"],
+      "heldOut": ["bedstead"]
+    },
+    "pairs": {
+      "c1": {
+        "answers": ["footstool", "ladder"],
+        "heldOut": ["tights"]
+      },
+      "c2": {
+        "answers": ["nail", "hammer", "pin", "coin", "screw"],
+        "heldOut": ["arrow"]
+      },
+      "c3": {
+        "answers": ["person", "dog", "bird", "chicken"],
+        "heldOut": ["cat", "horse"]
+      }
+    }
+  }
+}

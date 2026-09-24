@@ -1,0 +1,59 @@
+{
+  "id": "keys-music-carry",
+  "mode": "literal",
+  "judgeStatus": "calibrated",
+  "conditions": [
+    {
+      "id": "c1",
+      "text": "Has keys",
+      "detail": "ones you press",
+      "judge": "Consider `answer`. Does it have keys that you press?",
+      "levels": {
+        "yes": "It has keys that you press.",
+        "partly": "It has buttons that people only sometimes call keys.",
+        "no": "It has no keys to press."
+      }
+    },
+    {
+      "id": "c2",
+      "text": "Made for music",
+      "judge": "Consider `answer`. Is it made for playing music?",
+      "levels": {
+        "yes": "It is made to play music.",
+        "partly": "It can make music, but that is not what it is for.",
+        "no": "It is not for making music."
+      }
+    },
+    {
+      "id": "c3",
+      "text": "Easy to carry",
+      "judge": "Consider `answer`. Can one person easily carry it around?",
+      "levels": {
+        "yes": "One person can easily carry it.",
+        "partly": "Only with effort, or only small versions.",
+        "no": "It is too big or too fixed in place to carry."
+      }
+    }
+  ],
+  "judgments": {
+    "version": "2026-09-23.1",
+    "center": {
+      "answers": ["accordion", "melodica", "keytar", "toy piano"],
+      "heldOut": ["flute", "clarinet", "saxophone"]
+    },
+    "pairs": {
+      "c1": {
+        "answers": ["guitar", "harmonica", "violin", "ukulele"],
+        "heldOut": ["tambourine"]
+      },
+      "c2": {
+        "answers": ["calculator", "computer keyboard"],
+        "heldOut": ["remote control"]
+      },
+      "c3": {
+        "answers": ["piano", "organ", "harpsichord"],
+        "heldOut": ["grand piano", "church organ"]
+      }
+    }
+  }
+}

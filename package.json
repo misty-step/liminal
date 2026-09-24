@@ -19,7 +19,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "bun run format:check && bun run lint && bun run foundation:check && bun run type-check && bun run test",
-    "validate:live": "bun run scripts/live-matrix.ts"
+    "validate:live": "bun run scripts/live-matrix.ts",
+    "puzzles:promote": "bun run scripts/generator/promote.ts",
+    "puzzles:generate": "bun run scripts/generator/generate.ts",
+    "puzzles:audit": "bun run scripts/generator/audit.ts",
+    "puzzles:review": "bun run scripts/generator/review.ts",
+    "puzzles:daily": "bun run scripts/generator/daily.ts"
   },
   "dependencies": {
     "@sentry/nextjs": "10.75.1",

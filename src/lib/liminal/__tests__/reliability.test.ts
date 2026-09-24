@@ -2,8 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET as getHealth } from "@/app/api/health/route";
 import { POST as postJudge } from "@/app/api/judge/route";
 import { POST as postReport } from "@/app/api/report/route";
-import { judgeCache } from "../store";
 import type { D1Like } from "../store";
+import { judgeCache } from "../store";
 
 const harness = vi.hoisted(() => ({
   bindings: null as Record<string, unknown> | null,
@@ -65,10 +65,19 @@ const requiredSchemaObjects = [
   "judgments",
   "reports",
   "product_events",
+  "schedule",
   "judgments_state_insert_guard",
   "judgments_state_update_guard",
+  "schedule_no_update",
+  "schedule_future_only",
   "product_events_funnel",
   "product_events_session",
+] as const;
+
+const ALL_MIGRATIONS = [
+  "0001_judgments_and_reports.sql",
+  "0002_foundations.sql",
+  "0003_schedule.sql",
 ] as const;
 
 const requiredSchemaColumns = {
@@ -85,6 +94,7 @@ const requiredSchemaColumns = {
     "schema_version",
     "props_json",
   ],
+  schedule: ["date", "number", "puzzle_id", "puzzle_json", "source"],
 } as const;
 
 function schemaD1(options: {
@@ -125,12 +135,16 @@ function schemaD1(options: {
           return {
             coreMigration: Number(migrations.has("0001_judgments_and_reports.sql")),
             foundationMigration: Number(migrations.has("0002_foundations.sql")),
-            tableCount: ["judgments", "reports", "product_events"].filter((name) =>
+            scheduleMigration: Number(migrations.has("0003_schedule.sql")),
+            tableCount: ["judgments", "reports", "product_events", "schedule"].filter((name) =>
               objects.has(name),
             ).length,
-            triggerCount: ["judgments_state_insert_guard", "judgments_state_update_guard"].filter(
-              (name) => objects.has(name),
-            ).length,
+            triggerCount: [
+              "judgments_state_insert_guard",
+              "judgments_state_update_guard",
+              "schedule_no_update",
+              "schedule_future_only",
+            ].filter((name) => objects.has(name)).length,
             indexCount: ["product_events_funnel", "product_events_session"].filter((name) =>
               objects.has(name),
             ).length,
@@ -185,9 +199,13 @@ function providerResponse() {
     ok: true,
     json: async () => ({
       answers: {
-        c1: { type: "choice", choice: "yes", confidence: 0.95 },
-        c2: { type: "choice", choice: "partly", confidence: 0.85 },
-        c3: { type: "choice", choice: "no", confidence: 0.9 },
+        c1: { choice: "yes", confidence: 0.95, probabilities: { yes: 0.95, partly: 0.05, no: 0 } },
+        c2: {
+          choice: "partly",
+          confidence: 0.85,
+          probabilities: { yes: 0.1, partly: 0.8, no: 0.1 },
+        },
+        c3: { choice: "no", confidence: 0.9, probabilities: { yes: 0, partly: 0.1, no: 0.9 } },
       },
     }),
   } as unknown as Response;
@@ -231,7 +249,7 @@ describe("D1 readiness", () => {
     harness.bindings = {
       LIMINAL_DB: schemaD1({
         migrationTable: true,
-        migrations: ["0001_judgments_and_reports.sql", "0002_foundations.sql"],
+        migrations: ALL_MIGRATIONS,
         objects: requiredSchemaObjects.filter((name) => name !== "product_events_session"),
       }),
     };
@@ -242,7 +260,24 @@ describe("D1 readiness", () => {
     expect((await response.json()).checks.storage).toBe("failed");
   });
 
+  it("rejects a database that predates the schedule migration", async () => {
+    process.env.LIMINAL_ENVIRONMENT = "production";
+    harness.bindings = {
+      LIMINAL_DB: schemaD1({
+        migrationTable: true,
+        migrations: ["0001_judgments_and_reports.sql", "0002_foundations.sql"],
+        objects: requiredSchemaObjects.filter((name) => !name.startsWith("schedule")),
+      }),
+    };
+
+    const response = await getHealth();
+
+    expect(response.status).toBe(503);
+    expect((await response.json()).checks.storage).toBe("failed");
+  });
+
   it.each([
+    ["schedule", "puzzle_json"],
     ["judgments", "state"],
     ["reports", "note"],
     ["product_events", "props_json"],
@@ -253,7 +288,7 @@ describe("D1 readiness", () => {
       harness.bindings = {
         LIMINAL_DB: schemaD1({
           migrationTable: true,
-          migrations: ["0001_judgments_and_reports.sql", "0002_foundations.sql"],
+          migrations: ALL_MIGRATIONS,
           objects: requiredSchemaObjects,
           columns: {
             [table]: requiredSchemaColumns[table].filter((name) => name !== missingColumn),
@@ -273,12 +308,13 @@ describe("D1 readiness", () => {
     harness.bindings = {
       LIMINAL_DB: schemaD1({
         migrationTable: true,
-        migrations: ["0001_judgments_and_reports.sql", "0002_foundations.sql"],
+        migrations: ALL_MIGRATIONS,
         objects: requiredSchemaObjects,
         columns: {
           judgments: [...requiredSchemaColumns.judgments, "compatible_extra"],
           reports: [...requiredSchemaColumns.reports, "compatible_extra"],
           product_events: [...requiredSchemaColumns.product_events, "compatible_extra"],
+          schedule: [...requiredSchemaColumns.schedule, "compatible_extra"],
         },
       }),
     };

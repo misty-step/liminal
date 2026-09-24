@@ -1,51 +1,83 @@
 # Liminal
 
-A daily solo intersection puzzle. Find a real, recognizable noun (or short noun
-phrase) that satisfies every condition in the drawer. Five guesses. Per-condition
-feedback: **Outside**, **Close**, **Inside**. Several legitimate answers per
-puzzle; there is no single hidden canonical solution.
+A daily solo puzzle about the in-between. Three labeled circles overlap in four
+places: the center (inside all three) and three gaps (inside two circles, outside
+the third). Fill all four with real things. No guess limit: your score is how
+many guesses and how long it took. Every word lands where it belongs on the
+board; many answers are right in every region.
 
 Live target: `liminal.mistystep.io` (release owned by Zoe).
 
 ## Modes
 
-- **Today** — one puzzle per UTC day, same for every player. Deterministic
-  rotation over the curated deck (`src/lib/liminal/daily.ts`).
-- **Practice** — any drawer, any time. Progress is tracked per puzzle.
+- **Today**: one puzzle per UTC day, same for every player, numbered from
+  #1 on 2026-09-23 (`src/lib/liminal/daily.ts`). `GET /api/today` serves the
+  scheduled puzzle for today's date from the D1 `schedule` table and falls back
+  to the bundled deck rotation when the schedule has no entry for the date.
+  Only the server chooses that fallback, after a successful lookup: an
+  unreadable schedule (or a production deployment without the D1 binding)
+  answers 503, and the page shows unlabeled circles with "Try again" rather
+  than a puzzle other players might not see.
+- **Archive**: after finishing, "Play #N" opens the day before; "Back to today"
+  returns. `GET /api/puzzle/<number>` serves any past number and 404s future
+  ones, so nobody can play tomorrow early. Progress is saved per puzzle.
 
-Each puzzle is labeled **literal object** or **wordplay** and applies that
-mode's sense rules consistently.
+Literal-object and wordplay puzzles apply their own sense rules in the judge
+rubrics; the board does not label them.
 
-## Feedback model
+## Rules and feedback
 
-| State | Meaning |
-| --- | --- |
-| Inside | The answer satisfies this condition. |
-| Close | The answer nearly satisfies this condition (a tested near miss). |
-| Outside | The answer does not satisfy this condition. |
+Each guess is judged per circle: **inside**, **on the line** (close), or
+**outside**, and placed on the board accordingly. A guess fills a region when it
+lands there cleanly (no circle on the line) and the region is still empty
+(`src/lib/liminal/regions.ts`). Words on a line, in one circle, or outside every
+circle stay on the board as information. A word whose position cannot show its
+verdict exactly carries explicit marks (`src/lib/liminal/placement.ts`).
 
-Five guesses; every scored guess is retained per puzzle (versioned
-`localStorage` schema `liminal.v1`). Refresh keeps progress. Completed drawers
-keep the concepts the player discovered.
+The game ends only when all four regions are filled. The clock counts thinking
+time: it pauses while the judge considers a word (network latency never reaches
+the score), while the how-to is open, and while the tab is hidden. Progress and
+clock time are saved per puzzle (`localStorage` schema `liminal.v2`); v1
+progress is not migrated.
 
-A guess is consumed exactly when it receives a confident judgment (authored
-or live). Deterministic rejections (clue echo, empty, oversized), honest
-judge uncertainty, outages, rate limits, and the calibration gate consume
-nothing — a refused guess is never spent.
+A guess is spent exactly when it receives a judgment (authored or live).
+Refusals spend nothing: a circle label, a word already on the board, empty or
+oversized input, judge outages, rate limits, and the calibration gate.
+
+## Sharing
+
+The share text (`src/lib/liminal/share.ts`) is a header, one colored square per
+guess, the score, and a link:
+
+```text
+Liminal #1
+🟪⬜🟩🟧⬛
+5 guesses, 0:22
+https://liminal.mistystep.io/s/<code>
+```
+
+Squares are the place each guess filled (purple, green, orange gap; black
+center) or white when it filled nothing. A perfect four-guess board adds 🎯.
+The text never contains words or circle labels. The link's code carries the
+player's words; `/s/<code>` shows the result with each word hidden until tapped
+(noindex, no server state). Touch devices use the native share sheet; desktop
+copies to the clipboard.
 
 ## Judgment architecture
 
 - **Authored deck judgments** (`src/lib/liminal/deck.ts`) are deterministic,
-  offline, and always available. Every published puzzle ships with several
-  verified answers and near misses that fail exactly one condition; the
-  validation matrix is enforced by `src/lib/liminal/__tests__/deck.test.ts`.
+  offline, and always available. Every region of every puzzle ships with
+  verified answers and held-out answers; `src/lib/liminal/__tests__/deck.test.ts`
+  enforces that each authored answer lands in its region.
 - **Semantic service (Jev)** covers answers outside the authored lists.
   One authored question per condition (a Choice over descriptive levels;
   Noul yes/no only as a legacy fallback) via the server route `/api/judge`.
   Providers: TypeSafe native (`TYPESAFE_API_KEY`) or OpenRouter Decisions
   (`OPENROUTER_API_KEY`, model `typesafe/jev-1.13`).
-- Probabilities are **not** intensities. Code maps them to decision bands
-  (`inside >= 0.65`, `close >= 0.35`, else `outside`) in `judgment.ts`.
+- Probabilities are **not** intensities. A Choice is scored `yes + partly / 2`
+  and banded (`inside >= 0.65`, `close >= 0.35`, else `outside`) in
+  `judgment.ts`. There is no uncertainty refusal: a torn judge lands a word on
+  the line, where it fills nothing.
 - Judgments are **versioned and cached** (`judgmentKey`: puzzle, condition,
   answer, model, prompt version) so duplicate submissions never reroll a
   judgment.
@@ -56,7 +88,7 @@ nothing — a refused guess is never spent.
 
 - Credentials stay server-side (route handler only; never shipped to the client).
 - Player text is untrusted data: bounded length (120 chars), rate-limited,
-  time-boxed (4 s), and passed to the judge as `state` data — never as
+  time-boxed (8 s), and passed to the judge as `state` data — never as
   instructions.
 - `/api/report` is size-capped and rate-limited; failures are reported honestly.
 
@@ -90,6 +122,27 @@ bun run type-check
 bun run build:cf   # reproducible OpenNext/Cloudflare deploy artifact
 ```
 
+Puzzle pipeline. The judge key (`OPENROUTER_API_KEY` or `TYPESAFE_API_KEY`)
+scores words; generation and the audit's player model bill a separate
+`LIMINAL_GENERATOR_API_KEY` and refuse to run on the judge key, so drafting
+can never drain the key the live game judges with:
+
+```sh
+bun run puzzles:daily -- --store file --buffer 7 --budget 1   # fill upcoming dates (local files)
+bun run puzzles:generate -- --concepts 60 --keep 12 --budget 2   # propose, screen, expand, critique
+bun run puzzles:audit                               # critic on published puzzles
+bun run puzzles:promote content/candidates/<id>.json
+bun run validate:live -- --only <id> --mark-calibrated
+```
+
+Publishing is automatic. `.github/workflows/daily-puzzles.yml` runs
+`puzzles:daily --store d1` nightly: it fills missing dates from tomorrow up to
+a week ahead, publishing only puzzles that clear the publish bar and a
+zero-miss live calibration. Scheduled rows are insert-only and only future
+dates can be inserted, so the puzzle for a day never changes once that day has
+begun. A date nobody filled in time stays on the deck fallback all day. See
+`AGENTS.md` for the gates.
+
 ## Deploy contract (for Zoe)
 
 - Cloudflare Worker + custom domain `liminal.mistystep.io` →
@@ -106,33 +159,33 @@ bun run build:cf   # reproducible OpenNext/Cloudflare deploy artifact
 - Build: `bun run build:cf` (OpenNext, `open-next.config.ts`); deploy:
   `bun run deploy:cf` (wrangler `--env production`).
 - Durable store: D1 `liminal-judgments` (binding `LIMINAL_DB`) retains
-  first-writer-wins judgments keyed by the versioned judgment keys and holds
-  append-only answer reports and privacy-safe product events; additive schema
-  lives in `migrations/`.
+  first-writer-wins judgments keyed by the versioned judgment keys, holds
+  append-only answer reports and privacy-safe product events, and the
+  insert-only daily `schedule` (migration `0003_schedule.sql`, required by
+  `/api/health`). Additive schema lives in `migrations/`.
+- Daily generation (GitHub Actions): repository secrets
+  `LIMINAL_JUDGE_API_KEY`, `LIMINAL_GENERATOR_API_KEY` (must differ), and
+  `CLOUDFLARE_API_TOKEN` (D1 edit), plus variable `CLOUDFLARE_ACCOUNT_ID`.
 
 ## Known limitations (this slice)
 
-- **Live calibration recovered and hardened.** Runs 1–2 failed (39/55 and
-  41/55 rows mismatched); run 3 recovered via authored Choice rubrics; run 4
-  (2026-09-20.4) hardened the pass-or-fail canonical family. The gate is
-  `scripts/live-matrix.ts`: 53/53 rows match, 0 failures (24 answers, 17
-  near misses, 12 held-out). Raw evidence: `evidence/live-matrix-*.json`,
-  `evidence/calibration-findings.md`. All four launch puzzles are
-  `judgeStatus: "calibrated"`; the gate still refuses any future
-  uncalibrated puzzle (without consuming a guess) unless
-  `JEV_ALLOW_UNCALIBRATED=1`.
-- **Canonical bare words for Pass or Fail — exam, physical, test — are
-  honestly refused.** The live judge splits on their senses (exam the event
-  vs the exam paper; physical the adjective vs the noun) and lands below the
-  confidence floor, so the game refuses rather than guesses; no guess is
-  consumed. Authoring them would bypass the live-matrix gate, so they stay
-  out-of-deck with the report path as the escape valve. Multi-word family
-  members judge confidently and are accepted: checkup (authored), bar exam,
-  entrance exam, hearing test, final exam, eye test, background check.
-- **The authored layer is the launch-deck authority.** It is deterministic,
-  offline, and enforced by the test suite plus `evidence/validation-matrix.md`.
-- **"Close" has two meanings** once the judge is enabled: authored near miss
-  vs model uncertainty. See the findings doc before enabling.
+- **Live calibration.** The gate is `scripts/live-matrix.ts`: every region
+  answer, every held-out answer, and hostile input per puzzle. Deck 2026-09-23.1
+  under prompt `liminal-judge-2026-09-23.1` passed 132/132 rows (84 answers, 36
+  held-out, 12 hostile) in
+  `evidence/live-matrix-2026-09-23T20-17-24-426Z.json`; the run before it missed
+  one row ("sock" lands on the head line) and that answer was removed. History
+  and the banded-rule decision: `evidence/calibration-findings.md`.
+- **The deck was rebuilt for regions.** Kitchen Well, Made and Taken, and Pass
+  or Fail could not fill all four regions with the live judge (at least one
+  region had no clean answer) and were retired. Bath Vessel was kept.
+- **A torn judge costs a guess.** Banding replaces the old uncertainty refusal,
+  so a word the judge splits on lands on a line and is spent. The report path
+  ("Disagree?" on any word) is the escape valve.
+- **Crowding.** A second word for an already-filled pair region can be pushed
+  off it; such words show explicit marks rather than a misleading position.
+- **A stuck player has no way out.** With no guess limit there is no reveal
+  or give-up; the board stays open until all four places are filled.
 - The semantic judge is unit-tested against mocked transports; live behavior
   is proven by the live matrix at every deck/prompt version bump.
 - No accounts and no multiplayer (by design). Product events are anonymous,

@@ -1,15 +1,14 @@
-import { normalizeAnswer } from "./normalize";
+import type { ChoiceKey, JudgeResult } from "./judgment";
 import {
-  CHOICE_CONFIDENCE_FLOOR,
+  buildQuestions,
   CHOICE_KEYS,
   DEFAULT_MODEL,
   JUDGE_PROMPT_VERSION,
-  buildQuestions,
   judgmentKey,
-  stateFromChoice,
+  stateFromChoiceProbabilities,
   stateFromNoul,
 } from "./judgment";
-import type { ChoiceKey, JudgeResult } from "./judgment";
+import { normalizeAnswer } from "./normalize";
 import type { ConditionState, Puzzle } from "./types";
 
 /**
@@ -21,10 +20,9 @@ import type { ConditionState, Puzzle } from "./types";
  * Credentials stay server-side. Requests are bounded, time-boxed, and cached by
  * judgment version so the same answer never rerolls a judgment.
  *
- * Conditions ship authored Choice levels: one descriptive rubric per condition,
- * and the chosen level maps to outside / close / inside. A Choice answer below
- * the confidence floor is uncertainty, not a judgment: it is reported as
- * "uncertain" and the caller refuses without consuming a guess.
+ * Conditions ship authored Choice levels: one descriptive rubric per condition.
+ * Choice probabilities (yes fully, partly halfway) determine the judgment band;
+ * confidence is retained as evidence, not used to refuse a judgment.
  */
 
 export interface JudgeEnv {
@@ -89,6 +87,7 @@ interface TypeSafeResponse {
       noul?: number;
       choice?: string;
       confidence?: number;
+      probabilities?: Record<string, unknown>;
     }
   >;
 }
@@ -176,17 +175,15 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
         if (typeof value.choice !== "string" || !CHOICE_KEYS.includes(value.choice as ChoiceKey)) {
           return { status: "unavailable", reason: "invalid-response" };
         }
-        const confidence = typeof value.confidence === "number" ? value.confidence : 0;
-        if (confidence < CHOICE_CONFIDENCE_FLOOR) {
-          // Honest uncertainty: this is not a near miss and not a judgment.
-          return { status: "unavailable", reason: "uncertain" };
-        }
-        const state = stateFromChoice(value.choice);
+        const state =
+          value.probabilities && typeof value.probabilities === "object"
+            ? stateFromChoiceProbabilities(value.probabilities)
+            : null;
         if (!state) {
           return { status: "unavailable", reason: "invalid-response" };
         }
         fresh[conditionId] = state;
-        confidences[conditionId] = confidence;
+        if (typeof value.confidence === "number") confidences[conditionId] = value.confidence;
       } else {
         if (typeof value.noul !== "number") {
           return { status: "unavailable", reason: "invalid-response" };

@@ -5,73 +5,76 @@ export type PuzzleMode = "literal" | "wordplay";
 /** Per-condition feedback. Three states, never a decimal dashboard. */
 export type ConditionState = "outside" | "close" | "inside";
 
+/** Every puzzle is a three-circle diagram; conditions are always c1, c2, c3. */
+export type ConditionId = "c1" | "c2" | "c3";
+
+/**
+ * A region the player fills: "center" (inside all three circles) or a pair
+ * region, named by the one condition it falls outside.
+ */
+export type TargetKey = "center" | ConditionId;
+
 /**
  * Descriptive rubric levels for a condition's Choice question. Each level is a
- * plain-language description; the judge picks the one that fits, and code maps
- * the pick to outside / close / inside. Wording is authored, versioned with the
+ * plain-language description; the judge weighs them, and code maps the result
+ * to outside / close / inside. Wording is authored, versioned with the
  * judgment set, and never shown to the player.
  */
 export interface ChoiceLevels {
-  /** Clearly satisfies the condition. Maps to inside. */
+  /** Clearly satisfies the condition. */
   yes: string;
-  /** Borderline or a stretch. Maps to close. */
+  /** Borderline or a stretch. */
   partly: string;
-  /** Does not satisfy the condition. Maps to outside. */
+  /** Does not satisfy the condition. */
   no: string;
 }
 
 export interface Condition {
-  /** Stable id used in judgments, caches, and feedback. */
-  id: string;
-  /** Player-facing condition text. Authored by hand; never generated at runtime. */
+  id: ConditionId;
+  /** Player-facing circle label: short, authored by hand, never generated. */
   text: string;
+  /** Optional quiet second line that pins the intended sense. */
+  detail?: string;
   /**
    * Self-contained phrasing handed to the judge for this condition. It must not
-   * rely on antecedents from the display text (no dangling "its name"). Falls
-   * back to `text` when omitted.
+   * rely on antecedents from the display text. Falls back to `text` when omitted.
    */
   judge?: string;
   /** Authored Choice rubric. Absent means the condition falls back to a Noul yes/no. */
   levels?: ChoiceLevels;
 }
 
-/** One authored near miss: a real answer that fails exactly one condition. */
-export interface NearMiss {
-  answer: string;
-  /** Condition id the near miss fails. The other conditions are inside. */
-  fails: string;
-  note?: string;
+/** Answers for one target region. */
+export interface RegionAnswers {
+  /** Verified answers the authored path places here, offline and deterministically. */
+  answers: string[];
+  /**
+   * Valid answers deliberately held OUT of the authored allowlist.
+   * scripts/live-matrix.ts must show the live judge placing them here: the
+   * open-answer guarantee.
+   */
+  heldOut: string[];
 }
 
 export interface AuthoredJudgment {
   /** Version string for the authored judgment set. Bump on any edit. */
   version: string;
-  /** Answers verified to satisfy every condition. */
-  answers: string[];
-  /** Near misses with tested single-condition failures. */
-  nearMisses: NearMiss[];
-  /**
-   * Valid answers deliberately held OUT of the authored allowlist. They are
-   * never authored wins; scripts/live-matrix.ts must show the live semantic
-   * judge accepting them. This is the open-answer guarantee.
-   */
-  heldOut?: string[];
+  /** Inside all three circles. */
+  center: RegionAnswers;
+  /** Inside two circles and outside the third, keyed by the condition it falls outside. */
+  pairs: Record<ConditionId, RegionAnswers>;
 }
 
 export interface Puzzle {
   id: string;
-  title: string;
-  /** Cabinet drawer label. */
-  drawer: string;
+  /** Literal-object and wordplay puzzles apply their own sense rules. */
   mode: PuzzleMode;
-  /** Short authored teaser line. */
-  teaser: string;
-  conditions: Condition[];
+  conditions: readonly [Condition, Condition, Condition];
   judgments: AuthoredJudgment;
   /**
    * Whether live semantic judging has been calibrated for this puzzle's
-   * conditions. Defaults to "uncalibrated": the judge refuses such puzzles
-   * unless explicitly allowed, and never consumes a guess when it refuses.
+   * conditions. Uncalibrated puzzles refuse live judging (no guess consumed)
+   * unless explicitly allowed.
    */
   judgeStatus?: "calibrated" | "uncalibrated";
 }
@@ -79,36 +82,31 @@ export interface Puzzle {
 export type JudgmentSource = "authored" | "cached" | "judged";
 
 export interface GuessFeedback {
-  /** Condition id -> state. */
-  states: Record<string, ConditionState>;
-  solved: boolean;
+  states: Record<ConditionId, ConditionState>;
   source: JudgmentSource;
   /** Version of the judgment set used for this feedback. */
   judgmentVersion: string;
   /** True when the guess needs the semantic service before it can be scored. */
   needsJudgment?: boolean;
-  /** Set when the guess was rejected before judgment. */
-  rejected?: "echo" | "empty" | "too-long";
+  /** Set when the guess was refused before judgment; refusals spend nothing. */
+  rejected?: "echo" | "empty" | "too-long" | "repeat";
 }
 
 export interface GuessRecord {
   answer: string;
-  states: Record<string, ConditionState>;
+  states: Record<ConditionId, ConditionState>;
   at: number;
   source: JudgmentSource;
-  solved: boolean;
 }
 
+/** Saved per puzzle. Filled regions derive from the guesses (see regions.ts). */
 export interface PuzzleProgress {
-  schemaVersion: 1;
+  schemaVersion: 2;
   puzzleId: string;
   guesses: GuessRecord[];
-  solved: boolean;
-  solvedAnswer?: string;
-  /** Concepts the player discovered in this drawer. */
-  collected: string[];
+  /** Thinking time on the clock: excludes judge waits, hidden tabs, and the how-to. */
+  elapsedMs: number;
   updatedAt: number;
 }
 
-export const GUESS_LIMIT = 5;
 export const MAX_ANSWER_LENGTH = 120;

@@ -6,7 +6,15 @@ import { judgeAnswer, judgeEnvFrom, memoryCache } from "../typeSafe";
 const vessel = getPuzzle("bath-vessel")!;
 
 function okResponse(
-  cells: Record<string, { choice?: string; noul?: number; confidence?: number }>,
+  cells: Record<
+    string,
+    {
+      choice?: string;
+      noul?: number;
+      confidence?: number;
+      probabilities?: Record<string, unknown>;
+    }
+  >,
 ) {
   return {
     ok: true,
@@ -61,9 +69,21 @@ describe("judgeAnswer", () => {
         expect(Object.keys(question.criteria).sort()).toEqual(["no", "partly", "yes"]);
       }
       return okResponse({
-        c1: { choice: "yes", confidence: 0.9 },
-        c2: { choice: "partly", confidence: 0.8 },
-        c3: { choice: "no", confidence: 0.95 },
+        c1: {
+          choice: "yes",
+          confidence: 0.9,
+          probabilities: { yes: 0.9, partly: 0.08, no: 0.02 },
+        },
+        c2: {
+          choice: "partly",
+          confidence: 0.8,
+          probabilities: { yes: 0.35, partly: 0.5, no: 0.15 },
+        },
+        c3: {
+          choice: "no",
+          confidence: 0.95,
+          probabilities: { yes: 0.05, partly: 0.05, no: 0.9 },
+        },
       });
     }) as unknown as typeof fetch;
 
@@ -82,35 +102,52 @@ describe("judgeAnswer", () => {
     }
   });
 
-  it("reports low-confidence picks as honest uncertainty, never a near miss", async () => {
+  it("judges and caches a low-confidence Choice from its probabilities", async () => {
     const cache = memoryCache();
-    const unsure = vi.fn(async () =>
+    const fetchImpl = vi.fn(async () =>
       okResponse({
-        c1: { choice: "yes", confidence: 0.9 },
-        c2: { choice: "partly", confidence: 0.35 },
-        c3: { choice: "yes", confidence: 0.9 },
+        c1: {
+          choice: "yes",
+          confidence: 0.3,
+          probabilities: { yes: 0.6, partly: 0.35, no: 0.05 },
+        },
+        c2: {
+          choice: "partly",
+          confidence: 0.35,
+          probabilities: { yes: 0.4, partly: 0.5, no: 0.1 },
+        },
+        c3: {
+          choice: "no",
+          confidence: 0.9,
+          probabilities: { yes: 0.19, partly: 0.3, no: 0.51 },
+        },
       }),
     ) as unknown as typeof fetch;
-    const result = await judgeAnswer({
+    const first = await judgeAnswer({
       puzzle: vessel,
       answer: "urinal",
       env,
       cache,
-      fetchImpl: unsure,
+      fetchImpl,
     });
-    expect(result).toEqual({ status: "unavailable", reason: "uncertain" });
-    expect(
-      cache.get(`bath-vessel|c1|urinal|typesafe/jev-1.13|${JUDGE_PROMPT_VERSION}`),
-    ).toBeUndefined();
+    expect(first.status).toBe("judged");
+    if (first.status === "judged") {
+      expect(first.states).toEqual({ c1: "inside", c2: "inside", c3: "outside" });
+      expect(first.confidences).toEqual({ c1: 0.3, c2: 0.35, c3: 0.9 });
+    }
+    const firstStates = first.status === "judged" ? first.states : null;
+    const second = await judgeAnswer({ puzzle: vessel, answer: "urinal", env, cache, fetchImpl });
+    expect(second.status === "judged" ? second.states : null).toEqual(firstStates);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 
   it("serves repeats from cache instead of rerolling", async () => {
     const cache = memoryCache();
     const fetchImpl = vi.fn(async () =>
       okResponse({
-        c1: { choice: "yes", confidence: 0.9 },
-        c2: { choice: "yes", confidence: 0.9 },
-        c3: { choice: "yes", confidence: 0.9 },
+        c1: { choice: "yes", confidence: 0.9, probabilities: { yes: 0.9, partly: 0.1, no: 0 } },
+        c2: { choice: "yes", confidence: 0.9, probabilities: { yes: 0.9, partly: 0.1, no: 0 } },
+        c3: { choice: "yes", confidence: 0.9, probabilities: { yes: 0.9, partly: 0.1, no: 0 } },
       }),
     ) as unknown as typeof fetch;
     const first = await judgeAnswer({ puzzle: vessel, answer: "urinal", env, cache, fetchImpl });
@@ -163,12 +200,45 @@ describe("judgeAnswer", () => {
   it("never writes partial judgments to cache on failure", async () => {
     const cache = memoryCache();
     const fetchImpl = vi.fn(
-      async () => okResponse({ c1: { choice: "yes", confidence: 0.9 } }) as unknown as Response,
+      async () =>
+        okResponse({
+          c1: {
+            choice: "yes",
+            confidence: 0.9,
+            probabilities: { yes: 0.9, partly: 0.1, no: 0 },
+          },
+        }) as unknown as Response,
     ) as unknown as typeof fetch;
     const result = await judgeAnswer({ puzzle: vessel, answer: "urinal", env, cache, fetchImpl });
     expect(result.status).toBe("unavailable");
     expect(
       cache.get(`bath-vessel|c1|urinal|typesafe/jev-1.13|${JUDGE_PROMPT_VERSION}`),
     ).toBeUndefined();
+  });
+
+  it.each([
+    ["missing probabilities", { choice: "yes", confidence: 0.9 }],
+    [
+      "malformed probabilities",
+      { choice: "yes", probabilities: { yes: 0.7, partly: Number.NaN, no: 0.3 } },
+    ],
+    ["unknown choice key", { choice: "maybe", probabilities: { yes: 0.7, partly: 0.2, no: 0.1 } }],
+  ])("rejects %s without caching any fresh condition", async (_case, invalidCell) => {
+    const cache = memoryCache();
+    const validCell = {
+      choice: "yes",
+      confidence: 0.9,
+      probabilities: { yes: 0.9, partly: 0.1, no: 0 },
+    };
+    const fetchImpl = vi.fn(async () =>
+      okResponse({ c1: validCell, c2: invalidCell, c3: validCell }),
+    ) as unknown as typeof fetch;
+    const result = await judgeAnswer({ puzzle: vessel, answer: "urinal", env, cache, fetchImpl });
+    expect(result).toEqual({ status: "unavailable", reason: "invalid-response" });
+    for (const conditionId of ["c1", "c2", "c3"]) {
+      expect(
+        cache.get(`bath-vessel|${conditionId}|urinal|typesafe/jev-1.13|${JUDGE_PROMPT_VERSION}`),
+      ).toBeUndefined();
+    }
   });
 });

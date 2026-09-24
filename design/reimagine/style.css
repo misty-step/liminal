@@ -1,0 +1,733 @@
+:root {
+  --paper: #fafaf8;
+  --ink: #1e2126;
+  --quiet: #5c6169;
+  --line: #d8dadd;
+  --target: rgba(30, 33, 38, 0.06);
+  --c1: #2a8fa3;
+  --c1-text: #1a6c7c;
+  --c2: #d0487f;
+  --c2-text: #a53461;
+  --c3: #b98310;
+  --c3-text: #85590a;
+  --serif: "Newsreader", "Iowan Old Style", Georgia, serif;
+  --sans: "Schibsted Grotesk", system-ui, sans-serif;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  max-width: 460px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Header */
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 0 8px;
+}
+
+.wordmark {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.wordmark a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.date {
+  margin-left: auto;
+  color: var(--quiet);
+  font-size: 14px;
+}
+
+.help-button {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Board */
+
+.board {
+  --word-font: 500 17px var(--serif);
+  position: relative;
+  width: 100%;
+  aspect-ratio: 100 / 104;
+}
+
+.board svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ring {
+  fill: none;
+  stroke-width: 0.7;
+  transition:
+    stroke 400ms var(--ease),
+    stroke-width 400ms var(--ease);
+}
+
+.ring.ghost {
+  stroke: var(--line);
+  stroke-width: 0.35;
+  stroke-dasharray: 1.2 1.8;
+}
+
+.ring-1.shown {
+  stroke: var(--c1);
+}
+.ring-2.shown {
+  stroke: var(--c2);
+}
+.ring-3.shown {
+  stroke: var(--c3);
+}
+
+.ring.drawing {
+  stroke-dasharray: 170;
+  animation: draw 700ms var(--ease) both;
+}
+
+@keyframes draw {
+  from {
+    stroke-dashoffset: 170;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.target {
+  fill: var(--target);
+  animation: fade 600ms var(--ease) both;
+  transition: fill 700ms var(--ease);
+}
+
+.board.solved .target {
+  fill: var(--ink);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+.circle-label {
+  position: absolute;
+  font-size: 14px;
+  line-height: 1.25;
+  opacity: 0;
+  transform: translateY(4px);
+  transition:
+    opacity 400ms var(--ease) 250ms,
+    transform 400ms var(--ease) 250ms;
+}
+
+.circle-label.shown {
+  opacity: 1;
+  transform: none;
+}
+
+.label-main {
+  display: block;
+  font-weight: 600;
+}
+
+.label-detail {
+  display: block;
+  color: var(--quiet);
+  font-size: 13px;
+}
+
+.label-1 {
+  left: 1%;
+  top: 1%;
+  width: 47%;
+}
+.label-2 {
+  right: 1%;
+  top: 1%;
+  width: 47%;
+  text-align: right;
+}
+.label-3 {
+  left: 12%;
+  width: 76%;
+  top: 88%;
+  text-align: center;
+}
+.label-1 .label-main {
+  color: var(--c1-text);
+}
+.label-2 .label-main {
+  color: var(--c2-text);
+}
+.label-3 .label-main {
+  color: var(--c3-text);
+}
+
+.word-layer {
+  position: absolute;
+  inset: 0;
+}
+
+.word {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  font: var(--word-font);
+  white-space: nowrap;
+  border: 0;
+  border-radius: 999px;
+  padding: 1px 6px;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  text-shadow:
+    0 0 3px var(--paper),
+    0 0 3px var(--paper),
+    0 0 6px var(--paper);
+  transition:
+    left 650ms var(--ease),
+    top 650ms var(--ease),
+    opacity 400ms var(--ease),
+    background 500ms var(--ease),
+    color 500ms var(--ease);
+}
+
+.word.on-line {
+  font-style: italic;
+}
+
+.word.entering {
+  opacity: 0;
+}
+
+.word:hover {
+  text-decoration: underline dotted 1px;
+  text-underline-offset: 4px;
+}
+
+.board.solved .word:not(.won) {
+  color: var(--quiet);
+  background: var(--paper);
+  text-shadow: none;
+}
+
+.word.won {
+  background: var(--ink);
+  color: var(--paper);
+  text-shadow: none;
+  padding: 3px 12px;
+  font-weight: 600;
+  z-index: 1;
+}
+
+/* A way in nobody listed: the find pill gains an amber ring. */
+.word.won.unlisted {
+  box-shadow:
+    0 0 0 2px var(--paper),
+    0 0 0 4px var(--c3);
+}
+
+/* Status, field, dots */
+
+.status {
+  min-height: 1.45em;
+  margin: 10px 0 12px;
+  text-align: center;
+  color: var(--quiet);
+  font-size: 15px;
+}
+
+.status.refused {
+  color: var(--ink);
+}
+
+.status.pending {
+  color: var(--ink);
+  animation: breathe 1.2s ease-in-out infinite;
+}
+
+/* Floor of 0.7 keeps ink at about 6:1 on paper through the whole pulse. */
+@keyframes breathe {
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.guess {
+  display: flex;
+  gap: 8px;
+}
+
+.guess input {
+  flex: 1;
+  min-width: 0;
+  height: 52px;
+  padding: 0 16px;
+  border: 1.5px solid #8a8f96;
+  border-radius: 12px;
+  background: #fff;
+  font-family: var(--serif);
+  font-size: 19px;
+}
+
+.guess input:focus {
+  border-color: var(--ink);
+  outline: none;
+}
+
+.guess input::placeholder {
+  color: #6b7078;
+}
+
+.guess button,
+.primary,
+.share {
+  height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guess button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid #858a92;
+}
+
+.dot.used {
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+.stop-row {
+  margin: 14px 0 0;
+  text-align: center;
+}
+
+.stop-row .stop {
+  font-size: 15px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* End */
+
+.end {
+  text-align: center;
+  animation: fade 600ms var(--ease) 400ms both;
+}
+
+.end-title {
+  margin: 4px 0 6px;
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.end-sub {
+  margin: 0 auto 10px;
+  max-width: 34ch;
+  color: var(--quiet);
+  font-size: 15px;
+}
+
+.end-ways {
+  margin: 0 auto 18px;
+  max-width: 34ch;
+  font-family: var(--serif);
+  font-size: 18px;
+}
+
+.end-ways-label {
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--quiet);
+}
+
+.end-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+.another {
+  color: var(--ink);
+  font-weight: 600;
+  text-underline-offset: 4px;
+}
+
+.end-next {
+  margin-top: 16px;
+  color: var(--quiet);
+  font-size: 14px;
+}
+
+/* How to play */
+
+dialog.help {
+  width: min(360px, calc(100vw - 32px));
+  border: 0;
+  border-radius: 16px;
+  padding: 28px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+dialog.help::backdrop {
+  background: rgba(30, 33, 38, 0.35);
+}
+
+dialog.help h2 {
+  margin: 0 0 12px;
+  font-family: var(--serif);
+  font-size: 26px;
+  font-weight: 600;
+}
+
+dialog.help p {
+  margin: 0 0 12px;
+}
+
+dialog.help .primary {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Guess detail */
+
+.popover {
+  position: absolute;
+  z-index: 10;
+  padding: 14px 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(30, 33, 38, 0.14);
+}
+
+.pop-word {
+  margin: 0 0 8px;
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.pop-verdicts {
+  list-style: none;
+  margin: 0 0 10px;
+  padding: 0;
+  font-size: 14px;
+}
+
+.pop-verdicts li {
+  display: grid;
+  grid-template-columns: 14px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+}
+
+.v-state {
+  color: var(--quiet);
+}
+
+.link {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--quiet);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.pop-form label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.pop-form textarea {
+  width: 100%;
+  border: 1.5px solid #8a8f96;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.pop-form button.primary {
+  height: 40px;
+}
+
+.pop-sent {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: var(--quiet);
+}
+
+/* Condition keys: filled inside, half on the line, ring outside */
+
+.key,
+.mark {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+}
+
+.c-1 {
+  color: var(--c1);
+}
+.c-2 {
+  color: var(--c2);
+}
+.c-3 {
+  color: var(--c3);
+}
+
+.inside > .key,
+.mark.inside {
+  background: currentColor;
+}
+
+.close > .key,
+.mark.close {
+  background: linear-gradient(90deg, currentColor 50%, transparent 50%);
+}
+
+.pop-verdicts .v-text {
+  color: var(--ink);
+}
+
+.trail {
+  display: inline-grid;
+  gap: 5px;
+  margin: 2px 0 14px;
+}
+
+.trail-row {
+  display: flex;
+  gap: 5px;
+}
+
+.trail .mark {
+  width: 11px;
+  height: 11px;
+  border-width: 1.5px;
+}
+
+.trail .mark.hidden {
+  border-color: var(--line);
+  border-style: dotted;
+}
+
+/* Quiet list */
+
+.quiet-conditions {
+  list-style: none;
+  margin: 12px 0 20px;
+  padding: 0;
+}
+
+.quiet-conditions li {
+  display: grid;
+  grid-template-columns: 14px 1fr;
+  gap: 12px;
+  align-items: baseline;
+  padding: 6px 0;
+}
+
+.quiet-conditions .label-main {
+  color: var(--ink);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.quiet-conditions .key {
+  transform: translateY(1px);
+}
+
+.quiet-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  border-bottom: 1px solid var(--line);
+}
+
+.row-word {
+  flex: 1;
+  text-align: left;
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: var(--serif);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.row.won .row-word {
+  font-weight: 700;
+}
+
+.marks {
+  display: flex;
+  gap: 10px;
+}
+
+.marks .mark {
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 400px) {
+  .circle-label {
+    font-size: 13px;
+  }
+  .label-detail {
+    font-size: 12px;
+  }
+  .board {
+    --word-font: 500 16px var(--serif);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0ms !important;
+    animation-delay: 0ms !important;
+  }
+}
+
+/* Prototype index */
+
+.index h1 {
+  font-family: var(--serif);
+  font-size: 34px;
+  margin: 32px 0 4px;
+}
+
+.index li {
+  margin-bottom: 14px;
+}
+
+.index a {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* Explicit verdict under a word whose position cannot say it exactly */
+
+.word-marks {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  display: flex;
+  gap: 3px;
+  transform: translate(-50%, -3px);
+}
+
+.word-marks .mark {
+  width: 8px;
+  height: 8px;
+  border-width: 1.5px;
+}
+
+.off-list {
+  margin-left: 4px;
+  font-size: 12px;
+  line-height: 11px;
+  color: var(--c3-text);
+}
