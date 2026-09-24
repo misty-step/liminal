@@ -23,8 +23,9 @@ Criteria:
 4. WHEN all four places are filled, THE SYSTEM SHALL end the board, and SHALL
    NOT end it on guess count, however many guesses it takes.
 
-No-gos: no guess limit; no single canonical answer per place; no rooms,
-partners, or multiplayer.
+No-gos: no guess limit; no give-up or show-answers path (operator decision,
+2026-09-24); no single canonical answer per place; no rooms, partners, or
+multiplayer.
 
 Evidence: `src/lib/liminal/__tests__/regions.test.ts`,
 `src/lib/liminal/__tests__/placement.test.ts`,
@@ -83,9 +84,10 @@ Criteria:
 3. IF the report cannot be stored, THEN THE SYSTEM SHALL say it was not sent
    and SHALL NOT fall back to local storage in production.
 
-Evidence: `e2e/qa-journeys.ts` (word detail, report filed),
-`src/lib/liminal/__tests__/routes.test.ts`,
-`src/lib/liminal/__tests__/store.test.ts`
+Evidence: `src/lib/liminal/__tests__/report-durability.test.ts` (production
+route against a migrated SQLite stand-in for D1: stored, read back, and an
+honest failure), `src/lib/liminal/__tests__/routes.test.ts` (no local
+fallback in production), `e2e/qa-journeys.ts` (word detail, report filed)
 
 ## Capability: One shared puzzle a day
 
