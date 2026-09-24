@@ -124,13 +124,22 @@ field, a meter row (guess count and clock). Board aspect 100:104; circle radius 
 (36.5, 39.5), (63.5, 39.5), (50, 62.9). Labels: c1 top left, c2 top right, c3
 below. Minimum width 320 px; verified at 360, 390, 1280.
 
+When a touch text field is focused on a phone, the layout tracks
+`visualViewport` height/offset: the header stays above a compact board; the
+status, field, Place action and meter stay together above the keyboard. The
+three labels and rings stay visible at ordinary keyboard heights. Extremely
+short viewports scroll the diagram independently; the composer never sits
+behind the keyboard. On completion the layout returns to document flow.
+`US-009` covers this behavior; simulated visual-viewport QA is not a native
+iOS/Android keyboard audit.
+
 ## Components
 
 | Component | States |
 | --- | --- |
 | Board | unfilled targets faint; filled pair targets tint in their region color; filled center turns ink |
-| Board word | entering (flies in from bottom center), placed, on the line (italic), on ink (paper text for a later center word), filling (paper pill with region ring; center pill is paper on ink), inexact (marks under it), hover, focus-visible (paper halo plus ink outline) |
-| Field | idle "Name a thing", placing (disabled, "Placing"), refused (text kept and selected), hidden when finished |
+| Board word | waiting (submitted answer shown at the board edge while the judge thinks), entering (flies from there to the judged spot), placed, on the line (italic), on ink (paper text for a later center word), filling (paper pill with region ring; center pill is paper on ink), inexact (marks under it), hover, focus-visible (paper halo plus ink outline) |
+| Field | idle "Name a thing", placing (keeps keyboard focus, text held, "Placing"), refused (text kept and selected), hidden when finished |
 | Status line | placing (ink, pulse with 0.7 opacity floor), landing sentence, refusal |
 | Meter | guess count (quiet), clock in the serif with tabular figures (ink while running, quiet while paused); the clock is hidden from screen readers and stated in the end panel |
 | Header | mark, wordmark, date on Today; "#N" and "Back to today" in the archive; mark and wordmark only while today loads |
@@ -139,6 +148,7 @@ below. Minimum width 320 px; verified at 360, 390, 1280.
 | Share page `/s/<code>` | result card (number, squares, score), "The words" with each guess hidden until tapped, Show all, Play today’s Liminal; broken link state |
 | Word detail | verdict per circle, the region it fills, Disagree, note, Send, sent or failed |
 | How to play | first visit and "?" |
+| Sound | opt-in note toggle in header, persisted in `liminal.sound.v1`; Cuelume cues on accepted placement, fill, miss, completion and refusal. Results never depend on audio. `US-010` |
 
 ## Motion
 
@@ -149,6 +159,10 @@ below. Minimum width 320 px; verified at 360, 390, 1280.
 | End panel | 600 ms after 900 ms | Result after the board settles |
 
 Reduced motion collapses every animation and delay.
+
+The waiting answer occupies the board's lower edge until judgment. It does
+not imply a destination: only a returned verdict moves it. A refusal removes
+it without spending a guess.
 
 ## Copy
 
@@ -180,7 +194,7 @@ so a shared result spoils nothing for someone who has not played.
 
 ## Accessibility
 
-Focus order: help, words in guess order, field, button, end actions. Board
+Focus order: sound toggle, help, words in guess order, field, button, end actions. Board
 words are buttons named "{word}. {label}: {state}; …". Status line and end
 panel are polite live regions. axe-core: 0 violations on how-to, idle, placing,
 refusals, outage, mid game, word detail, report, partial end, practice,
@@ -200,3 +214,8 @@ one circle, outside, echo, repeat, outage, word detail, report, complete end
 with time and share preview, today unavailable, archive (#N, Back to today), share page (hidden,
 revealed, broken), clock paused (judge, how-to, hidden tab), desktop, 360 px
 wordplay, reduced motion, keyboard focus.
+For `US-009` and `US-010`, review idle, keyboard focused at ordinary and
+short viewport heights, awaiting verdict, free refusal, adjudicated miss,
+new fill, completion after the keyboard closes, sound off/on/reload, detail,
+report, help, reduced motion and desktop. Simulated `visualViewport` resize
+does not prove behavior on native iOS or Android keyboards.

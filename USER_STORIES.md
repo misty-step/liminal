@@ -164,3 +164,41 @@ Evidence: `src/lib/liminal/__tests__/generator-publish.test.ts`,
 `src/lib/liminal/__tests__/generator-schedule-store.test.ts`,
 `src/lib/liminal/__tests__/generator-budget.test.ts`,
 `.github/workflows/daily-puzzles.yml`
+
+## Capability: Play on a phone
+
+## US-009 Keep the puzzle playable above the keyboard
+
+Statement: When I name an answer on my phone, I want to see the whole puzzle
+and whether my word is being placed, so I can keep reasoning without hiding
+the keyboard between guesses.
+
+Criteria:
+1. WHILE the phone keyboard is open, THE SYSTEM SHALL keep the three circle
+   labels, the board, the input, the Place action, and the current feedback
+   visible or reachable in the visible viewport without the keyboard covering
+   the input or Place action.
+2. WHILE a word is being judged, THE SYSTEM SHALL show that word waiting at
+   the board and keep the composer available without charging a guess early.
+3. WHEN the verdict arrives, THE SYSTEM SHALL move the word to its judged
+   position and distinguish a newly filled place from a miss without relying
+   on motion or sound alone.
+
+Evidence: `src/app/page.tsx`, `src/app/Board.tsx`, `src/app/globals.css`,
+mobile visual-viewport and reduced-motion browser review.
+
+## US-010 Hear optional game cues
+
+Statement: When I play a puzzle, I want an optional sound for the result of
+my action, so I can feel its outcome without requiring sound to understand it.
+
+Criteria:
+1. WHERE I enable sounds, THE SYSTEM SHALL play a cue on a placed word, a
+   newly filled place, a completed board, or a refused answer.
+2. WHERE I turn sounds off, THE SYSTEM SHALL play nothing and remember my
+   choice across reloads.
+3. THE SYSTEM SHALL show every result in text and on the board even when
+   sound is off or unavailable.
+
+Evidence: `src/lib/liminal/audio.ts`, `src/app/page.tsx`, browser sound
+toggle and submission review.

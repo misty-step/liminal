@@ -14,10 +14,11 @@ interface BoardProps {
   puzzle: Puzzle | null;
   guesses: readonly GuessRecord[];
   fills: Partial<Record<TargetKey, number>>;
+  pendingWord: string | null;
   onWord: (index: number, anchor: HTMLElement) => void;
 }
 
-export function Board({ puzzle, guesses, fills, onWord }: BoardProps) {
+export function Board({ puzzle, guesses, fills, pendingWord, onWord }: BoardProps) {
   const uid = useId().replaceAll(":", "");
   const boardRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -132,6 +133,11 @@ export function Board({ puzzle, guesses, fills, onWord }: BoardProps) {
       ))}
 
       <div className="word-layer">
+        {pendingWord && (
+          <span className="word word-awaiting" aria-hidden="true" style={START}>
+            {pendingWord}
+          </span>
+        )}
         {spots &&
           guesses.map((guess, index) => {
             const spot = spots[index];
@@ -168,7 +174,7 @@ export function Board({ puzzle, guesses, fills, onWord }: BoardProps) {
                 onClick={(event) => onWord(index, event.currentTarget)}
               >
                 <span>{guess.answer}</span>
-                {showMarks && (
+                {showMarks && index < landed && (
                   <span className="word-marks" aria-hidden="true">
                     {CONDITION_IDS.map((id) => (
                       <span key={id} className={`mark mark-${id} ${guess.states[id]}`} />

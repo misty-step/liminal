@@ -2,6 +2,7 @@
 
 import type { FormEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { playGameSound, setSoundEnabled, soundEnabled } from "@/lib/liminal/audio";
 import { DECK } from "@/lib/liminal/deck";
 import { evaluateGuess, judgedFeedback } from "@/lib/liminal/evaluator";
 import { parsePuzzle } from "@/lib/liminal/puzzleSchema";
@@ -111,6 +112,8 @@ export default function Page() {
   const [current, setCurrent] = useState<DailyPayload | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [progressById, setProgressById] = useState<Record<string, PuzzleProgress>>({});
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
   const [text, setText] = useState("");
   const [status, setStatus] = useState<{ message: string; tone?: "refused" | "pending" } | null>(
     null,
@@ -129,6 +132,7 @@ export default function Page() {
   const segmentRef = useRef<{ puzzleId: string; startedAt: number } | null>(null);
   const howtoRef = useRef<HTMLDialogElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const shellRef = useRef<HTMLDivElement>(null);
   const detailRef = useRef<HTMLDivElement>(null);
   const detailAnchor = useRef<HTMLElement | null>(null);
   const openedRef = useRef<string | null>(null);
@@ -172,6 +176,32 @@ export default function Page() {
     document.addEventListener("visibilitychange", onVisibility);
     return () => document.removeEventListener("visibilitychange", onVisibility);
   }, [loadToday]);
+  useEffect(() => setSoundOn(soundEnabled()), []);
+
+  // Mobile keyboards resize the visual viewport, not reliably the layout
+  // viewport. Keep the composer in that visible rectangle and let the board
+  // use its remaining height. Short keyboards scroll the board, not the form.
+  useEffect(() => {
+    if (!keyboardOpen) return;
+    const viewport = window.visualViewport;
+    const shell = shellRef.current;
+    if (!shell) return;
+    const update = () => {
+      const height = viewport?.height ?? window.innerHeight;
+      shell.style.setProperty("--visual-height", `${height}px`);
+      shell.style.setProperty("--visual-top", `${viewport?.offsetTop ?? 0}px`);
+      shell.style.setProperty("--board-width", `${Math.max(240, (height - 185) / 1.04)}px`);
+    };
+    update();
+    viewport?.addEventListener("resize", update);
+    viewport?.addEventListener("scroll", update);
+    window.addEventListener("resize", update);
+    return () => {
+      viewport?.removeEventListener("resize", update);
+      viewport?.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [keyboardOpen]);
 
   // Load saved progress the first time a puzzle is shown.
   useEffect(() => {
@@ -279,6 +309,7 @@ export default function Page() {
   const refuse = (message: string, reason: string) => {
     setStatus({ message, tone: "refused" });
     emitProductEvent("guess_refused", { puzzle_id: puzzle.id, reason });
+    playGameSound("refuse");
     inputRef.current?.select();
   };
 
@@ -295,9 +326,11 @@ export default function Page() {
       refuse(REFUSAL[local.rejected](word), "rejection");
       return;
     }
+    playGameSound("place");
 
     setPending(true);
     setStatus({ message: `Placing “${word}”`, tone: "pending" });
+    let finished = false;
     try {
       let feedback: GuessFeedback = local;
       if (local.needsJudgment) {
@@ -339,11 +372,14 @@ export default function Page() {
       persist(updated);
       setText("");
       const after = boardState(updated.guesses);
+      finished = after.complete;
       const landing = landingOf(feedback.states);
       const newlyFilled =
         landing.kind === "target" && board.fills[landing.key] === undefined ? landing.key : null;
+      playGameSound(after.complete ? "complete" : newlyFilled ? "fill" : "miss");
 
       if (after.complete) {
+        setKeyboardOpen(false);
         setStatus(null);
       } else if (newlyFilled === "center") {
         setStatus({ message: `“${word}” fills the center. ${after.filledCount} of 4.` });
@@ -373,7 +409,7 @@ export default function Page() {
       }
     } finally {
       setPending(false);
-      inputRef.current?.focus();
+      if (!finished) inputRef.current?.focus();
     }
   };
 
@@ -432,7 +468,7 @@ export default function Page() {
   const detailFill = detail ? TARGETS.find((key) => board.fills[key] === detail.index) : undefined;
 
   return (
-    <div className="shell">
+    <div ref={shellRef} className={`shell${keyboardOpen ? " keyboard-open" : ""}`}>
       <header className="top">
         <Mark size={28} />
         <h1 className="wordmark">Liminal</h1>
@@ -450,19 +486,37 @@ export default function Page() {
             </button>
           </span>
         )}
+        <button
+          type="button"
+          className="sound-button"
+          aria-label={soundOn ? "Turn sounds off" : "Turn sounds on"}
+          aria-pressed={soundOn}
+          title={soundOn ? "Sounds on" : "Sounds off"}
+          onClick={() => {
+            const next = !soundOn;
+            setSoundEnabled(next);
+            setSoundOn(next);
+            if (next) playGameSound("fill");
+          }}
+        >
+          <span aria-hidden="true">♪</span>
+        </button>
         <button type="button" className="help-button" aria-label="How to play" onClick={openHowto}>
           ?
         </button>
       </header>
 
       <main id="game" className="play" aria-busy={pending || (!current && !loadFailed)}>
-        <Board
-          key={current ? puzzle.id : "loading"}
-          puzzle={current ? puzzle : null}
-          guesses={progress.guesses}
-          fills={board.fills}
-          onWord={openDetail}
-        />
+        <div className="board-stage">
+          <Board
+            key={current ? puzzle.id : "loading"}
+            puzzle={current ? puzzle : null}
+            guesses={progress.guesses}
+            fills={board.fills}
+            pendingWord={pending ? text.trim() : null}
+            onWord={openDetail}
+          />
+        </div>
 
         {!current && (
           <p className="status refused" aria-live="polite">
@@ -488,7 +542,7 @@ export default function Page() {
         )}
 
         {current && !board.complete && (
-          <>
+          <div className="composer">
             <form className="guess" onSubmit={submit} autoComplete="off">
               <label className="visually-hidden" htmlFor="guess">
                 Your guess
@@ -497,13 +551,28 @@ export default function Page() {
                 id="guess"
                 ref={inputRef}
                 value={text}
-                onChange={(event) => setText(event.target.value)}
+                onChange={(event) => {
+                  if (!pending) setText(event.target.value);
+                }}
+                onFocus={() => {
+                  if (window.matchMedia("(max-width: 600px) and (pointer: coarse)").matches)
+                    setKeyboardOpen(true);
+                }}
+                onBlur={() => setKeyboardOpen(false)}
                 placeholder="Name a thing"
                 spellCheck={false}
                 maxLength={120}
-                disabled={pending || !ready}
+                aria-readonly={pending}
+                disabled={!ready}
               />
-              <button type="submit" disabled={pending || !text.trim() || !ready}>
+              <button
+                type="submit"
+                disabled={pending || !text.trim() || !ready}
+                onPointerDown={(event) => {
+                  // Keep the keyboard layout through the subsequent click.
+                  if (keyboardOpen) event.preventDefault();
+                }}
+              >
                 {pending ? "Placing" : "Place"}
               </button>
             </form>
@@ -515,7 +584,7 @@ export default function Page() {
                 {formatClock(clockMs)}
               </span>
             </div>
-          </>
+          </div>
         )}
 
         {board.complete && (
