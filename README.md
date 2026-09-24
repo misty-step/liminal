@@ -6,7 +6,7 @@ the third). Fill all four with real things. No guess limit: your score is how
 many guesses and how long it took. Every word lands where it belongs on the
 board; many answers are right in every region.
 
-Live target: `liminal.mistystep.io` (release owned by Zoe).
+Live: `liminal.mistystep.io` (Cloudflare Worker `liminal`, deployed from `master`).
 
 ## Modes
 
@@ -144,7 +144,21 @@ a day never changes once that day has begun; a future puzzle can still be
 pulled before it airs. A date nobody filled in time stays on the deck fallback all day. See
 `AGENTS.md` for the gates.
 
-## Deploy contract (for Zoe)
+## Deploy
+
+Release from a clean, merged `master` with native `wrangler` auth:
+
+```sh
+wrangler d1 migrations apply liminal-judgments --remote --env production   # first: health requires new schema
+SHA=$(git rev-parse HEAD)
+SENTRY_RELEASE=$SHA NEXT_PUBLIC_SENTRY_RELEASE=$SHA SENTRY_ENVIRONMENT=production \
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT=production bun run build:cf
+bun run deploy:cf
+printf '%s' "$SHA" | wrangler secret put SENTRY_RELEASE --env production
+curl -s https://liminal.mistystep.io/api/health   # expect storage ok
+```
+
+Contract:
 
 - Cloudflare Worker + custom domain `liminal.mistystep.io` →
   `{ "pattern": "liminal.mistystep.io", "custom_domain": true }`.
