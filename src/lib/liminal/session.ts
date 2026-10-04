@@ -33,11 +33,11 @@ export function responseSpendsGuess(response: JudgmentResponse): response is Spe
 }
 
 export interface KeyboardViewport {
-  width: number;
+  narrow: boolean;
   coarsePointer: boolean;
 }
 
 /** Whether focusing the composer should switch to the keyboard-open layout. */
 export function keyboardOpenForViewport(viewport: KeyboardViewport): boolean {
-  return viewport.width <= 600 && viewport.coarsePointer;
+  return viewport.narrow && viewport.coarsePointer;
 }

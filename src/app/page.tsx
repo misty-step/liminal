@@ -563,7 +563,7 @@ export default function Page() {
                 onFocus={() => {
                   setKeyboardOpen(
                     keyboardOpenForViewport({
-                      width: window.innerWidth,
+                      narrow: window.matchMedia("(max-width: 600px)").matches,
                       coarsePointer: window.matchMedia("(pointer: coarse)").matches,
                     }),
                   );
