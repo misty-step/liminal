@@ -68,17 +68,11 @@ export function judgmentKey(input: {
   );
 }
 
-export type JudgeQuestion =
-  | {
-      type: "noul";
-      instructions: string;
-      criteria: { true: string; false: string };
-    }
-  | {
-      type: "choice";
-      instructions: string;
-      criteria: Record<ChoiceKey, string>;
-    };
+export type JudgeQuestion = {
+  type: "choice";
+  instructions: string;
+  criteria: Record<ChoiceKey, string>;
+};
 
 /**
  * One authored Choice question per condition. The player answer is passed as
