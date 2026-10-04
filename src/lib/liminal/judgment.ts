@@ -1,4 +1,4 @@
-import type { ConditionState, Puzzle } from "./types";
+import type { ConditionId, ConditionState, Puzzle } from "./types";
 
 /**
  * TypeSafe "Jev" supplies typed judgments, one per condition.
@@ -81,32 +81,22 @@ export type JudgeQuestion =
     };
 
 /**
- * One question per condition. Conditions with authored levels become Choice
- * questions (descriptive outside/close/inside); the rest fall back to a Noul
- * yes/no. The player answer is passed as state data and never interpreted as
- * instructions; the question text is authored here, not by the player.
+ * One authored Choice question per condition. The player answer is passed as
+ * state data and never interpreted as instructions; the question text is
+ * authored here, not by the player.
  */
 export function buildQuestions(puzzle: Puzzle): Record<string, JudgeQuestion> {
   const questions: Record<string, JudgeQuestion> = {};
   for (const condition of puzzle.conditions) {
-    questions[condition.id] = condition.levels
-      ? {
-          type: "choice",
-          instructions: condition.judge ?? condition.text,
-          criteria: {
-            yes: condition.levels.yes,
-            partly: condition.levels.partly,
-            no: condition.levels.no,
-          },
-        }
-      : {
-          type: "noul",
-          instructions: condition.judge ?? condition.text,
-          criteria: {
-            true: "The answer clearly satisfies the condition.",
-            false: "The answer does not satisfy the condition.",
-          },
-        };
+    questions[condition.id] = {
+      type: "choice",
+      instructions: condition.judge,
+      criteria: {
+        yes: condition.levels.yes,
+        partly: condition.levels.partly,
+        no: condition.levels.no,
+      },
+    };
   }
   return questions;
 }
@@ -117,7 +107,7 @@ export function judgeEnabledFor(puzzle: Puzzle, env: Record<string, string | und
 
 export interface JudgeOutcome {
   status: "judged";
-  states: Record<string, ConditionState>;
+  states: Record<ConditionId, ConditionState>;
   /** Live confidence per condition, when the judgment was fresh. */
   confidences?: Record<string, number>;
   model: string;

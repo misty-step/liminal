@@ -41,6 +41,17 @@ describe("parsePuzzle", () => {
     rejectsField({ ...base, conditions }, "conditions[0].levels");
   });
 
+  it.each(["yes", "partly", "no"] as const)("requires condition level %s", (level) => {
+    const levels = { ...base.conditions[0].levels, [level]: undefined };
+    const conditions = [{ ...base.conditions[0], levels }, ...base.conditions.slice(1)];
+    rejectsField({ ...base, conditions }, `conditions[0].levels.${level}`);
+  });
+
+  it("requires each condition's judge wording", () => {
+    const conditions = [{ ...base.conditions[0], judge: undefined }, ...base.conditions.slice(1)];
+    rejectsField({ ...base, conditions }, "conditions[0].judge");
+  });
+
   it("rejects empty answer entries", () => {
     const judgments = {
       ...base.judgments,
@@ -49,7 +60,8 @@ describe("parsePuzzle", () => {
     rejectsField({ ...base, judgments }, "judgments.center.answers");
   });
 
-  it("rejects an unknown judge status", () => {
+  it("requires a known judge status", () => {
+    rejectsField({ ...base, judgeStatus: undefined }, "judgeStatus");
     rejectsField({ ...base, judgeStatus: "ready" }, "judgeStatus");
   });
 });
