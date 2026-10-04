@@ -95,8 +95,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-function optionalFiniteNumber(record: Record<string, unknown>, key: string): boolean {
-  const value = record[key];
+function isOptionalFiniteNumber(value: unknown): value is number | undefined {
   return value === undefined || (typeof value === "number" && Number.isFinite(value));
 }
 
@@ -108,8 +107,8 @@ function parseTypeSafeResponse(value: unknown): TypeSafeResponse | null {
       !isRecord(candidate) ||
       (candidate.type !== undefined && typeof candidate.type !== "string") ||
       (candidate.choice !== undefined && typeof candidate.choice !== "string") ||
-      !optionalFiniteNumber(candidate, "noul") ||
-      !optionalFiniteNumber(candidate, "confidence") ||
+      !isOptionalFiniteNumber(candidate.noul) ||
+      !isOptionalFiniteNumber(candidate.confidence) ||
       (candidate.probabilities !== undefined && !isRecord(candidate.probabilities))
     ) {
       return null;
