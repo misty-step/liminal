@@ -28,6 +28,14 @@ export const FALLBACK_ROTATION = [
   "tail-fly-alive",
 ] as const;
 
+/** Whether a deck has exactly the frozen fallback ids in the same order. */
+export function fallbackRotationMatchesDeck(deck: readonly Pick<Puzzle, "id">[]): boolean {
+  return (
+    deck.length === FALLBACK_ROTATION.length &&
+    FALLBACK_ROTATION.every((id, index) => deck[index]?.id === id)
+  );
+}
+
 export function dailyPuzzleIndex(dateKey: string): number {
   const size = FALLBACK_ROTATION.length;
   const index = dayNumber(dateKey) % size;

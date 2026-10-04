@@ -66,6 +66,21 @@ describe("in-between deck", () => {
     });
   }
 
+  it("names the bundled pair regions that have two authored answers", () => {
+    const exceptions = DECK.flatMap((puzzle) =>
+      (["c1", "c2", "c3"] as const)
+        .filter((target) => puzzle.judgments.pairs[target].answers.length === 2)
+        .map((target) => `${puzzle.id}:${target}`),
+    ).sort();
+
+    expect(exceptions).toEqual([
+      "head-and-foot:c1",
+      "keys-music-carry:c2",
+      "shell-water-eat:c3",
+      "tail-fly-alive:c1",
+    ]);
+  });
+
   it("exposes puzzles by id", () => {
     expect(getPuzzle("head-and-foot")?.mode).toBe("wordplay");
     expect(getPuzzle("bath-vessel")?.mode).toBe("literal");

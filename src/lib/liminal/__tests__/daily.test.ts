@@ -6,6 +6,7 @@ import {
   dateKeyUTC,
   dayNumber,
   FALLBACK_ROTATION,
+  fallbackRotationMatchesDeck,
 } from "../daily";
 import { DECK } from "../deck";
 
@@ -26,6 +27,14 @@ describe("daily rotation (US-005)", () => {
   it("keeps launch fallback assignments", () => {
     expect(dailyPuzzle(dateForNumber(1), DECK).id).toBe("shell-water-eat");
     expect(dailyPuzzle(dateForNumber(2), DECK).id).toBe("wheels-motor-ride");
+  });
+
+  it("keeps the frozen rotation identical to the bundled deck order", () => {
+    expect(fallbackRotationMatchesDeck(DECK)).toBe(true);
+    expect(fallbackRotationMatchesDeck([...DECK].reverse())).toBe(false);
+    expect(fallbackRotationMatchesDeck([...DECK, { ...DECK[0], id: "appended-later" }])).toBe(
+      false,
+    );
   });
 
   it("an appended deck puzzle leaves every fallback date unchanged", () => {
