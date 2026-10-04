@@ -189,9 +189,7 @@ export function decodeReveal(code: string): Reveal | null {
     if (btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "") !== code)
       return null;
     const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-    return parseRevealPayload(
-      JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)),
-    );
+    return parseRevealPayload(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)));
   } catch {
     return null;
   }

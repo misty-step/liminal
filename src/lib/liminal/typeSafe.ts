@@ -119,9 +119,7 @@ function parseTypeSafeResponse(value: unknown): TypeSafeResponse | null {
       ...(candidate.noul === undefined ? {} : { noul: candidate.noul }),
       ...(candidate.choice === undefined ? {} : { choice: candidate.choice }),
       ...(candidate.confidence === undefined ? {} : { confidence: candidate.confidence }),
-      ...(candidate.probabilities === undefined
-        ? {}
-        : { probabilities: candidate.probabilities }),
+      ...(candidate.probabilities === undefined ? {} : { probabilities: candidate.probabilities }),
     };
   }
   return { answers };
