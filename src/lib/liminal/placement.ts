@@ -24,6 +24,12 @@ for (let y = BOUNDS.y0; y <= BOUNDS.y1; y += 1) {
   for (let x = BOUNDS.x0; x <= BOUNDS.x1; x += 1) GRID.push({ x, y });
 }
 
+function firstPoint(points: readonly { x: number; y: number }[]): { x: number; y: number } {
+  const point = points[0];
+  if (!point) throw new RangeError("Placement grid is empty");
+  return point;
+}
+
 function signedDistance(p: { x: number; y: number }, id: ConditionId): number {
   const c = CIRCLES[id];
   return Math.hypot(p.x - c.x, p.y - c.y) - RADIUS;
@@ -82,7 +88,7 @@ export function placeWords(words: readonly PlacementInput[], lineHeight: number)
     if (!pool.length) pool = GRID;
     const cx = pool.reduce((sum, p) => sum + p.x, 0) / pool.length;
     const cy = pool.reduce((sum, p) => sum + p.y, 0) / pool.length;
-    let best = pool[0];
+    let best = firstPoint(pool);
     let bestCost = Number.POSITIVE_INFINITY;
     for (const p of GRID) {
       if (p.x - word.width / 2 < 1 || p.x + word.width / 2 > BOARD_W - 1) continue;

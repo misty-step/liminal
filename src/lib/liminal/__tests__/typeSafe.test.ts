@@ -197,6 +197,26 @@ describe("judgeAnswer", () => {
     expect(invalid).toEqual({ status: "unavailable", reason: "invalid-response" });
   });
 
+  it.each([
+    ["an answers array", { answers: [] }],
+    ["a non-object answer", { answers: { c1: null } }],
+    ["a nonnumeric confidence", { answers: { c1: { confidence: "high" } } }],
+    ["a probabilities array", { answers: { c1: { probabilities: [] } } }],
+  ])("rejects %s at the response boundary", async (_case, payload) => {
+    const fetchImpl = vi.fn(
+      async () => ({ ok: true, json: async () => payload }) as unknown as Response,
+    ) as unknown as typeof fetch;
+    await expect(
+      judgeAnswer({
+        puzzle: vessel,
+        answer: "urinal",
+        env,
+        cache: memoryCache(),
+        fetchImpl,
+      }),
+    ).resolves.toEqual({ status: "unavailable", reason: "invalid-response" });
+  });
+
   it("never writes partial judgments to cache on failure", async () => {
     const cache = memoryCache();
     const fetchImpl = vi.fn(
