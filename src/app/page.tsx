@@ -16,6 +16,7 @@ import {
 } from "@/lib/liminal/regions";
 import type { ProductEventName } from "@/lib/liminal/runtime";
 import type { DailyPayload } from "@/lib/liminal/schedule";
+import { clockRunning, keyboardOpenForViewport, responseSpendsGuess } from "@/lib/liminal/session";
 import { shareText } from "@/lib/liminal/share";
 import { emptyProgress, loadProgress, recordGuess, saveProgress } from "@/lib/liminal/storage";
 import type { GuessFeedback, Puzzle, PuzzleProgress, TargetKey } from "@/lib/liminal/types";
@@ -270,9 +271,15 @@ export default function Page() {
   // The clock counts thinking time only: it stops while the judge considers a
   // word, while the how-to is open, while the tab is hidden, and once the board
   // is complete. Network latency never reaches the score.
-  const clockRunning = ready && !board.complete && !pending && !howtoOpen && visible;
+  const isClockRunning = clockRunning({
+    ready,
+    complete: board.complete,
+    pending,
+    howtoOpen,
+    visible,
+  });
   useEffect(() => {
-    if (!clockRunning) return;
+    if (!isClockRunning) return;
     segmentRef.current = { puzzleId: puzzle.id, startedAt: performance.now() };
     const interval = setInterval(() => setTick((tick) => tick + 1), 250);
     window.addEventListener("pagehide", foldClock);
@@ -281,7 +288,7 @@ export default function Page() {
       window.removeEventListener("pagehide", foldClock);
       foldClock();
     };
-  }, [clockRunning, puzzle.id, foldClock]);
+  }, [isClockRunning, puzzle.id, foldClock]);
 
   function openHowto() {
     howtoRef.current?.showModal();
@@ -340,14 +347,13 @@ export default function Page() {
           body: JSON.stringify({ puzzleId: puzzle.id, answer: word }),
         }).catch(() => null);
         const data: unknown = await response?.json().catch(() => null);
-        const judged =
-          response?.ok &&
-          data &&
-          typeof data === "object" &&
-          Reflect.get(data, "status") === "judged"
-            ? parseStates(Reflect.get(data, "states"))
-            : null;
-        if (!judged) {
+        const status = data && typeof data === "object" ? Reflect.get(data, "status") : undefined;
+        const outcome = {
+          ok: response?.ok === true,
+          status,
+          states: status === "judged" ? parseStates(Reflect.get(data ?? {}, "states")) : null,
+        };
+        if (!responseSpendsGuess(outcome)) {
           const reason = data && typeof data === "object" ? Reflect.get(data, "reason") : undefined;
           if (reason === "rate-limited") {
             refuse("Too many tries at once. Wait a moment. No guess used.", "ratelimit");
@@ -360,7 +366,7 @@ export default function Page() {
           return;
         }
         feedback = judgedFeedback(
-          judged,
+          outcome.states,
           "judged",
           String(Reflect.get(data ?? {}, "judgmentVersion") ?? "unknown"),
         );
@@ -555,8 +561,12 @@ export default function Page() {
                   if (!pending) setText(event.target.value);
                 }}
                 onFocus={() => {
-                  if (window.matchMedia("(max-width: 600px) and (pointer: coarse)").matches)
-                    setKeyboardOpen(true);
+                  setKeyboardOpen(
+                    keyboardOpenForViewport({
+                      width: window.innerWidth,
+                      coarsePointer: window.matchMedia("(pointer: coarse)").matches,
+                    }),
+                  );
                 }}
                 onBlur={() => setKeyboardOpen(false)}
                 placeholder="Name a thing"
@@ -580,7 +590,7 @@ export default function Page() {
               <span className="meter-count">
                 {progress.guesses.length} {progress.guesses.length === 1 ? "guess" : "guesses"}
               </span>
-              <span className={`meter-clock${clockRunning ? "" : " paused"}`} aria-hidden="true">
+              <span className={`meter-clock${isClockRunning ? "" : " paused"}`} aria-hidden="true">
                 {formatClock(clockMs)}
               </span>
             </div>
