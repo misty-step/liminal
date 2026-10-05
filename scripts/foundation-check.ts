@@ -21,6 +21,43 @@ function requireText(path: string, needles: readonly string[]): string {
   return value;
 }
 
+function readStringConstant(path: string, name: string): string | null {
+  const source = read(path);
+  const match = source.match(
+    new RegExp(`\\b(?:export\\s+)?const\\s+${name}\\s*=\\s*["']([^"'\\r\\n]+)["']`),
+  );
+  if (!match) {
+    failures.push(`${path} must define ${name}`);
+    return null;
+  }
+  return match[1];
+}
+
+function readStringArrayConstant(path: string, name: string): string[] {
+  const source = read(path);
+  const match = source.match(
+    new RegExp(`\\b(?:export\\s+)?const\\s+${name}\\s*=\\s*\\[([\\s\\S]*?)\\]\\s*as const`),
+  );
+  if (!match) {
+    failures.push(`${path} must define ${name} as a const array`);
+    return [];
+  }
+  return [...match[1].matchAll(/["']([^"']+)["']/g)].map((item) => item[1]);
+}
+
+function readPuzzleFiles(): string[] {
+  const path = "src/lib/liminal/puzzles/index.ts";
+  const source = read(path);
+  const match = source.match(/\bPUZZLE_FILES\b[^=]*=\s*\[([\s\S]*?)\];/);
+  if (!match) {
+    failures.push(`${path} must define PUZZLE_FILES`);
+    return [];
+  }
+  const files = [...match[1].matchAll(/\bfile:\s*["']([^"']+)["']/g)].map((item) => item[1]);
+  if (files.length === 0) failures.push(`${path} PUZZLE_FILES must not be empty`);
+  return files;
+}
+
 function requireSquareSvg(path: string, size: number): void {
   const svg = read(path);
   const viewBox = new RegExp(`viewBox=["']0 0 ${size} ${size}["']`);
@@ -154,10 +191,50 @@ requireText(".github/workflows/ci.yml", [
 ]);
 requireText("DESIGN.md", ["16 px", "32 px", "256 px"]);
 
+const fallbackRotation = readStringArrayConstant(
+  "src/lib/liminal/daily.ts",
+  "FALLBACK_ROTATION",
+);
+const puzzleFiles = readPuzzleFiles();
+const deckVersion = readStringConstant("src/lib/liminal/deck.ts", "DECK_VERSION");
+readStringConstant("src/lib/liminal/judgment.ts", "JUDGE_PROMPT_VERSION");
+
+const puzzleIds: string[] = [];
+for (const file of puzzleFiles) {
+  const path = `src/lib/liminal/puzzles/${file}`;
+  try {
+    const puzzle = JSON.parse(read(path)) as {
+      id?: unknown;
+      judgments?: { version?: unknown };
+    };
+    if (typeof puzzle.id !== "string") {
+      failures.push(`${path} must define a string id`);
+    } else {
+      puzzleIds.push(puzzle.id);
+    }
+    if (deckVersion !== null && puzzle.judgments?.version !== deckVersion) {
+      failures.push(`${path} judgments.version must equal DECK_VERSION ${deckVersion}`);
+    }
+  } catch {
+    failures.push(`${path} must contain valid JSON`);
+  }
+}
+
+if (
+  fallbackRotation.length !== puzzleIds.length ||
+  fallbackRotation.some((id, index) => id !== puzzleIds[index])
+) {
+  failures.push(
+    `FALLBACK_ROTATION ids ${JSON.stringify(fallbackRotation)} must match PUZZLE_FILES ids ${JSON.stringify(puzzleIds)} in order`,
+  );
+}
+
 if (failures.length > 0) {
   for (const failure of failures) console.error(`foundation-check: ${failure}`);
   console.error(`foundation-check: failed (${failures.length})`);
   process.exit(1);
 }
 
-console.log("foundation-check: passed (brand, health, telemetry, storage, Sentry, CI)");
+console.log(
+  "foundation-check: passed (brand, health, telemetry, storage, Sentry, CI, deck identity)",
+);
