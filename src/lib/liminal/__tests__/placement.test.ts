@@ -58,4 +58,12 @@ describe("placeWords (US-001)", () => {
     const overlapY = Math.abs(a.y - b.y) < 6;
     expect(overlapX && overlapY).toBe(false);
   });
+
+  it("returns a defined fallback spot when no grid point can fit the word", () => {
+    const [spot] = placeWords(
+      [{ states: { c1: "close", c2: "close", c3: "close" }, width: 500 }],
+      6,
+    );
+    expect(spot).toEqual({ x: 3, y: 13, exact: false });
+  });
 });

@@ -79,17 +79,53 @@ export function memoryCache(limit = 5000): JudgmentCache {
   };
 }
 
+interface TypeSafeAnswer {
+  type?: string;
+  noul?: number;
+  choice?: string;
+  confidence?: number;
+  probabilities?: Record<string, unknown>;
+}
+
 interface TypeSafeResponse {
-  answers?: Record<
-    string,
-    {
-      type?: string;
-      noul?: number;
-      choice?: string;
-      confidence?: number;
-      probabilities?: Record<string, unknown>;
+  answers: Record<string, TypeSafeAnswer>;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isOptionalFiniteNumber(value: unknown): value is number | undefined {
+  return value === undefined || (typeof value === "number" && Number.isFinite(value));
+}
+
+function parseTypeSafeResponse(value: unknown): TypeSafeResponse | null {
+  if (!isRecord(value) || !isRecord(value.answers)) return null;
+  const answers: Record<string, TypeSafeAnswer> = {};
+  for (const [conditionId, candidate] of Object.entries(value.answers)) {
+    if (
+      !isRecord(candidate) ||
+      (candidate.type !== undefined && typeof candidate.type !== "string") ||
+      (candidate.choice !== undefined && typeof candidate.choice !== "string") ||
+      !isOptionalFiniteNumber(candidate.noul) ||
+      !isOptionalFiniteNumber(candidate.confidence) ||
+      (candidate.probabilities !== undefined && !isRecord(candidate.probabilities))
+    ) {
+      return null;
     }
-  >;
+    answers[conditionId] = {
+      ...(candidate.type === undefined ? {} : { type: candidate.type }),
+      ...(candidate.noul === undefined ? {} : { noul: candidate.noul }),
+      ...(candidate.choice === undefined ? {} : { choice: candidate.choice }),
+      ...(candidate.confidence === undefined ? {} : { confidence: candidate.confidence }),
+      ...(candidate.probabilities === undefined ? {} : { probabilities: candidate.probabilities }),
+    };
+  }
+  return { answers };
+}
+
+function isChoiceKey(value: string): value is ChoiceKey {
+  return CHOICE_KEYS.some((choice) => choice === value);
 }
 
 export interface JudgeOptions {
@@ -160,8 +196,8 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
       return { status: "unavailable", reason: "upstream-error" };
     }
 
-    const body = (await response.json()) as TypeSafeResponse;
-    if (!body.answers) return { status: "unavailable", reason: "invalid-response" };
+    const body = parseTypeSafeResponse(await response.json());
+    if (!body) return { status: "unavailable", reason: "invalid-response" };
 
     // Validate every fresh judgment before caching any of them: a partial
     // response must not leave half a judgment behind.
@@ -172,7 +208,7 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
         return { status: "unavailable", reason: "invalid-response" };
       }
       if (question.type === "choice") {
-        if (typeof value.choice !== "string" || !CHOICE_KEYS.includes(value.choice as ChoiceKey)) {
+        if (typeof value.choice !== "string" || !isChoiceKey(value.choice)) {
           return { status: "unavailable", reason: "invalid-response" };
         }
         const state =

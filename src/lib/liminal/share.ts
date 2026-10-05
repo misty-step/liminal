@@ -32,6 +32,77 @@ const CODES: Record<TargetKey, string> = {
 const MAX_CODE_LENGTH = 2000;
 const MAX_WORDS = 60;
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isSafeInteger(value: unknown): value is number {
+  return typeof value === "number" && Number.isSafeInteger(value);
+}
+
+function parseLandingCode(letter: unknown): { landing: Landing; filled: boolean } | null {
+  switch (letter) {
+    case "A":
+      return { landing: { kind: "target", key: "c1" }, filled: true };
+    case "B":
+      return { landing: { kind: "target", key: "c2" }, filled: true };
+    case "C":
+      return { landing: { kind: "target", key: "c3" }, filled: true };
+    case "M":
+      return { landing: { kind: "target", key: "center" }, filled: true };
+    case "1":
+      return { landing: { kind: "target", key: "c1" }, filled: false };
+    case "2":
+      return { landing: { kind: "target", key: "c2" }, filled: false };
+    case "3":
+      return { landing: { kind: "target", key: "c3" }, filled: false };
+    case "m":
+      return { landing: { kind: "target", key: "center" }, filled: false };
+    case "l":
+      return { landing: { kind: "line" }, filled: false };
+    case "s":
+      return { landing: { kind: "single" }, filled: false };
+    case "o":
+      return { landing: { kind: "outside" }, filled: false };
+    default:
+      return null;
+  }
+}
+
+function parseRevealPayload(value: unknown): Reveal | null {
+  if (!isRecord(value) || Object.keys(value).sort().join(",") !== "n,t,v,w") return null;
+  if (
+    value.v !== 1 ||
+    !isSafeInteger(value.n) ||
+    value.n < 1 ||
+    !isSafeInteger(value.t) ||
+    value.t < 0 ||
+    !Array.isArray(value.w) ||
+    value.w.length > MAX_WORDS
+  ) {
+    return null;
+  }
+
+  const words: ShareWord[] = [];
+  const fillFlags: boolean[] = [];
+  const seen = new Set<string>();
+  for (const entry of value.w) {
+    if (!Array.isArray(entry) || entry.length !== 2) return null;
+    const [word, letter] = entry;
+    if (typeof word !== "string" || !word.length || word.length > MAX_ANSWER_LENGTH) return null;
+    const normalized = word.toLowerCase();
+    if (seen.has(normalized)) return null;
+    seen.add(normalized);
+    const parsed = parseLandingCode(letter);
+    if (!parsed) return null;
+    words.push({ word, landing: parsed.landing });
+    fillFlags.push(parsed.filled);
+  }
+  const marked = markedWords(words);
+  if (marked.some((word, index) => word.filled !== fillFlags[index])) return null;
+  return { number: value.n, elapsedMs: value.t * 1000, words: marked };
+}
+
 function markedWords(words: readonly ShareWord[]): RevealWord[] {
   const filled = new Set<TargetKey>();
   return words.map(({ word, landing }) => {
@@ -118,55 +189,7 @@ export function decodeReveal(code: string): Reveal | null {
     if (btoa(binary).replaceAll("+", "-").replaceAll("/", "_").replace(/=+$/, "") !== code)
       return null;
     const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
-    const value: unknown = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
-    if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-    const data = value as Record<string, unknown>;
-    if (
-      Object.keys(data).sort().join(",") !== "n,t,v,w" ||
-      data.v !== 1 ||
-      !Number.isSafeInteger(data.n) ||
-      (data.n as number) < 1 ||
-      !Number.isSafeInteger(data.t) ||
-      (data.t as number) < 0 ||
-      !Array.isArray(data.w) ||
-      data.w.length > MAX_WORDS
-    )
-      return null;
-
-    const words: ShareWord[] = [];
-    const fillFlags: boolean[] = [];
-    const seen = new Set<string>();
-    for (const entry of data.w) {
-      if (!Array.isArray(entry) || entry.length !== 2) return null;
-      const [word, letter] = entry;
-      if (
-        typeof word !== "string" ||
-        !word.length ||
-        word.length > MAX_ANSWER_LENGTH ||
-        typeof letter !== "string"
-      )
-        return null;
-      const normalized = word.toLowerCase();
-      if (seen.has(normalized)) return null;
-      seen.add(normalized);
-      const filledPair = { A: "c1", B: "c2", C: "c3" } as const;
-      const pair = filledPair[letter as keyof typeof filledPair];
-      const low = letter.toLowerCase();
-      let landing: Landing;
-      if (pair) landing = { kind: "target", key: pair };
-      else if (low === "m") landing = { kind: "target", key: "center" };
-      else if (low === "1" || low === "2" || low === "3")
-        landing = { kind: "target", key: `c${low}` as TargetKey };
-      else if (low === "l") landing = { kind: "line" };
-      else if (low === "s") landing = { kind: "single" };
-      else if (low === "o") landing = { kind: "outside" };
-      else return null;
-      words.push({ word, landing });
-      fillFlags.push(Boolean(pair) || letter !== low);
-    }
-    const marked = markedWords(words);
-    if (marked.some((word, index) => word.filled !== fillFlags[index])) return null;
-    return { number: data.n as number, elapsedMs: (data.t as number) * 1000, words: marked };
+    return parseRevealPayload(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)));
   } catch {
     return null;
   }

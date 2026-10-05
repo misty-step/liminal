@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { D1Like } from "../store";
-import { d1JudgeCache, judgeCache, reportStore } from "../store";
+import { d1JudgeCache, judgeCache, parseCloudBindings, reportStore } from "../store";
 import { memoryCache } from "../typeSafe";
 
 /** In-memory D1 double with SQLite unique-key semantics for the statements used. */
@@ -94,6 +94,16 @@ describe("d1JudgeCache — durable first-writer-wins", () => {
 });
 
 describe("runtime fallbacks outside Workers", () => {
+  it("accepts only a context with a D1-shaped binding", () => {
+    const db = fakeD1();
+    expect(parseCloudBindings({ env: { LIMINAL_DB: db, OTHER: "ignored" } })).toEqual({
+      LIMINAL_DB: db,
+    });
+    expect(parseCloudBindings({ env: {} })).toEqual({});
+    expect(parseCloudBindings({ env: { LIMINAL_DB: { prepare: "not a function" } } })).toBeNull();
+    expect(parseCloudBindings({ env: null })).toBeNull();
+  });
+
   it("judgeCache falls back to a usable process-local cache", async () => {
     const cache = await judgeCache();
     expect(await cache.set("kx", "outside")).toBe("outside");

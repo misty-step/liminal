@@ -61,6 +61,17 @@ describe("share text (US-007)", () => {
 });
 
 describe("reveal code (US-007)", () => {
+  it("accepts the existing v1 codec unchanged", () => {
+    const v1 =
+      "eyJ2IjoxLCJuIjoxMiwidCI6ODQsInciOltbImNhZsOpIiwiQiJdLFsid2FpdCIsIm8iXSxbIm9yY2hpZCIsIkMiXSxbImFnYWluIiwiMiJdLFsidG9yY2giLCJBIl0sWyJoZWFydCIsIk0iXV19";
+    expect(encodeReveal({ number: 12, elapsedMs: 84_999, words: mixed })).toBe(v1);
+    expect(decodeReveal(v1)).toEqual({
+      number: 12,
+      elapsedMs: 84_000,
+      words: mixed.map((word, index) => ({ ...word, filled: [0, 2, 4, 5].includes(index) })),
+    });
+  });
+
   it("round trips Unicode words, first fills, landing positions and whole seconds", () => {
     const code = encodeReveal({ number: 12, elapsedMs: 84_999, words: mixed });
     expect(decodeReveal(code)).toEqual({
@@ -91,6 +102,9 @@ describe("reveal code (US-007)", () => {
       "x".repeat(2001),
       pack({ v: 2, n: 1, t: 1, w: [] }),
       pack({ v: 1, n: -1, t: 1, w: [] }),
+      pack({ v: 1, n: 1.5, t: 1, w: [] }),
+      pack({ v: 1, n: 1, t: 1, w: {}, extra: false }),
+      pack({ v: 1, n: 1, t: 1, w: [{}] }),
       pack({ v: 1, n: 1, t: 1, w: [["word", "z"]] }),
       pack({ v: 1, n: 1, t: 1, w: [["word", "1"]] }),
       pack({

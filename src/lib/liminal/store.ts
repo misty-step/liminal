@@ -35,8 +35,6 @@ export interface CloudBindings {
   LIMINAL_DB?: D1Like;
 }
 
-const STATE_VALUES: readonly ConditionState[] = ["inside", "close", "outside"];
-
 export class D1InvariantError extends Error {
   constructor(message: string) {
     super(message);
@@ -45,17 +43,30 @@ export class D1InvariantError extends Error {
 }
 
 function isConditionState(value: unknown): value is ConditionState {
-  return typeof value === "string" && (STATE_VALUES as readonly string[]).includes(value);
+  return value === "inside" || value === "close" || value === "outside";
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isD1Like(value: unknown): value is D1Like {
+  return isRecord(value) && typeof value.prepare === "function";
+}
+
+export function parseCloudBindings(value: unknown): CloudBindings | null {
+  if (!isRecord(value) || !isRecord(value.env)) return null;
+  const db = value.env.LIMINAL_DB;
+  if (db === undefined) return {};
+  return isD1Like(db) ? { LIMINAL_DB: db } : null;
 }
 
 /** Cloudflare bindings for this invocation, or null outside Workers. */
 export async function cloudBindings(): Promise<CloudBindings | null> {
   try {
     const mod = await import("@opennextjs/cloudflare");
-    const context = mod.getCloudflareContext() as unknown as
-      | { env?: Record<string, unknown> }
-      | undefined;
-    return context?.env ? (context.env as CloudBindings) : null;
+    const context: unknown = mod.getCloudflareContext();
+    return parseCloudBindings(context);
   } catch {
     return null;
   }
