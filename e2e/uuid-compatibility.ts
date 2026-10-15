@@ -85,6 +85,10 @@ try {
         await page.locator(".board .word-layer .word").nth(index).waitFor();
       }
       assert.equal(await page.locator("h2.end-title").innerText(), "Filled in 4 guesses");
+      await page.waitForFunction(() => {
+        const end = document.querySelector("section.end");
+        return end && getComputedStyle(end).opacity === "1";
+      });
       await page.screenshot({ path: `${out}/${scenario}-complete.png`, fullPage: true });
       if (scenario.startsWith("fallback-")) {
         const names = events.map((event) => {
