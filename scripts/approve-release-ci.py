@@ -5,7 +5,8 @@ import subprocess
 import time
 
 repo = os.environ['GITHUB_REPOSITORY']
-number = int(json.loads(os.environ['RELEASE_PR'])['number'])
+generated = json.loads(os.environ['RELEASE_PR'])
+number = int(generated['number'])
 
 
 def api(path, method='GET'):
@@ -18,7 +19,7 @@ pr = api(f'pulls/{number}')
 assert pr['state'] == 'open' and pr['base']['ref'] == 'master'
 assert pr['head']['repo']['full_name'] == repo
 assert pr['user']['login'] == 'github-actions[bot]'
-assert pr['head']['ref'] == 'release-please--branches--master'
+assert pr['head']['ref'] == generated['headBranchName']
 sha = pr['head']['sha']
 # Bounded discovery of GitHub's delayed native run, not CI-success polling.
 for _ in range(24):
