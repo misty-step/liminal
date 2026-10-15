@@ -93,6 +93,11 @@ With the IDs captured above, delete **only this rule**, never the zone ruleset:
 curl --fail-with-body -sS --request DELETE -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$CF_ZONE_API/rulesets/${RULESET_ID:?}/rules/${RULE_ID:?}"
 ```
 
+The live rule was created at 2026-10-15T17:50:53Z with
+`RULESET_ID=f3a46b251d044efcbd00f28b9fefa6cf` and
+`RULE_ID=7b466386d77948cb847a3636e56ce522`. Its activation record is in the
+[postmortem](../postmortems/2026-10-15-plain-http.md).
+
 Then GET the entrypoint again and verify `liminal_http_to_https` is absent, other
 rules are unchanged, HTTPS/health still work, and fresh HTTP requests no longer
 redirect. The empty phase ruleset can remain. A 308 can be cached by clients;

@@ -39,8 +39,31 @@ the exact repo payload with HTTP 200, `success: true`, no errors, and a null
 result. A subsequent entrypoint GET still returned error 10003, proving the
 dry-run did not create a rule. The validator first rejected an unsupported
 scheme field; the corrected rule uses the documented `ssl` connection predicate.
+Independent review re-ran the validator: the exact payload passed, and an
+unknown target field, an unknown match field and status 309 were each rejected.
 
-Production application is pending independent review. The releasing reviewer
-must append actual rule/ruleset IDs, apply/readback time, exact matched payload,
-HTTP 308/Location probes, unchanged HTTPS/build identity and healthy storage
-before closing the repair. This note does not claim that validation is recovery.
+Activation from merged `master` `f17db14` (PR #20), after its CI passed:
+
+- 17:50:52Z: the entrypoint was still absent (10003) and the dry run passed.
+- 17:50:53Z: `POST /rulesets` created ruleset `f3a46b251d044efcbd00f28b9fefa6cf`
+  with rule `7b466386d77948cb847a3636e56ce522` (`liminal_http_to_https`,
+  version 1). The ruleset GET and the phase-entrypoint GET each held only that
+  rule, equal field for field to `ops/https-redirect.json` (SHA-256
+  `a2031c48…dafc5b54fdaec`). A dry-run of the rollback DELETE returned 200 and
+  removed nothing. Always Use HTTPS stayed `off` and HSTS stayed disabled.
+- The edge converged within a minute: probes at 17:51:01Z were mixed, and every
+  probe from 17:51:39Z on redirected.
+
+Read-only proof at 17:52:36Z and 17:53:24Z: HTTP HEAD returned 308 with the
+exact HTTPS URL as `Location` for `/`, `/s/ABCDE?source=https-check`,
+`/api/health`, an HTML-referenced `/_next/static/` chunk, a nonexistent path,
+`/?`, `/api/judge` and `/s/a%2Fb?x=a%2Bb&x=two&empty=`. GET matched, and
+following the redirect reached HTTPS 200. HTTPS statuses matched the 17:49Z
+baseline, health reported deck and storage `ok`, all 14 HTML-referenced assets
+were byte-identical, and Worker version `d7279abb` stayed active at 100%.
+`http://foundations.mistystep.io/` still returned 200: other hosts are
+untouched. The 308 carries no `Cache-Control`, so clients may cache it.
+
+Status: recovered. Rollback is the single-rule DELETE in the operations guide.
+Nothing yet alerts if the rule is removed; an outside probe asserting the HTTP
+308 is a proposed follow-up.
