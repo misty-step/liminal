@@ -1,5 +1,12 @@
 .shell {
   max-width: 640px;
+  min-height: 100dvh;
+}
+
+.shell nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 
 .main {
