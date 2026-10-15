@@ -443,6 +443,47 @@ async function qaContext(options: Parameters<typeof browser.newContext>[0] = {})
   await context.close();
 }
 
+// ---------- Canonical, static release notes ----------
+for (const width of [1280, 390]) {
+  for (const colorScheme of ["light", "dark"] as const) {
+    const context = await qaContext({ viewport: { width, height: 844 }, colorScheme });
+    await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
+    const page = await context.newPage();
+    await page.goto(BASE, { waitUntil: "domcontentloaded" });
+    await page.getByRole("link", { name: "Changelog", exact: true }).click();
+    await page.getByRole("heading", { name: "Changelog", exact: true }).waitFor();
+    const health = await (await fetch(`${BASE}/api/health`)).json();
+    check(
+      `changelog ${width} ${colorScheme} shows serving version`,
+      (await page.getByText(`This build · ${health.version}`, { exact: true }).count()) === 1,
+    );
+    const notes = await page.getByRole("article", { name: "Release notes" }).innerText();
+    check(
+      `changelog ${width} ${colorScheme} has honest notes or empty state`,
+      notes.trim().length > 0,
+    );
+    check(
+      `changelog ${width} ${colorScheme} fits without horizontal scrolling`,
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    );
+    check(
+      `changelog ${width} ${colorScheme} follows system theme`,
+      await page.evaluate(
+        (expected) => getComputedStyle(document.body).colorScheme === expected,
+        colorScheme,
+      ),
+    );
+    await page.screenshot({ path: `${OUT}/changelog-${width}-${colorScheme}.png`, fullPage: true });
+    await page.getByRole("link", { name: "Play today", exact: true }).click();
+    await page.locator("#guess").waitFor();
+    check(
+      `changelog ${width} ${colorScheme} returns to the game`,
+      await page.locator("#guess").isVisible(),
+    );
+    await context.close();
+  }
+}
+
 await browser.close();
 
 const failed = results.filter((row) => !row.ok);

@@ -1,0 +1,70 @@
+.shell {
+  max-width: 640px;
+}
+
+.main {
+  padding: 40px 0;
+}
+
+.main h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.12;
+}
+
+.intro {
+  margin: 12px 0 8px;
+}
+
+.version {
+  margin: 0;
+  color: var(--quiet);
+  font-size: 14px;
+}
+
+.notes {
+  margin: 36px 0;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+
+.notes h2 {
+  margin: 40px 0 12px;
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+  font-family: var(--serif);
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.notes h3 {
+  margin: 24px 0 8px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.notes ul {
+  padding-left: 20px;
+}
+
+.notes li + li {
+  margin-top: 8px;
+}
+
+.notes a {
+  color: inherit;
+  text-underline-offset: 3px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :global(body):has(.shell) {
+    --paper: #1e2126;
+    --ink: #f3f3ef;
+    --quiet: #b5bac2;
+    --line: #454a52;
+    color-scheme: dark;
+  }
+}

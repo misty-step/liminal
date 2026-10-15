@@ -5,6 +5,7 @@ on:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+    types: [opened, synchronize, reopened, edited]
   workflow_dispatch:
 
 permissions:
@@ -15,6 +16,15 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 scripts/check-title.py
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 25
@@ -41,6 +51,8 @@ jobs:
         run: bun run test
       - name: Test promotion refusals
         run: python3 -m unittest discover -s scripts -p test_promotion.py -v
+      - name: Test release boundaries
+        run: python3 -m unittest discover -s scripts -p test_release.py -v
       - name: Build Cloudflare artifact
         run: bun run build:cf
         env:
