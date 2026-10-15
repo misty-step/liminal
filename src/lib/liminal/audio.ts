@@ -1,4 +1,5 @@
 import type { play, setEnabled, SoundName } from "cuelume";
+import { readLocalItem, writeLocalItem } from "./localStorage";
 
 export type GameSoundCue = "place" | "fill" | "miss" | "complete" | "refuse";
 
@@ -22,11 +23,7 @@ let loading: Promise<SoundEngine | null> | null = null;
 export function soundEnabled(): boolean {
   if (typeof window === "undefined") return false;
   if (enabled === undefined) {
-    try {
-      enabled = window.localStorage.getItem(STORAGE_KEY) === "true";
-    } catch {
-      enabled = false;
-    }
+    enabled = readLocalItem(STORAGE_KEY) === "true";
   }
   return enabled;
 }
@@ -35,11 +32,7 @@ export function setSoundEnabled(value: boolean): void {
   if (typeof window === "undefined") return;
   enabled = value;
   revision++;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, String(value));
-  } catch {
-    // The current tab can still honor the choice when storage is unavailable.
-  }
+  writeLocalItem(STORAGE_KEY, String(value));
   try {
     engine?.setEnabled(value);
   } catch {

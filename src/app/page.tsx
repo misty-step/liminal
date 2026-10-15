@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { playGameSound, setSoundEnabled, soundEnabled } from "@/lib/liminal/audio";
 import { DECK } from "@/lib/liminal/deck";
 import { evaluateGuess, judgedFeedback } from "@/lib/liminal/evaluator";
+import { readLocalItem, writeLocalItem } from "@/lib/liminal/localStorage";
 import { emitProductEvent } from "@/lib/liminal/productEvents";
 import { parsePuzzle } from "@/lib/liminal/puzzleSchema";
 import {
@@ -137,10 +138,13 @@ export default function Page() {
     void loadToday();
 
     const visitorKey = "liminal.visited.v1";
-    const newVisitor = window.localStorage.getItem(visitorKey) === null;
-    window.localStorage.setItem(visitorKey, "1");
-    emitProductEvent("session_start", { mode: "today", new_visitor: newVisitor });
-    if (!window.localStorage.getItem(HOWTO_KEY)) {
+    const visited = readLocalItem(visitorKey);
+    writeLocalItem(visitorKey, "1");
+    // An unreadable visitor marker cannot establish whether this is a first visit.
+    if (visited !== undefined) {
+      emitProductEvent("session_start", { mode: "today", new_visitor: visited === null });
+    }
+    if (!readLocalItem(HOWTO_KEY)) {
       howtoRef.current?.showModal();
       setHowtoOpen(true);
     }
@@ -682,7 +686,7 @@ export default function Page() {
         className="howto"
         onClose={() => {
           setHowtoOpen(false);
-          window.localStorage.setItem(HOWTO_KEY, "1");
+          writeLocalItem(HOWTO_KEY, "1");
           inputRef.current?.focus();
         }}
       >

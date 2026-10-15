@@ -1,3 +1,4 @@
+import { readLocalItem, writeLocalItem } from "./localStorage";
 import { boardState, parseStates } from "./regions";
 import type { GuessFeedback, GuessRecord, PuzzleProgress } from "./types";
 
@@ -72,13 +73,11 @@ export function canGuess(progress: PuzzleProgress): boolean {
   return !boardState(progress.guesses).complete;
 }
 
-/** localStorage helpers; safe to call on the server (they no-op). */
+/** Persistence is optional: the page retains progress in memory when unavailable. */
 export function loadProgress(puzzleId: string): PuzzleProgress | null {
-  if (typeof window === "undefined") return null;
-  return parseProgress(window.localStorage.getItem(storageKey(puzzleId)), puzzleId);
+  return parseProgress(readLocalItem(storageKey(puzzleId)) ?? null, puzzleId);
 }
 
 export function saveProgress(progress: PuzzleProgress): void {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(storageKey(progress.puzzleId), JSON.stringify(progress));
+  writeLocalItem(storageKey(progress.puzzleId), JSON.stringify(progress));
 }
