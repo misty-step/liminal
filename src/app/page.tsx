@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { playGameSound, setSoundEnabled, soundEnabled } from "@/lib/liminal/audio";
 import { DECK } from "@/lib/liminal/deck";
 import { evaluateGuess, judgedFeedback } from "@/lib/liminal/evaluator";
+import { emitProductEvent } from "@/lib/liminal/productEvents";
 import { parsePuzzle } from "@/lib/liminal/puzzleSchema";
 import {
   boardState,
@@ -14,7 +15,6 @@ import {
   parseStates,
   TARGETS,
 } from "@/lib/liminal/regions";
-import type { ProductEventName } from "@/lib/liminal/runtime";
 import type { DailyPayload } from "@/lib/liminal/schedule";
 import { shareText } from "@/lib/liminal/share";
 import { emptyProgress, loadProgress, recordGuess, saveProgress } from "@/lib/liminal/storage";
@@ -22,8 +22,6 @@ import type { GuessFeedback, Puzzle, PuzzleProgress, TargetKey } from "@/lib/lim
 import { Board } from "./Board";
 import { Mark } from "./Mark";
 import { ShareButton } from "./ShareButton";
-
-type EventProps = Record<string, string | number | boolean>;
 
 const STATE_WORD = { inside: "Inside", close: "On the line", outside: "Outside" } as const;
 const HOWTO_KEY = "liminal.howto.v2";
@@ -34,31 +32,6 @@ const REFUSAL: Record<NonNullable<GuessFeedback["rejected"]>, (word: string) => 
   "too-long": () => "Keep it to a short name.",
   empty: () => "Name a thing first.",
 };
-
-function sessionId(): string {
-  const key = "liminal.event-session.v1";
-  const retained = window.sessionStorage.getItem(key);
-  if (retained) return retained;
-  const created = `session_${crypto.randomUUID().replaceAll("-", "")}`;
-  window.sessionStorage.setItem(key, created);
-  return created;
-}
-
-function emitProductEvent(eventName: ProductEventName, props: EventProps): void {
-  if (typeof window === "undefined") return;
-  const body = JSON.stringify({
-    eventId: crypto.randomUUID(),
-    eventName,
-    sessionId: sessionId(),
-    props,
-  });
-  void fetch("/api/events", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body,
-    keepalive: true,
-  }).catch(() => undefined);
-}
 
 /** A target region by its circles; a pair region excludes the third by rule. */
 function regionName(puzzle: Puzzle, key: TargetKey): string {
