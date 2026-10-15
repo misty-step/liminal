@@ -151,11 +151,16 @@ describe("best-effort product events", () => {
   });
 
   it("handles network rejections without an unhandled rejection", async () => {
-    const { fetch } = browser();
-    fetch.mockRejectedValue(new Error("Offline"));
+    browser();
+    let calls = 0;
+    // A vi.fn promise spy handles rejections itself, hiding a missing production catch.
+    vi.stubGlobal("fetch", () => {
+      calls += 1;
+      return Promise.reject(new Error("Offline"));
+    });
     emitProductEvent("session_start", {});
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(calls).toBe(1);
   });
 
   it("does nothing during server rendering", () => {
