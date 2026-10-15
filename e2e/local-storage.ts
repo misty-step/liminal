@@ -170,6 +170,10 @@ try {
         assert.equal(await page.evaluate((key) => localStorage.getItem(key), progressKey), before);
         assert.equal(await page.evaluate(() => localStorage.getItem("liminal.visited.v1")), "1");
         assert.equal(await page.evaluate(() => localStorage.getItem("liminal.howto.v2")), "1");
+        await page.waitForFunction(() => {
+          const end = document.querySelector("section.end");
+          return end && getComputedStyle(end).opacity === "1";
+        });
         await page.screenshot({ path: `${out}/${scenario}-reload.png`, fullPage: true });
         assert.deepEqual(await page.evaluate(() => window.__liminalStorageProbe.unhandled), []);
         const returning = events.map((event) => parseProductEventPayload(event));
