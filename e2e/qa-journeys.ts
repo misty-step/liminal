@@ -117,6 +117,10 @@ async function fillBoard(page: Page, label: string, screenshotPrefix: string) {
     }
   }
   await page.locator("h2.end-title").waitFor();
+  await page.waitForFunction(() => {
+    const end = document.querySelector("section.end");
+    return end && getComputedStyle(end).opacity === "1";
+  });
   const title = (await page.locator("h2.end-title").innerText()).trim();
   const clock = (await page.locator("p.end-sub").innerText()).trim();
   check(
@@ -176,6 +180,9 @@ async function qaContext(options: Parameters<typeof browser.newContext>[0] = {})
   const reportStatus = (await page.locator(".report-status").innerText()).trim();
   check("word verdict report is filed", reportStatus === "Noted. Thanks.", reportStatus);
   await page.screenshot({ path: `${OUT}/desktop-report.png`, fullPage: true });
+  // Complete the report journey before starting the separate archive story.
+  await page.keyboard.press("Escape");
+  await page.locator(".detail").waitFor({ state: "detached" });
 
   // Archive: "Play #N" opens the previous day's puzzle. Puzzle #1 has none.
   const previous = page.getByRole("button", { name: /^Play #\d+$/ });
