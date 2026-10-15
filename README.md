@@ -158,7 +158,9 @@ Release from a clean, merged `master` with native `wrangler` auth:
 wrangler d1 migrations apply liminal-judgments --remote --env production   # first: health requires new schema
 SHA=$(git rev-parse HEAD)
 SENTRY_RELEASE=$SHA NEXT_PUBLIC_SENTRY_RELEASE=$SHA SENTRY_ENVIRONMENT=production \
-  NEXT_PUBLIC_SENTRY_ENVIRONMENT=production bun run build:cf
+  NEXT_PUBLIC_SENTRY_ENVIRONMENT=production \
+  NEXT_PUBLIC_SENTRY_DSN="${NEXT_PUBLIC_SENTRY_DSN:?Set the public browser Sentry DSN}" \
+  bun run build:cf
 bun run deploy:cf
 printf '%s' "$SHA" | wrangler secret put SENTRY_RELEASE --env production
 curl -s https://liminal.mistystep.io/api/health   # expect storage ok
@@ -175,7 +177,9 @@ Contract:
   `JEV_DECISIONS_URL=https://openrouter.ai/api/alpha/decisions`.
 - Release build vars: `SENTRY_RELEASE` and `NEXT_PUBLIC_SENTRY_RELEASE` are the
   exact candidate SHA; client Sentry activation also needs the public DSN and
-  explicit environment. Source-map upload uses scoped `SENTRY_AUTH_TOKEN`,
+  explicit environment. Supply `NEXT_PUBLIC_SENTRY_DSN` in the build shell;
+  production builds [reject missing browser capture or release identity](docs/decisions/production-sentry-build-guard.md).
+  Source-map upload uses scoped `SENTRY_AUTH_TOKEN`,
   `SENTRY_ORG`, and `SENTRY_PROJECT=liminal` in release CI only.
 - Build: `bun run build:cf` (OpenNext, `open-next.config.ts`); deploy:
   `bun run deploy:cf` (wrangler `--env production`).
