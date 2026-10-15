@@ -5,18 +5,19 @@ on:
     branches: [master, main]
   pull_request:
     branches: [master, main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   quality:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     steps:
       - name: Check out candidate
         uses: actions/checkout@v4
@@ -38,14 +39,17 @@ jobs:
         run: bun run type-check
       - name: Test
         run: bun run test
+      - name: Test promotion refusals
+        run: python3 -m unittest discover -s scripts -p test_promotion.py -v
       - name: Build Cloudflare artifact
         run: bun run build:cf
         env:
-          LIMINAL_ENVIRONMENT: test
-          NEXT_PUBLIC_SENTRY_ENVIRONMENT: test
+          LIMINAL_ENVIRONMENT: production
+          NEXT_PUBLIC_SENTRY_DSN: ${{ vars.NEXT_PUBLIC_SENTRY_DSN }}
+          NEXT_PUBLIC_SENTRY_ENVIRONMENT: production
           NEXT_PUBLIC_SENTRY_RELEASE: ${{ github.event.pull_request.head.sha || github.sha }}
           NEXT_TELEMETRY_DISABLED: "1"
-          SENTRY_ENVIRONMENT: test
+          SENTRY_ENVIRONMENT: production
           SENTRY_RELEASE: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Record exact source identity
         env:
@@ -53,11 +57,31 @@ jobs:
         run: |
           test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"
           printf '%s\n' "$CANDIDATE_SHA" > .open-next/SOURCE_SHA
+      - name: Bundle the Worker once
+        run: bunx --no-install wrangler deploy --env production --dry-run --outdir .open-next/bundle
+      - name: Install Chromium
+        run: bunx --no-install playwright install --with-deps chromium
+      - name: Walk stories against the bundled artifact and isolated local D1
+        run: python3 scripts/verify-artifact.py
+      - name: Package the verified bytes
+        run: |
+          tar -czf worker-artifact.tar.gz .open-next
+          sha256sum worker-artifact.tar.gz > worker-artifact.sha256
       - name: Retain deploy candidate
         uses: actions/upload-artifact@v4
         with:
           name: open-next-${{ github.event.pull_request.head.sha || github.sha }}
-          path: .open-next
+          path: |
+            worker-artifact.tar.gz
+            worker-artifact.sha256
           if-no-files-found: error
           retention-days: 3
           include-hidden-files: true
+      - name: Retain story proof
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifact-qa-${{ github.event.pull_request.head.sha || github.sha }}
+          path: evidence/artifact-qa
+          if-no-files-found: warn
+          retention-days: 7

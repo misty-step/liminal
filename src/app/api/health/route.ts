@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { DECK } from "@/lib/liminal/deck";
 import { runtimeEnvironment } from "@/lib/liminal/runtime";
 import { cloudBindings } from "@/lib/liminal/store";
+import { version } from "../../../../package.json";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -26,6 +27,8 @@ export async function GET() {
         status: "unhealthy",
         service: "liminal",
         environment: "invalid",
+        version,
+        revision: process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? null,
         checks: {
           deck: deckReady ? "ok" : "failed",
           storage: "configuration-error",
@@ -42,6 +45,8 @@ export async function GET() {
         service: "liminal",
         environment,
         checks: { deck: "failed", storage: "unknown" },
+        version,
+        revision: process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? null,
       },
       { status: 503, headers: { "cache-control": "no-store" } },
     );
@@ -55,6 +60,8 @@ export async function GET() {
         service: "liminal",
         environment,
         checks: { deck: "ok", storage: "not-configured" },
+        version,
+        revision: process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? null,
       },
       { status: 503, headers: { "cache-control": "no-store" } },
     );
@@ -121,6 +128,8 @@ export async function GET() {
           service: "liminal",
           environment,
           checks: { deck: "ok", storage: "failed" },
+          version,
+          revision: process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? null,
         },
         { status: 503, headers: { "cache-control": "no-store" } },
       );
@@ -133,6 +142,8 @@ export async function GET() {
       service: "liminal",
       environment,
       checks: { deck: "ok", storage: db ? "ok" : "not-configured" },
+      version,
+      revision: process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? null,
     },
     { headers: { "cache-control": "no-store" } },
   );

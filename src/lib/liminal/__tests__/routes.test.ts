@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { POST as postEvent } from "@/app/api/events/route";
 import { GET as getHealth } from "@/app/api/health/route";
 import { POST as postJudge } from "@/app/api/judge/route";
@@ -6,10 +6,12 @@ import { GET as getPuzzleByNumber } from "@/app/api/puzzle/[number]/route";
 import { POST as postReport } from "@/app/api/report/route";
 import { GET as getToday } from "@/app/api/today/route";
 import { dateKeyUTC, puzzleNumber } from "@/lib/liminal/daily";
+import { version } from "../../../../package.json";
 
 const previousEnvironment = process.env.LIMINAL_ENVIRONMENT;
 
 afterEach(() => {
+  vi.unstubAllEnvs();
   if (previousEnvironment === undefined) delete process.env.LIMINAL_ENVIRONMENT;
   else process.env.LIMINAL_ENVIRONMENT = previousEnvironment;
 });
@@ -32,7 +34,18 @@ describe("production route boundaries (US-002, US-004, US-005, US-006)", () => {
       service: "liminal",
       environment: "development",
       checks: { deck: "ok", storage: "not-configured" },
+      version,
+      revision: process.env.NEXT_PUBLIC_SENTRY_RELEASE ?? null,
     });
+  });
+
+  it("reports the build identity even when production storage is unavailable", async () => {
+    vi.stubEnv("LIMINAL_ENVIRONMENT", "production");
+    const revision = "a".repeat(40);
+    vi.stubEnv("NEXT_PUBLIC_SENTRY_RELEASE", revision);
+    const response = await getHealth();
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ version, revision, status: "unhealthy" });
   });
 
   it("serves today's puzzle with its number and never a future one", async () => {
