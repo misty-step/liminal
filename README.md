@@ -86,6 +86,10 @@ copies to the clipboard.
 
 ## Security posture
 
+- Plain HTTP requests to `liminal.mistystep.io` are redirected to the same HTTPS
+  URL by the host-scoped [edge rule](docs/operations/https-redirect.md), using 308
+  to preserve methods and bodies. Its exact configuration and rollback live in
+  the repo; no zone-wide HTTPS setting or HSTS is needed.
 - Credentials stay server-side (route handler only; never shipped to the client).
 - Player text is untrusted data: bounded length (120 chars), rate-limited,
   time-boxed (8 s), and passed to the judge as `state` data — never as

@@ -1,0 +1,23 @@
+{
+  "name": "Liminal HTTPS redirect",
+  "kind": "zone",
+  "phase": "http_request_dynamic_redirect",
+  "rules": [
+    {
+      "ref": "liminal_http_to_https",
+      "description": "Redirect only Liminal HTTP traffic to HTTPS, preserving method and URI.",
+      "enabled": true,
+      "expression": "http.host eq \"liminal.mistystep.io\" and not ssl",
+      "action": "redirect",
+      "action_parameters": {
+        "from_value": {
+          "target_url": {
+            "expression": "concat(\"https://liminal.mistystep.io\", raw.http.request.uri)"
+          },
+          "status_code": 308,
+          "preserve_query_string": false
+        }
+      }
+    }
+  ]
+}
