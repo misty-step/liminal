@@ -1,8 +1,14 @@
+import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const release = "0123456789abcdef0123456789abcdef01234567";
 const productionError =
   "Production builds require NEXT_PUBLIC_SENTRY_DSN and matching NEXT_PUBLIC_SENTRY_RELEASE and SENTRY_RELEASE values set to the same 40-hex commit SHA.";
+
+it("compiles canonical release notes without a Worker filesystem dependency", async () => {
+  const config = (await import("./next.config")).default;
+  expect(config.env?.LIMINAL_CHANGELOG).toBe(readFileSync("CHANGELOG.md", "utf8"));
+});
 
 beforeEach(() => {
   vi.resetModules();

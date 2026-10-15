@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { withSentryConfig } from "@sentry/nextjs/config";
 import type { NextConfig } from "next";
 
@@ -22,6 +23,9 @@ if (
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
+  env: {
+    LIMINAL_CHANGELOG: readFileSync("CHANGELOG.md", "utf8"),
+  },
 };
 
 export default withSentryConfig(nextConfig, {

@@ -7,7 +7,7 @@
  * so only the OUTAGE_BASE journey reaches the judge. OUTAGE_BASE may point at a
  * second instance with an unreachable judge or BASE without judge credentials.
  */
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import type { Page } from "playwright";
 
@@ -458,6 +458,12 @@ for (const width of [1280, 390]) {
       (await page.getByText(`This build · ${health.version}`, { exact: true }).count()) === 1,
     );
     const notes = await page.getByRole("article", { name: "Release notes" }).innerText();
+    const releaseCount = [...readFileSync("CHANGELOG.md", "utf8").matchAll(/^## /gm)].length;
+    check(
+      `changelog ${width} ${colorScheme} contains the canonical releases`,
+      (await page.getByRole("article", { name: "Release notes" }).locator("h2").count()) ===
+        releaseCount,
+    );
     check(
       `changelog ${width} ${colorScheme} has honest notes or empty state`,
       notes.trim().length > 0,

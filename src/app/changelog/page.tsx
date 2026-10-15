@@ -1,5 +1,3 @@
-import { readFileSync } from "node:fs";
-import path from "node:path";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Markdown from "react-markdown";
@@ -15,10 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default function ChangelogPage() {
-  const notes = readFileSync(path.join(process.cwd(), "CHANGELOG.md"), "utf8").replace(
-    /^# Changelog\s*/,
-    "",
-  );
+  const notes = (process.env.LIMINAL_CHANGELOG ?? "").replace(/^# Changelog\s*/, "");
   return (
     <div className={`shell share-shell ${styles.shell}`}>
       <header className="top">

@@ -19,8 +19,9 @@ cancellation; stale runs do not publish. The bot's generated PR receives real
 native CI through narrowly scoped workflow approval, never a passing stand-in.
 Squash-only merging retains the checked PR title and an empty commit body.
 
-CHANGELOG.md is the only notes artifact. /changelog statically renders it during
-Next's build using react-markdown (escaped HTML, no browser credentials or fetch).
+CHANGELOG.md is the only notes artifact. Next's native build configuration
+inlines it into the bundle; /changelog statically renders it using react-markdown
+(escaped HTML, no runtime filesystem, browser credentials or fetch).
 The initial adoption build honestly shows an empty state until the generated
 release PR lands. The page extends the existing typography, mark and paper/ink
 tokens; its dark theme follows the system without changing the game design.
