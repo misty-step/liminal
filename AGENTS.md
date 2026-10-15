@@ -81,7 +81,7 @@ own live matrix has zero misses. `judgeStatus` becomes `calibrated` only then.
 `content/schedule/YYYY-MM-DD.json` for local runs. `D1HttpScheduleStore` writes
 plain INSERTs via Cloudflare's D1 HTTP API to the `schedule` table. For the
 nightly GitHub workflow, configure repository secrets `LIMINAL_JUDGE_API_KEY`,
-`LIMINAL_GENERATOR_API_KEY` (different keys), and `CLOUDFLARE_API_TOKEN`
+`LIMINAL_GENERATOR_API_KEY` (different keys), and `LIMINAL_DAILY_D1_TOKEN`
 (D1 edit permission), plus repository variable `CLOUDFLARE_ACCOUNT_ID`.
 The database ID is in the workflow. The generator key pays for proposal and
 player calls; the judge key pays for Jev. The nightly run caps generator spend

@@ -127,7 +127,11 @@ async function fillBoard(page: Page, label: string, screenshotPrefix: string) {
   await page.screenshot({ path: `${OUT}/${screenshotPrefix}-end.png`, fullPage: true });
 }
 
-const browser = await chromium.launch();
+const browser = await chromium.launch({
+  executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
+  // A production-built rehearsal must not emit synthetic events to live Sentry.
+  args: ["--host-resolver-rules=MAP *.sentry.io ~NOTFOUND"],
+});
 
 // ---------- Desktop completion, persistence, report, practice ----------
 {

@@ -152,19 +152,19 @@ pulled before it airs. A date nobody filled in time stays on the deck fallback a
 
 ## Deploy
 
-Release from a clean, merged `master` with native `wrangler` auth:
+Reviewed changes deploy automatically from `master`. CI builds and bundles once,
+walks the [stories](SPEC.md) against those exact bytes with disposable local D1,
+then retains a checksummed artifact. `Deploy app` consumes that successful CI
+run without rebuilding. It refuses stale/foreign/failed/skipped candidates,
+preserves Worker secrets and variables, and reads back health plus the full
+source revision. A failed promotion restores the prior healthy native Worker
+version and checks provider and HTTP identity. It never restores data or secrets.
+See [the artifact-promotion decision](docs/decisions/artifact-promotion.md).
 
-```sh
-wrangler d1 migrations apply liminal-judgments --remote --env production   # first: health requires new schema
-SHA=$(git rev-parse HEAD)
-SENTRY_RELEASE=$SHA NEXT_PUBLIC_SENTRY_RELEASE=$SHA SENTRY_ENVIRONMENT=production \
-  NEXT_PUBLIC_SENTRY_ENVIRONMENT=production \
-  NEXT_PUBLIC_SENTRY_DSN="${NEXT_PUBLIC_SENTRY_DSN:?Set the public browser Sentry DSN}" \
-  bun run build:cf
-bun run deploy:cf
-printf '%s' "$SHA" | wrangler secret put SENTRY_RELEASE --env production
-curl -s https://liminal.mistystep.io/api/health   # expect storage ok
-```
+Repository `CLOUDFLARE_API_TOKEN` is the shared narrow deployment binding;
+`NEXT_PUBLIC_SENTRY_DSN` is the existing public browser DSN build variable.
+Database changes remain separate: this code-only deploy neither applies remote
+migrations nor invokes puzzle generation/calibration. Existing data is preserved.
 
 Contract:
 
@@ -179,8 +179,8 @@ Contract:
   exact candidate SHA; client Sentry activation also needs the public DSN and
   explicit environment. Supply `NEXT_PUBLIC_SENTRY_DSN` in the build shell;
   production builds [reject missing browser capture or release identity](docs/decisions/production-sentry-build-guard.md).
-  Source-map upload uses scoped `SENTRY_AUTH_TOKEN`,
-  `SENTRY_ORG`, and `SENTRY_PROJECT=liminal` in release CI only.
+  Source-map upload is not configured in this CI adoption; source-map custody is
+  separate from artifact promotion.
 - Build: `bun run build:cf` (OpenNext, `open-next.config.ts`); deploy:
   `bun run deploy:cf` (wrangler `--env production`).
 - Durable store: D1 `liminal-judgments` (binding `LIMINAL_DB`) retains
@@ -191,7 +191,7 @@ Contract:
   schema lives in `migrations/`. Apply migrations before deploying.
 - Daily generation (GitHub Actions): repository secrets
   `LIMINAL_JUDGE_API_KEY`, `LIMINAL_GENERATOR_API_KEY` (must differ), and
-  `CLOUDFLARE_API_TOKEN`, plus variable `CLOUDFLARE_ACCOUNT_ID`. The token is
+  `LIMINAL_DAILY_D1_TOKEN`, plus variable `CLOUDFLARE_ACCOUNT_ID`. The token is
   the account-owned `liminal-daily-d1` (D1 Write only; local copy in pass at
   `workstation/LIMINAL_DAILY_D1_TOKEN`), never the workstation admin token.
 

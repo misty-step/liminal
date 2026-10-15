@@ -16,3 +16,8 @@ coverage/
 .DS_Store
 # Generated puzzle pipeline output: candidates, reviews, local schedule, bake-offs.
 content/
+evidence/artifact-qa/
+worker-artifact.tar.gz
+worker-artifact.sha256
+promotion-receipt.json
+__pycache__/

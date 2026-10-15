@@ -1,4 +1,4 @@
-# Stories
+# Liminal specification
 
 <!-- Root artifact: what users must be able to do. One file, ids never
 reused, criteria a check can fail on. skill://user-stories guides edits.
@@ -202,3 +202,23 @@ Criteria:
 
 Evidence: `src/lib/liminal/audio.ts`, `src/app/page.tsx`, browser sound
 toggle and submission review.
+
+## Capability: Safe app updates
+
+## US-011 Receive verified updates without losing accepted state
+
+Statement: When the app updates, I want my progress and accepted reports to
+remain intact, and operators to identify and recover the serving code.
+
+Criteria:
+1. THE SYSTEM SHALL verify the app artifact against the existing stories using
+   isolated storage before promoting those same bytes, without paid judging.
+2. THE SYSTEM SHALL NOT promote a failed, skipped, foreign, or stale CI candidate.
+3. THE SYSTEM SHALL report its package version and full source revision in health.
+4. IF promotion or its live readback fails, THE SYSTEM SHALL restore the prior
+   healthy native Worker version and verify it through provider and HTTP reads.
+5. Code delivery and rollback SHALL NOT run puzzle publication, remote migrations,
+   data restoration, or credential rewrites.
+
+Evidence: `scripts/verify-artifact.py`, `scripts/test_promotion.py`,
+`scripts/promotion.py`, `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`.
