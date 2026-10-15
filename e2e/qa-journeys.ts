@@ -129,21 +129,34 @@ async function fillBoard(page: Page, label: string, screenshotPrefix: string) {
 
 const browser = await chromium.launch({
   executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE,
-  // A production-built rehearsal must not emit synthetic events to live Sentry.
-  args: ["--host-resolver-rules=MAP *.sentry.io ~NOTFOUND"],
 });
+
+async function qaContext(options: Parameters<typeof browser.newContext>[0] = {}) {
+  const context = await browser.newContext(options);
+  // Abort external traffic at the consumer boundary, without DNS retry loops
+  // or synthetic events entering the production-built browser's live Sentry.
+  const origins = new Set([new URL(BASE).origin, new URL(OUTAGE_BASE).origin]);
+  await context.route("**/*", (route) =>
+    origins.has(new URL(route.request().url()).origin)
+      ? route.continue()
+      : route.abort("blockedbyclient"),
+  );
+  return context;
+}
 
 // ---------- Desktop completion, persistence, report, practice ----------
 {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const context = await qaContext({ viewport: { width: 1280, height: 860 } });
   const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  // Optional keepalive analytics must not define whether the puzzle is ready.
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
   await dismissHowto(page);
   const todayLabel = await puzzleLabel(page);
   check("board shows the scheduled puzzle", todayLabel === TODAY.label, todayLabel);
   await fillBoard(page, todayLabel, "desktop");
 
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.locator("h2.end-title").waitFor();
   const persistedWords = await page.locator(".board .word-layer .word").count();
   const persistedTitle = (await page.locator("h2.end-title").innerText()).trim();
   check(
@@ -188,10 +201,10 @@ const browser = await chromium.launch({
 
 // ---------- Local refusals, fresh progress ----------
 {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const context = await qaContext({ viewport: { width: 1280, height: 860 } });
   await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
   const label = await puzzleLabel(page);
   const answer = answersFor(label).pairs.c3[0];
   await guess(page, label);
@@ -221,10 +234,10 @@ const browser = await chromium.launch({
 
 // ---------- No guess limit: many misses, center never filled ----------
 {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const context = await qaContext({ viewport: { width: 1280, height: 860 } });
   await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
   const label = await puzzleLabel(page);
   const { pairs } = answersFor(label);
   const pairAnswers = [...new Set([...pairs.c2, ...pairs.c3, ...pairs.c1])];
@@ -245,10 +258,10 @@ const browser = await chromium.launch({
 
 // ---------- Judge outage (dedicated instance with an unreachable judge) ----------
 {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const context = await qaContext({ viewport: { width: 1280, height: 860 } });
   await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
-  await page.goto(OUTAGE_BASE, { waitUntil: "networkidle" });
+  await page.goto(OUTAGE_BASE, { waitUntil: "domcontentloaded" });
   await guess(page, "sundial");
   const status = await awaitStatus(page, "No guess used");
   const words = await page.locator(".board .word-layer .word").count();
@@ -267,7 +280,7 @@ const browser = await chromium.launch({
 
 // ---------- Thinking-time clock (US-003) ----------
 {
-  const context = await browser.newContext({ viewport: { width: 1280, height: 860 } });
+  const context = await qaContext({ viewport: { width: 1280, height: 860 } });
   await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
   // A slow judge that ends in an outage: the wait must not reach the score.
@@ -279,7 +292,7 @@ const browser = await chromium.launch({
       body: JSON.stringify({ status: "unavailable", reason: "upstream" }),
     });
   });
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
   // Seconds on the clock. Held over a 2.5 s pause means at most 1 s of drift
   // (the steps around the pause still count); running means at least 2 s.
   const clock = async () => {
@@ -333,21 +346,22 @@ const browser = await chromium.launch({
 
 // ---------- Mobile completion ----------
 {
-  const context = await browser.newContext({
+  const context = await qaContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
     isMobile: true,
     hasTouch: true,
   });
   const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
   await dismissHowto(page);
   const label = await puzzleLabel(page);
   check("mobile board shows the scheduled puzzle", label === TODAY.label, label);
   const soundToggle = page.getByRole("button", { name: "Turn sounds on" });
   check("sound is opt-in", (await soundToggle.count()) === 1);
   await soundToggle.click();
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.getByRole("button", { name: "Turn sounds off" }).waitFor();
   check(
     "sound preference survives reload",
     (await page.getByRole("button", { name: "Turn sounds off" }).count()) === 1,
@@ -392,13 +406,13 @@ const browser = await chromium.launch({
 
 // ---------- Reduced motion ----------
 {
-  const context = await browser.newContext({
+  const context = await qaContext({
     viewport: { width: 390, height: 844 },
     reducedMotion: "reduce",
   });
   await context.addInitScript(() => localStorage.setItem("liminal.howto.v2", "1"));
   const page = await context.newPage();
-  await page.goto(BASE, { waitUntil: "networkidle" });
+  await page.goto(BASE, { waitUntil: "domcontentloaded" });
   const label = await puzzleLabel(page);
   await guess(page, answersFor(label).pairs.c3[0], 1);
   const transition = await page
