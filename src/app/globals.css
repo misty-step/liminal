@@ -163,6 +163,21 @@ textarea {
   width: 100%;
 }
 
+.about-nav {
+  margin-top: 28px;
+  text-align: center;
+}
+
+.about-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.keyboard-open .about-nav {
+  display: none;
+}
+
 /* Board */
 
 .board {

@@ -222,3 +222,18 @@ Criteria:
 
 Evidence: `scripts/verify-artifact.py`, `scripts/test_promotion.py`,
 `scripts/promotion.py`, `.github/workflows/ci.yml`, `.github/workflows/deploy.yml`.
+
+## US-012 Read what changed
+
+Statement: When Liminal changes, I want to read its release notes without
+leaving the app, so I can understand what is new in the version I am using.
+
+Criteria:
+1. THE SYSTEM SHALL link to /changelog from the game and offer a way back to play.
+2. THE SYSTEM SHALL render the deployed revision's generated CHANGELOG.md at
+   build time, with its package version and a link to GitHub Releases.
+3. IF no release has been generated, THEN THE SYSTEM SHALL say so, not invent notes.
+4. THE SYSTEM SHALL keep the notes readable on desktop and phone, in system
+   light and dark themes, with no browser credential or runtime GitHub request.
+
+Evidence: `e2e/qa-journeys.ts`, `src/app/changelog/page.tsx`.

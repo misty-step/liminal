@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import type { FormEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { playGameSound, setSoundEnabled, soundEnabled } from "@/lib/liminal/audio";
@@ -625,6 +626,12 @@ export default function Page() {
           </section>
         )}
       </main>
+
+      <nav aria-label="About Liminal" className="about-nav">
+        <Link className="link" href="/changelog">
+          Changelog
+        </Link>
+      </nav>
 
       {detail && detailGuess && (
         <div
