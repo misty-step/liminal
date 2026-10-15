@@ -38,7 +38,9 @@ The game ends only when all four regions are filled. The clock counts thinking
 time: it pauses while the judge considers a word (network latency never reaches
 the score), while the how-to is open, and while the tab is hidden. Progress and
 clock time are saved per puzzle (`localStorage` schema `liminal.v2`); v1
-progress is not migrated.
+progress is not migrated. If the browser denies persistent storage, the current
+tab remains playable using in-memory progress; restoring it after reload is not
+guaranteed. See [the persistence capability decision](docs/decisions/browser-persistence-capability.md).
 
 A guess is spent exactly when it receives a judgment (authored or live).
 Refusals spend nothing: a circle label, a word already on the board, empty or

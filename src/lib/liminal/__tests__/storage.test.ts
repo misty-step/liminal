@@ -1,10 +1,78 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { getPuzzle } from "../deck";
 import { evaluateGuess, judgedFeedback } from "../evaluator";
-import { canGuess, emptyProgress, parseProgress, recordGuess, storageKey } from "../storage";
+import {
+  canGuess,
+  emptyProgress,
+  loadProgress,
+  parseProgress,
+  recordGuess,
+  saveProgress,
+  storageKey,
+} from "../storage";
+
+afterEach(() => vi.unstubAllGlobals());
 
 const vessel = getPuzzle("bath-vessel")!;
 const miss = judgedFeedback({ c1: "outside", c2: "outside", c3: "outside" }, "judged", "v");
+
+describe("browser persistence capability", () => {
+  const progress = recordGuess(
+    emptyProgress("bath-vessel", 1),
+    evaluateGuess(vessel, "faucet"),
+    "faucet",
+    2,
+  );
+
+  it("loads nothing and saves harmlessly on the server", () => {
+    vi.stubGlobal("window", undefined);
+    expect(loadProgress(progress.puzzleId)).toBeNull();
+    expect(() => saveProgress(progress)).not.toThrow();
+  });
+
+  it("contains a denied localStorage getter for both load and save", () => {
+    vi.stubGlobal("window", {
+      get localStorage() {
+        throw new DOMException("Storage denied", "SecurityError");
+      },
+    });
+    expect(loadProgress(progress.puzzleId)).toBeNull();
+    expect(() => saveProgress(progress)).not.toThrow();
+  });
+
+  it("contains denied reads without discarding in-memory progress", () => {
+    vi.stubGlobal("window", {
+      localStorage: {
+        getItem() {
+          throw new DOMException("Read denied", "SecurityError");
+        },
+        setItem: vi.fn(),
+      },
+    });
+    expect(loadProgress(progress.puzzleId)).toBeNull();
+    expect(progress.guesses.map((guess) => guess.answer)).toEqual(["faucet"]);
+  });
+
+  it("contains quota-denied writes and retries when storage becomes available", () => {
+    const items = new Map<string, string>();
+    let denied = true;
+    vi.stubGlobal("window", {
+      localStorage: {
+        getItem: (key: string) => items.get(key) ?? null,
+        setItem(key: string, value: string) {
+          if (denied) throw new DOMException("Quota exceeded", "QuotaExceededError");
+          items.set(key, value);
+        },
+      },
+    });
+    expect(() => saveProgress(progress)).not.toThrow();
+    expect(loadProgress(progress.puzzleId)).toBeNull();
+    denied = false;
+    saveProgress(progress);
+    expect(items.get("liminal.v2.puzzle.bath-vessel")).toBe(JSON.stringify(progress));
+    expect(loadProgress(progress.puzzleId)).toEqual(progress);
+  });
+});
 
 describe("progress storage (US-001, US-002, US-003)", () => {
   it("uses a versioned key that ignores five-guess v1 progress", () => {
