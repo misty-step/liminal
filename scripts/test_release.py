@@ -61,8 +61,9 @@ class ReleaseSafety(unittest.TestCase):
         self.assertFalse((self.root / 'injected').exists())
 
     def test_native_approval_is_exact_and_never_restarts_running_ci(self):
+        generated = {'number':7, 'headBranchName':'release-please--branches--master--components--liminal'}
         pr = {'state':'open', 'base':{'ref':'master'}, 'head':{'sha':self.sha,
-              'ref':'release-please--branches--master', 'repo':{'full_name':'fixture/liminal'}},
+              'ref':generated['headBranchName'], 'repo':{'full_name':'fixture/liminal'}},
               'user':{'login':'github-actions[bot]'}}
         run = {'id':123, 'head_sha':self.sha, 'head_repository':{'full_name':'fixture/liminal'},
                'path':'.github/workflows/ci.yml', 'event':'pull_request', 'status':'completed',
@@ -77,10 +78,16 @@ else: print((root/'runs.json').read_text())''')
         (self.root / 'pr.json').write_text(json.dumps(pr))
         def execute():
             (self.root / 'runs.json').write_text(json.dumps({'workflow_runs':[run]}))
-            return self.run_cmd('python3', '-c', 'import runpy,time; time.sleep=lambda _:None; runpy.run_path(' + repr(str(SOURCE / 'approve-release-ci.py')) + ",run_name='__main__')", RELEASE_PR='{"number":7}')
+            return self.run_cmd('python3', '-c', 'import runpy,time; time.sleep=lambda _:None; runpy.run_path(' + repr(str(SOURCE / 'approve-release-ci.py')) + ",run_name='__main__')", RELEASE_PR=json.dumps(generated))
         self.assertEqual(execute().returncode, 0)
         self.assertTrue((self.root / 'approved').exists())
         (self.root / 'approved').unlink()
+        pr['head']['ref'] = 'release-please--branches--master'
+        (self.root / 'pr.json').write_text(json.dumps(pr))
+        self.assertNotEqual(execute().returncode, 0)
+        self.assertFalse((self.root / 'approved').exists())
+        pr['head']['ref'] = generated['headBranchName']
+        (self.root / 'pr.json').write_text(json.dumps(pr))
         run.update(status='in_progress', conclusion=None)
         self.assertEqual(execute().returncode, 0)
         self.assertFalse((self.root / 'approved').exists())
