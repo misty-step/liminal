@@ -105,15 +105,44 @@ Independent review approved the production code and required the factual
 corrections above plus a non-vacuous rejected-network regression: a plain fetch
 stub must expose an unhandled rejection when the production promise catch is
 removed. Kaylee authorized self-verification of those corrections and release
-without another review round. Exact-head hosted CI, merge and verified
-deployment remain release gates; this document does not claim deployment or
-Sentry resolution. The release owner must build clean merged master with
-`NEXT_PUBLIC_SENTRY_DSN` supplied privately and `NEXT_PUBLIC_SENTRY_RELEASE` set
-to the exact source SHA, verify the isolated candidate, and promote those same
-bytes through the approved README deploy lane. Retain the source SHA and Worker
-version; verify served static bytes, browser Sentry activation and health with
-read-only requests. Only after verification and a regression watch may the owner
-resolve LIMINAL-1 and record the transition on `t_c5dbfb4f` and incident
-`t_0c37060e`. Never exercise the missing-API scenario against production or
-create production usage fixtures. No D1 migration or credential change belongs
-to this repair.
+without another review round. The corrected test killed the missing-catch mutant
+with exit 1 and an unhandled `Offline` rejection; restoring the approved code
+passed all 184 tests. No runtime change was needed after independent approval.
+
+## Recovery
+
+PR #18 passed exact-head CI run `38775839430` at
+`aed7384e6059d06e80528b1065c1a919586cedb0` and merged as
+`f9a2621419744379cdec226d885b141f07e964b4`. Merged-master CI run `38775990309`
+also passed. A clean checkout of that merged source was built once with the
+project's public browser DSN and exact release supplied at build time. The
+actual local Cloudflare Worker passed all six missing-API/fault scenarios;
+Chromium and Firefox also completed the native insecure-origin scenario.
+External telemetry and event persistence were blocked during browser proof.
+
+The same tested artifact (1,408 files, verified by a SHA-256 manifest) was
+promoted through the approved README lane on 2026-10-15. At 17:20:40Z, after the
+release-metadata update, production served Worker version
+`d7279abb-f875-452f-9a21-788402f5af8d` at 100%. Fresh GETs at 17:21:55Z matched
+all 15 HTML-referenced static/build assets byte-for-byte, and health reported
+the deck and storage healthy. Health has no release field: served bytes, build
+ID, active Worker version and browser Sentry options establish identity.
+
+A normal production mount showed a playable board with no page errors. The
+served browser client reported capture enabled, a DSN present, production
+environment, exact release `f9a2621419744379cdec226d885b141f07e964b4`, and
+`sendDefaultPii: false`. All browser POSTs and external telemetry were blocked:
+there was no missing-API production test, gameplay fixture or analytics write.
+No production D1 migration, data or credential change was needed.
+
+The repair card retains the screenshots, commands, source/artifact hashes,
+hosted CI results and the subsequent bounded Sentry watch and issue-state
+readback. Three GET-only samples from 17:22:31Z through 17:27:36Z found health
+healthy, no issues attributed to the new release, and LIMINAL-1 unchanged at four
+events with last occurrence 2026-09-24T23:31:28Z. Only then was LIMINAL-1 resolved;
+an independent exact-issue GET at 17:27:49Z verified `status: resolved`, the same
+event count and unchanged last occurrence. The transition is recorded on
+`t_c5dbfb4f` and incident `t_0c37060e`. This bounded watch is not a guarantee
+against future regressions. The separate HTTPS, production-build guard and
+localStorage-denial repairs remain owned by `t_393a8eae`, `t_c8476774` and
+`t_0575050d`, respectively.
