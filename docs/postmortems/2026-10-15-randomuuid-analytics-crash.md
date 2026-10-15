@@ -88,6 +88,12 @@ availability dependency in React mount effects and gameplay handlers.
 - The page only calls that contained boundary. No global polyfill, new
   dependency, schema, game mechanic or production-data change is needed.
 
+## Corrective actions
+
+- Prevent a repeat of the disabled browser capture and false release identity:
+  [require browser Sentry identity in production builds](../decisions/production-sentry-build-guard.md)
+  (`t_c8476774`).
+
 ## Verification and release custody
 
 `bun run check` passed 184 tests across 25 files, including 15 new ID/analytics
