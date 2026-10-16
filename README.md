@@ -139,6 +139,14 @@ bun run type-check
 bun run build:cf   # reproducible OpenNext/Cloudflare deploy artifact
 ```
 
+`BASE=http://127.0.0.1:<port> bun e2e/product-analytics.ts` exercises a local
+production-built Worker against the approved live PostHog sink: rejection,
+outage/recovery, all five story names, private share-route templating, restored
+completion and a separate DNT game. It refuses non-loopback apps and records
+only synthetic UUIDs/properties, never the ingestion token. Its transport
+receipt is not stored-event proof: retrieve those exact UUIDs through the
+authorized project API separately. The standard artifact QA blocks all sinks.
+
 Puzzle pipeline. The judge key (`OPENROUTER_API_KEY` or `TYPESAFE_API_KEY`)
 scores words; generation and the audit's player model bill a separate
 `LIMINAL_GENERATOR_API_KEY` and refuse to run on the judge key, so drafting

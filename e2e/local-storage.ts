@@ -168,8 +168,12 @@ try {
       assert.deepEqual(errors, [], "No global error or unhandled page exception");
       assert.deepEqual(judgeRequests, [], "Four authored guesses need no live judge");
       assert(
-        external.every((url) => url === "https://us.i.posthog.com"),
-        "Only optional analytics was blocked",
+        external.every(
+          (url) =>
+            url === "https://us.i.posthog.com" ||
+            new URL(url).hostname.endsWith(".ingest.us.sentry.io"),
+        ),
+        `Only optional telemetry was blocked: ${JSON.stringify(external)}`,
       );
       results.push({
         scenario,
