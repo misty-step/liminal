@@ -217,6 +217,7 @@ remain intact, and operators to identify and recover the serving code.
 Criteria:
 1. THE SYSTEM SHALL verify the app artifact against the existing stories using
    isolated storage before promoting those same bytes, without paid judging.
+   Non-production runs SHALL NOT access production storage.
 2. THE SYSTEM SHALL NOT promote a failed, skipped, foreign, or stale CI candidate.
 3. THE SYSTEM SHALL report its package version and full source revision in health.
 4. IF promotion or its live readback fails, THE SYSTEM SHALL restore the prior

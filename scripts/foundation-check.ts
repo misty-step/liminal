@@ -83,13 +83,11 @@ requireText("migrations/0002_foundations.sql", [
 ]);
 
 const wrangler = requireText("wrangler.jsonc", [
-  '"LIMINAL_ENVIRONMENT": "staging"',
   '"LIMINAL_ENVIRONMENT": "production"',
-  '"SENTRY_ENVIRONMENT": "staging"',
   '"SENTRY_ENVIRONMENT": "production"',
 ]);
-if ((wrangler.match(/"LIMINAL_DB"/g) ?? []).length < 3) {
-  failures.push("wrangler.jsonc must bind LIMINAL_DB at root, staging, and production");
+if ((wrangler.match(/"LIMINAL_DB"/g) ?? []).length < 2) {
+  failures.push("wrangler.jsonc must bind LIMINAL_DB at root and production");
 }
 
 for (const path of [
