@@ -139,8 +139,12 @@ Criteria:
 3. WHEN someone opens the link, THE SYSTEM SHALL show the result with each of
    my words hidden until tapped.
 4. IF the link is malformed, THEN THE SYSTEM SHALL show it as broken.
+5. THE SYSTEM SHALL NOT send the share code or the words it encodes to error
+   or performance telemetry, including request URLs, referrers, transactions,
+   spans, breadcrumbs, and tags; telemetry SHALL retain only the share route.
 
-Evidence: `src/lib/liminal/__tests__/share.test.ts`
+Evidence: `src/lib/liminal/__tests__/share.test.ts`,
+`src/lib/liminal/__tests__/monitoring.test.ts`, `e2e/qa-journeys.ts`
 
 ## Capability: Fresh puzzles every day
 
