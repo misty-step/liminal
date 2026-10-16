@@ -1,5 +1,7 @@
 # AGENTS.md — Liminal
 
+Shared standard: [Constitution](https://foundations.mistystep.io/) and [Way of working](https://foundations.mistystep.io/way-of-working).
+
 Solo daily puzzle app. Standard Misty Step conventions: Next.js (App Router),
 TypeScript strict, bun, vitest, Cloudflare Workers deploy.
 
