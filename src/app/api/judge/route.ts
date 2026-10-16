@@ -87,6 +87,14 @@ export async function POST(request: Request) {
     );
   }
 
+  // Capture only the bounded class, never player input or raw provider faults.
+  // Native Sentry delivery is asynchronous: an unavailable sink cannot hold play.
+  Sentry.captureMessage("Semantic judge unavailable", {
+    level: "error",
+    tags: { route: "judge", operation: "provider", reason: result.reason },
+    fingerprint: ["semantic-judge", result.reason],
+  });
+
   // Honest outage: the client must not consume a guess.
   return NextResponse.json(
     { status: "unavailable", reason: result.reason, normalized: normalizeAnswer(answer) },

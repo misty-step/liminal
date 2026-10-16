@@ -47,10 +47,15 @@ Criteria:
    including for a confident miss.
 4. IF a guess is invented or instruction-like, THEN THE SYSTEM SHALL NOT let
    it fill a place.
+5. WHEN semantic judging fails, THE SYSTEM SHALL report a bounded failure class
+   to the existing error sink with release and environment, without player text,
+   credentials, or provider response bodies. A failed sink SHALL NOT delay play
+   or turn an unavailable judgment into a verdict.
 
 Evidence: `src/lib/liminal/__tests__/evaluator.test.ts`,
 `src/lib/liminal/__tests__/storage.test.ts`,
 `src/lib/liminal/__tests__/typeSafe.test.ts`,
+`src/lib/liminal/__tests__/judge-failures.test.ts`,
 `src/lib/liminal/__tests__/routes.test.ts`,
 `src/lib/liminal/__tests__/generator-publish.test.ts` (hostile input never
 lands), `bun run validate:live` (hostile rows), `e2e/qa-journeys.ts`
