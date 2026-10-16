@@ -144,7 +144,7 @@ Criteria:
    spans, breadcrumbs, and tags; telemetry SHALL retain only the share route.
 
 Evidence: `src/lib/liminal/__tests__/share.test.ts`,
-`src/lib/liminal/__tests__/monitoring.test.ts`, `e2e/qa-journeys.ts`
+`src/lib/liminal/__tests__/monitoring.test.ts`
 
 ## Capability: Fresh puzzles every day
 
