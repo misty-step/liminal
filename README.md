@@ -103,9 +103,20 @@ copies to the clipboard.
 - `GET /api/health` checks the deck and the D1 binding. Staging and production
   fail closed when durable storage is missing; local development reports that
   storage is intentionally not configured.
-- `POST /api/events` accepts a strict, versioned first-party event taxonomy.
-  Events contain an anonymous session ID and bounded enums/counts only. Player
-  answers, report notes, IP addresses, and joinable actor IDs are not events.
+- The official PostHog browser SDK measures the stories in
+  [SPEC](SPEC.md#capability-privacy-safe-product-measurement). CI binds the
+  approved US project's public ingestion key as `NEXT_PUBLIC_POSTHOG_KEY`;
+  `app=liminal`, environment and the existing release SHA partition queries.
+  Anonymous IDs are host-scoped with 30-day cookies; sessions/retries use SDK
+  defaults. Only templated routes and bounded enums/counts leave the app.
+  Person profiles, autocapture, recording, IP/GeoIP and private content are
+  disabled; DNT is honored. Filter `environment=production` and
+  `is_synthetic=false` before counting people. Missing capture is unknown, not
+  zero usage. Never use a personal API credential in a browser/build.
+- New clients no longer post analytics to D1. `POST /api/events`, its strict
+  legacy schema and existing rows remain only for old tabs/code rollback;
+  they are not a second current collector or the new usage source. This
+  change neither migrates nor deletes accepted data.
 - Sentry is disabled unless a DSN is supplied. Server, edge, and browser
   capture use explicit environment and release values, sampled traces, source
   maps for release builds, `sendDefaultPii: false`, and a scrubber that removes
@@ -127,6 +138,14 @@ bun run test       # vitest: engine, deck, boundaries, storage, routes, privacy
 bun run type-check
 bun run build:cf   # reproducible OpenNext/Cloudflare deploy artifact
 ```
+
+`BASE=http://127.0.0.1:<port> bun e2e/product-analytics.ts` exercises a local
+production-built Worker against the approved live PostHog sink: rejection,
+outage/recovery, all five story names, private share-route templating, restored
+completion and a separate DNT game. It refuses non-loopback apps and records
+only synthetic UUIDs/properties, never the ingestion token. Its transport
+receipt is not stored-event proof: retrieve those exact UUIDs through the
+authorized project API separately. The standard artifact QA blocks all sinks.
 
 Puzzle pipeline. The judge key (`OPENROUTER_API_KEY` or `TYPESAFE_API_KEY`)
 scores words; generation and the audit's player model bill a separate

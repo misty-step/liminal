@@ -7,11 +7,11 @@
     "requiredChecks": ["deck", "storage"]
   },
   "productEvents": {
-    "path": "/api/events",
+    "path": "https://us.i.posthog.com",
     "schemaVersion": 1,
     "environmentExplicit": true,
     "playerTextAllowed": false,
-    "actorIdentity": "anonymous-session"
+    "actorIdentity": "host-scoped-anonymous-browser"
   },
   "sentry": {
     "projectSlug": "liminal",

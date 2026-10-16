@@ -138,13 +138,6 @@ export default function Page() {
   useEffect(() => {
     void loadToday();
 
-    const visitorKey = "liminal.visited.v1";
-    const visited = readLocalItem(visitorKey);
-    writeLocalItem(visitorKey, "1");
-    // An unreadable visitor marker cannot establish whether this is a first visit.
-    if (visited !== undefined) {
-      emitProductEvent("session_start", { mode: "today", new_visitor: visited === null });
-    }
     if (!readLocalItem(HOWTO_KEY)) {
       howtoRef.current?.showModal();
       setHowtoOpen(true);

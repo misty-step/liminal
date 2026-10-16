@@ -2,7 +2,6 @@
 import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
-import { parseProductEventPayload } from "../src/lib/liminal/runtime";
 
 const base = process.env.BASE ?? "http://127.0.0.1:43175";
 assert(["localhost", "127.0.0.1", "[::1]"].includes(new URL(base).hostname), "Local only");
@@ -31,10 +30,11 @@ try {
     const errors: string[] = [];
     const events: unknown[] = [];
     page.on("pageerror", (error) => errors.push(error.message));
-    // Capture envelopes without writing analytics, even to the local server.
+    // Never write legacy analytics or send test traffic to production sinks.
+    await page.route("https://**/*", (route) => route.abort("blockedbyclient"));
     await page.route("**/api/events", async (route) => {
       events.push(route.request().postDataJSON());
-      await route.fulfill({ status: 202, json: { ok: true } });
+      await route.abort("blockedbyclient");
     });
     await context.addInitScript((scenario) => {
       Object.defineProperty(crypto, "randomUUID", { value: undefined, configurable: true });
@@ -55,7 +55,7 @@ try {
       if (scenario.startsWith("fetch-")) {
         const original = window.fetch.bind(window);
         window.fetch = (...args) => {
-          if (args[0] === "/api/events") {
+          if (String(args[0]).includes("posthog.com") || args[0] === "/api/events") {
             if (scenario === "fetch-throws") throw new Error("Fetch denied");
             return Promise.reject(new Error("Network unavailable"));
           }
@@ -91,45 +91,10 @@ try {
       });
       await page.screenshot({ path: `${out}/${scenario}-complete.png`, fullPage: true });
       if (scenario.startsWith("fallback-")) {
-        const names = events.map((event) => {
-          const parsed = parseProductEventPayload(event);
-          assert(parsed.ok, "Server accepts the event envelope");
-          return parsed.value.eventName;
-        });
-        assert.deepEqual(names.sort(), [
-          "guess_judged",
-          "guess_judged",
-          "guess_judged",
-          "guess_judged",
-          "puzzle_complete",
-          "puzzle_open",
-          "session_start",
-        ]);
-        const session = await page.evaluate(() =>
-          sessionStorage.getItem("liminal.event-session.v1"),
-        );
-        assert.match(session ?? "", /^session_[0-9a-f]{12}4[0-9a-f]{3}[89ab][0-9a-f]{15}$/);
-        const ids = new Set<string>();
-        for (const event of events) {
-          const parsed = parseProductEventPayload(event);
-          assert(parsed.ok, "Server accepts the event envelope");
-          assert.match(
-            parsed.value.eventId,
-            /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
-          );
-          assert.equal(parsed.value.sessionId, session);
-          ids.add(parsed.value.eventId);
-        }
-        assert.equal(ids.size, events.length, "Unique event IDs, retained session ID");
         await page.reload({ waitUntil: "networkidle" });
         assert.equal(await page.locator("h2.end-title").innerText(), "Filled in 4 guesses");
-        assert.equal(
-          await page.evaluate(() => sessionStorage.getItem("liminal.event-session.v1")),
-          session,
-        );
-      } else {
-        assert.equal(events.length, 0, "Unavailable analytics is dropped");
       }
+      assert.equal(events.length, 0, "New clients do not use the retired collector");
       assert.deepEqual(errors, [], "Gameplay and reload must not throw");
       results.push({ scenario, ok: true, events: events.length, errors });
       console.log(

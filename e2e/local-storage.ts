@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { chromium } from "playwright";
 import { parsePuzzle } from "../src/lib/liminal/puzzleSchema";
-import { parseProductEventPayload } from "../src/lib/liminal/runtime";
+
 import { parseProgress } from "../src/lib/liminal/storage";
 
 declare global {
@@ -128,32 +128,17 @@ try {
       assert.deepEqual(probe.unhandled, []);
       if (scenario === "denied-getter") assert(probe.getterFailures > 0);
       if (scenario === "denied-read") {
-        for (const key of [
-          "liminal.visited.v1",
-          "liminal.howto.v2",
-          "liminal.sound.v1",
-          progressKey,
-        ]) {
+        for (const key of ["liminal.howto.v2", "liminal.sound.v1", progressKey]) {
           assert(probe.readFailures.includes(key), `Actual denied read: ${key}`);
         }
       }
       if (scenario === "denied-write") {
-        for (const key of ["liminal.visited.v1", "liminal.howto.v2", progressKey]) {
+        for (const key of ["liminal.howto.v2", progressKey]) {
           assert(probe.writeFailures.includes(key), `Actual denied write: ${key}`);
         }
         assert.equal(await page.evaluate((key) => localStorage.getItem(key), progressKey), null);
       }
-      const sessionEvents = events.flatMap((event) => {
-        const parsed = parseProductEventPayload(event);
-        assert(parsed.ok, "Captured attempt is a valid envelope, not proof of delivery");
-        return parsed.value.eventName === "session_start" ? [parsed.value] : [];
-      });
-      if (scenario === "denied-getter" || scenario === "denied-read") {
-        assert.equal(sessionEvents.length, 0, "No invented first-visit telemetry");
-      } else {
-        assert.equal(sessionEvents.length, 1);
-        assert.equal(sessionEvents[0].props.new_visitor, true);
-      }
+      assert.equal(events.length, 0, "New clients never use the legacy D1 collector");
       let reloadVerified = false;
       if (scenario === "available") {
         const before = await page.evaluate((key) => localStorage.getItem(key), progressKey);
@@ -168,7 +153,7 @@ try {
         assert.equal(await page.locator("h2.end-title").innerText(), "Filled in 4 guesses");
         assert.equal(await page.locator("dialog.howto[open]").count(), 0);
         assert.equal(await page.evaluate((key) => localStorage.getItem(key), progressKey), before);
-        assert.equal(await page.evaluate(() => localStorage.getItem("liminal.visited.v1")), "1");
+
         assert.equal(await page.evaluate(() => localStorage.getItem("liminal.howto.v2")), "1");
         await page.waitForFunction(() => {
           const end = document.querySelector("section.end");
@@ -176,21 +161,20 @@ try {
         });
         await page.screenshot({ path: `${out}/${scenario}-reload.png`, fullPage: true });
         assert.deepEqual(await page.evaluate(() => window.__liminalStorageProbe.unhandled), []);
-        const returning = events.map((event) => parseProductEventPayload(event));
-        assert(
-          returning.some(
-            (event) =>
-              event.ok &&
-              event.value.eventName === "session_start" &&
-              event.value.props.new_visitor === false,
-          ),
-        );
+        assert.equal(events.length, 0, "Reload does not restore the old collector");
         reloadVerified = true;
       }
       assert.equal(await page.getByText("The board stopped.", { exact: true }).count(), 0);
       assert.deepEqual(errors, [], "No global error or unhandled page exception");
       assert.deepEqual(judgeRequests, [], "Four authored guesses need no live judge");
-      assert.deepEqual(external, [], "No production or other external browser traffic");
+      assert(
+        external.every(
+          (url) =>
+            url === "https://us.i.posthog.com" ||
+            new URL(url).hostname.endsWith(".ingest.us.sentry.io"),
+        ),
+        `Only optional telemetry was blocked: ${JSON.stringify(external)}`,
+      );
       results.push({
         scenario,
         ok: true,

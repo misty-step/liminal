@@ -22,7 +22,7 @@ operation. Both obtaining the storage object and calling its methods may fail;
 writes may fail independently, including quota exhaustion. Do not cache an
 unavailable capability forever: later operations can succeed if access recovers.
 
-- Keep the existing keys and values: `liminal.visited.v1`, `liminal.howto.v2`,
+- Keep the existing preference/progress keys and values: `liminal.howto.v2`,
   `liminal.sound.v1`, and `liminal.v2.puzzle.<id>`. No schema change or migration.
 - A missing or unreadable saved game loads no progress. The existing page state
   remains authoritative for the current tab; best-effort saves must not block
@@ -30,10 +30,10 @@ unavailable capability forever: later operations can succeed if access recovers.
 - An unreadable how-to preference shows instructions; dismissing or reopening
   them must still work. Sound remains opt-in, and an unavailable preference
   does not prevent the tab from honoring a new sound choice.
-- Distinguish an absent visitor marker (`null`) from an unreadable one
-  (`undefined`). Skip `session_start` when first-visit status is unknowable
-  rather than inventing a `new_visitor` value. Other analytics retain their
-  existing best-effort behavior. No persistence or telemetry delivery is claimed.
+- The old visitor/session collector is superseded by the official analytics
+  SDK (see README). Its historical marker may remain untouched in storage;
+  the app no longer reads it or fabricates first-visit events. Analytics
+  remains optional when browser persistence is unavailable.
 - If storage remains unavailable, this tab can complete the puzzle, but reload
   cannot be promised to restore its progress. When storage works, reload keeps
   the same guesses and elapsed time.
