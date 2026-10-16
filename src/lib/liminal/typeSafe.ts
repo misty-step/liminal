@@ -160,8 +160,8 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
       return { status: "unavailable", reason: "upstream-error" };
     }
 
-    const body = (await response.json()) as TypeSafeResponse;
-    if (!body.answers) return { status: "unavailable", reason: "invalid-response" };
+    const body = (await response.json()) as TypeSafeResponse | null;
+    if (!body?.answers) return { status: "unavailable", reason: "invalid-response" };
 
     // Validate every fresh judgment before caching any of them: a partial
     // response must not leave half a judgment behind.
@@ -197,7 +197,14 @@ export async function judgeAnswer(options: JudgeOptions): Promise<JudgeResult> {
     }
   } catch (error) {
     const aborted = error instanceof Error && error.name === "AbortError";
-    return { status: "unavailable", reason: aborted ? "timeout" : "upstream-error" };
+    return {
+      status: "unavailable",
+      reason: aborted
+        ? "timeout"
+        : error instanceof SyntaxError
+          ? "invalid-response"
+          : "upstream-error",
+    };
   } finally {
     clearTimeout(timer);
   }
