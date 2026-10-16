@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Newsreader, Schibsted_Grotesk } from "next/font/google";
 import type { ReactNode } from "react";
+import { ProductPageview } from "./ProductPageview";
 import "./globals.css";
 
 // Self-hosted at build by next/font (SIL OFL). Words on the board use the serif.
@@ -75,6 +76,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           Skip to the puzzle
         </a>
         {children}
+        <ProductPageview />
       </body>
     </html>
   );

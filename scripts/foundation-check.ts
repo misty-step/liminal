@@ -130,7 +130,10 @@ const manifest = JSON.parse(read("ops/production-foundations.json")) as {
 if (manifest.classification !== "browser-app")
   failures.push("ops manifest class must be browser-app");
 if (manifest.health?.path !== "/api/health") failures.push("ops manifest must register health");
-if (manifest.productEvents?.path !== "/api/events" || manifest.productEvents.playerTextAllowed) {
+if (
+  manifest.productEvents?.path !== "https://us.i.posthog.com" ||
+  manifest.productEvents.playerTextAllowed
+) {
   failures.push("ops manifest must register privacy-safe product events");
 }
 if (

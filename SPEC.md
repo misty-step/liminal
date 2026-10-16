@@ -212,6 +212,23 @@ Criteria:
 Evidence: `src/lib/liminal/audio.ts`, `src/app/page.tsx`, browser sound
 toggle and submission review.
 
+## Capability: Privacy-safe product measurement
+
+Operators can measure anonymous weekly activity and the existing play stories
+without collecting the player's words or making play depend on analytics.
+
+- Record pageviews with sessions, and `puzzle_open` (US-001/US-006),
+  `guess_judged` (US-002), `guess_refused` (US-002), `puzzle_complete`
+  (US-003), and `report_submitted` (US-004). Record accepted outcomes only;
+  restoring a finished board does not record another completion.
+- Use a browser-local anonymous identity, never an account identity or a
+  cross-product identifier. Exclude answers, labels, reports, share codes,
+  query strings, referrers, IPs and location from analytics. No automatic
+  interaction capture, replay, person profiles or error capture.
+- Identify the app, environment, release and synthetic/browser automation
+  traffic so production human activity can be queried separately. Honor Do
+  Not Track. Analytics absence, rejection and recovery never block play.
+
 ## Capability: Safe app updates
 
 ## US-011 Receive verified updates without losing accepted state

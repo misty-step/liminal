@@ -103,9 +103,20 @@ copies to the clipboard.
 - `GET /api/health` checks the deck and the D1 binding. Staging and production
   fail closed when durable storage is missing; local development reports that
   storage is intentionally not configured.
-- `POST /api/events` accepts a strict, versioned first-party event taxonomy.
-  Events contain an anonymous session ID and bounded enums/counts only. Player
-  answers, report notes, IP addresses, and joinable actor IDs are not events.
+- The official PostHog browser SDK measures the stories in
+  [SPEC](SPEC.md#capability-privacy-safe-product-measurement). CI binds the
+  approved US project's public ingestion key as `NEXT_PUBLIC_POSTHOG_KEY`;
+  `app=liminal`, environment and the existing release SHA partition queries.
+  Anonymous IDs are host-scoped with 30-day cookies; sessions/retries use SDK
+  defaults. Only templated routes and bounded enums/counts leave the app.
+  Person profiles, autocapture, recording, IP/GeoIP and private content are
+  disabled; DNT is honored. Filter `environment=production` and
+  `is_synthetic=false` before counting people. Missing capture is unknown, not
+  zero usage. Never use a personal API credential in a browser/build.
+- New clients no longer post analytics to D1. `POST /api/events`, its strict
+  legacy schema and existing rows remain only for old tabs/code rollback;
+  they are not a second current collector or the new usage source. This
+  change neither migrates nor deletes accepted data.
 - Sentry is disabled unless a DSN is supplied. Server, edge, and browser
   capture use explicit environment and release values, sampled traces, source
   maps for release builds, `sendDefaultPii: false`, and a scrubber that removes
