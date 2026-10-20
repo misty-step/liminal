@@ -1,0 +1,14 @@
+$ wrangler d1 execute LIMINAL_DB --env production --local --persist-to <state>/judge/d1 --command "select count(*) as judgments from judgments"  # 2026-10-20T22:27:10Z
+[
+  {
+    "results": [
+      {
+        "judgments": 6
+      }
+    ],
+    "success": true,
+    "meta": {
+      "duration": 1
+    }
+  }
+]

@@ -1,0 +1,83 @@
+{
+  "base": "http://127.0.0.1:35851",
+  "puzzleId": "head-and-foot",
+  "results": [
+    {
+      "scenario": "denied-getter",
+      "ok": true,
+      "nativeRandomUUID": true,
+      "result": "Filled in 4 guesses",
+      "howtoReopened": true,
+      "reloadVerified": false,
+      "probe": {
+        "getterFailures": 11,
+        "readFailures": [],
+        "writeFailures": [],
+        "unhandled": []
+      },
+      "errors": [],
+      "analyticsPersisted": false
+    },
+    {
+      "scenario": "denied-read",
+      "ok": true,
+      "nativeRandomUUID": true,
+      "result": "Filled in 4 guesses",
+      "howtoReopened": true,
+      "reloadVerified": false,
+      "probe": {
+        "getterFailures": 0,
+        "readFailures": [
+          "liminal.howto.v2",
+          "liminal.sound.v1",
+          "liminal.v2.puzzle.head-and-foot"
+        ],
+        "writeFailures": [],
+        "unhandled": []
+      },
+      "errors": [],
+      "analyticsPersisted": false
+    },
+    {
+      "scenario": "denied-write",
+      "ok": true,
+      "nativeRandomUUID": true,
+      "result": "Filled in 4 guesses",
+      "howtoReopened": true,
+      "reloadVerified": false,
+      "probe": {
+        "getterFailures": 0,
+        "readFailures": [],
+        "writeFailures": [
+          "liminal.howto.v2",
+          "liminal.v2.puzzle.head-and-foot",
+          "liminal.howto.v2",
+          "liminal.v2.puzzle.head-and-foot",
+          "liminal.v2.puzzle.head-and-foot",
+          "liminal.v2.puzzle.head-and-foot",
+          "liminal.v2.puzzle.head-and-foot",
+          "liminal.v2.puzzle.head-and-foot"
+        ],
+        "unhandled": []
+      },
+      "errors": [],
+      "analyticsPersisted": false
+    },
+    {
+      "scenario": "available",
+      "ok": true,
+      "nativeRandomUUID": true,
+      "result": "Filled in 4 guesses",
+      "howtoReopened": true,
+      "reloadVerified": true,
+      "probe": {
+        "getterFailures": 0,
+        "readFailures": [],
+        "writeFailures": [],
+        "unhandled": []
+      },
+      "errors": [],
+      "analyticsPersisted": false
+    }
+  ]
+}

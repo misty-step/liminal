@@ -1,0 +1,14 @@
+$ wrangler d1 execute LIMINAL_DB --env production --local --persist-to <state>/offline/d1 --command "select count(*) as reports from reports"  # 2026-10-20T22:22:28Z
+[
+  {
+    "results": [
+      {
+        "reports": 1
+      }
+    ],
+    "success": true,
+    "meta": {
+      "duration": 1
+    }
+  }
+]

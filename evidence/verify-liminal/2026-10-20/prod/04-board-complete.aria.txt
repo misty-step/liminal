@@ -1,0 +1,31 @@
+- link "Skip to the puzzle":
+  - /url: "#game"
+- banner:
+  - heading "Liminal" [level=1]
+  - text: October 20
+  - button "Turn sounds on"
+  - button "How to play": "?"
+- main:
+  - text: Lives in water Spends its life mainly in water Has no bones No skeleton of bone inside Has a stinger A dedicated stinging organ
+  - 'button "squid. Lives in water: inside; Has no bones: inside; Has a stinger: outside. Fills a region."': squid
+  - 'button "lionfish. Lives in water: inside; Has no bones: outside; Has a stinger: inside. Fills a region."': lionfish
+  - 'button "bee. Lives in water: outside; Has no bones: inside; Has a stinger: inside. Fills a region."': bee
+  - 'button "jellyfish. Lives in water: inside; Has no bones: inside; Has a stinger: inside. Fills a region."': jellyfish
+  - heading "Filled in 4 guesses" [level=2]
+  - paragraph: 0:00 on the clock
+  - list:
+    - listitem: Lives in water + Has no bones squid, clam, oyster, scallop
+    - listitem: Lives in water + Has a stinger lionfish, stonefish, catfish, scorpionfish
+    - listitem: Has no bones + Has a stinger bee, wasp, hornet, yellow jacket
+    - listitem: All three jellyfish, sea anemone, box jellyfish, portuguese man o' war, sea nettle
+  - figure "Share preview":
+    - text: "Liminal #28"
+    - img "Guess results": 🟪🟩🟧⬛
+    - text: 4 guesses, 0:00 🎯 liminal.mistystep.io/s/…
+  - button "Share"
+  - 'button "Play #27"'
+  - paragraph: Next puzzle in 1h 32m
+- navigation "About Liminal":
+  - link "Changelog":
+    - /url: /changelog
+- alert

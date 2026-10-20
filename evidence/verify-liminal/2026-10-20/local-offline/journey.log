@@ -1,0 +1,36 @@
+$ verify-liminal journey offline  # 2026-10-20T22:19:04Z
+journey on http://127.0.0.1:35851 -> ./evidence/verify-liminal/2026-10-20/local-offline
+PASS health is ok in production mode — {"status":"ok","service":"liminal","environment":"production","checks":{"deck":"ok","storage":"ok"},"version":"0.2.1","revision":"3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed"}
+PASS today is the shared numbered puzzle for this UTC date — 2026-10-20 #28
+PASS today's number serves today's puzzle — status=200
+PASS tomorrow's number is refused — status=404
+PASS puzzle #0 does not exist — 404
+PASS first visit opens how to play
+PASS board shows today's three circles — Has a head | Has a foot | Isn't alive
+PASS empty board starts at zero guesses
+PASS circle label is refused for free — That repeats a circle. Name a thing instead.
+PASS repeat word is refused for free — “PERSON” is already on the board.
+PASS four authored answers fill four regions — filled=4
+PASS board ends with guess count and thinking time — Filled in 4 guesses / 0:01 on the clock
+PASS share text is four spoiler-free lines — ["Liminal #28","🟪🟩🟧⬛","4 guesses, 0:01 🎯","http://127.0.0.1:35851/s/eyJ2IjoxLCJuIjoyOCwidCI6MSwidyI6W1sicGVyc29uIiwiQyJdLFsibmFpbCIsIkIiXSxbImZvb3RzdG9vbCIsIkEiXSxbImJlZCIsIk0iXV19"] leaked=[]
+PASS finished board survives reload
+PASS word detail shows a verdict per circle — verdicts=3
+PASS disagree is offered on a word
+PASS archive opens yesterday's different puzzle — Has keys | Made for music | Easy to carry
+PASS back to today restores today's board
+PASS changelog names the serving version — 0.2.1
+PASS share page hides every word until tapped — visible=[]
+PASS tapping reveals one word — 1 person filled the purple gap (taps=1; 0 dropped before hydration)
+PASS malformed share link says it is broken
+PASS schedule outage shows retry and no puzzle
+PASS retry after the outage loads today's board
+PASS slow schedule shows a busy board, then today's puzzle — loading=true
+PASS judge outage is honest and spends nothing — Couldn’t reach the judge. Try again in a moment. No guess used.
+PASS judge rate limit is honest and spends nothing — Too many tries at once. Wait a moment. No guess used.
+PASS storage denied still plays — errors=[]
+PASS phone width fits board and composer — {"noSideScroll":true,"labels":true,"composer":true}
+PASS phone completes a board
+PASS the journey wrote nothing to the server — only GET/HEAD reached the app
+
+31/31 checks passed -> ./evidence/verify-liminal/2026-10-20/local-offline
+exit=0

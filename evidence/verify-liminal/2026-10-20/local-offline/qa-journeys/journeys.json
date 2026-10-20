@@ -1,0 +1,270 @@
+{
+  "at": "2026-10-20T22:21:53.411Z",
+  "results": [
+    {
+      "name": "board shows the scheduled puzzle",
+      "ok": true,
+      "detail": "Has a head"
+    },
+    {
+      "name": "desktop fill c3",
+      "ok": true,
+      "detail": "word=1, targets=1, answer=person"
+    },
+    {
+      "name": "desktop fill c2",
+      "ok": true,
+      "detail": "word=1, targets=2, answer=nail"
+    },
+    {
+      "name": "desktop fill c1",
+      "ok": true,
+      "detail": "word=1, targets=3, answer=footstool"
+    },
+    {
+      "name": "desktop fill center",
+      "ok": true,
+      "detail": "word=1, targets=4, answer=bed"
+    },
+    {
+      "name": "desktop completed in four with a time",
+      "ok": true,
+      "detail": "Filled in 4 guesses / 0:02 on the clock"
+    },
+    {
+      "name": "four fills survive refresh",
+      "ok": true,
+      "detail": "words=4, title=Filled in 4 guesses"
+    },
+    {
+      "name": "word detail has three verdicts",
+      "ok": true,
+      "detail": "verdicts=3"
+    },
+    {
+      "name": "word verdict report is filed",
+      "ok": true,
+      "detail": "Noted. Thanks."
+    },
+    {
+      "name": "archive opens an earlier puzzle",
+      "ok": true,
+      "detail": "today=Has a head, archive=Has keys"
+    },
+    {
+      "name": "back to today restores daily puzzle",
+      "ok": true,
+      "detail": "Has a head"
+    },
+    {
+      "name": "circle label echo spends nothing",
+      "ok": true,
+      "detail": "words=0, guesses=0, status=That repeats a circle. Name a thing instead."
+    },
+    {
+      "name": "case-insensitive repeat spends nothing",
+      "ok": true,
+      "detail": "words=1, guesses=1, status=“PERSON” is already on the board."
+    },
+    {
+      "name": "no guess limit: the board stays open until complete",
+      "ok": true,
+      "detail": "guesses=11, field enabled=true, end panels=0"
+    },
+    {
+      "name": "judge outage is honest and spends nothing",
+      "ok": true,
+      "detail": "status=Couldn’t reach the judge. Try again in a moment. No guess used., words=0, guesses=0"
+    },
+    {
+      "name": "clock runs while the player thinks",
+      "ok": true,
+      "detail": "0 -> 2"
+    },
+    {
+      "name": "clock holds while the judge considers a word",
+      "ok": true,
+      "detail": "2 -> 2; Couldn’t reach the judge. Try again in a moment. No guess used."
+    },
+    {
+      "name": "clock holds while the how-to is open",
+      "ok": true,
+      "detail": "2 -> 2"
+    },
+    {
+      "name": "clock holds while the tab is hidden",
+      "ok": true,
+      "detail": "2 -> 2"
+    },
+    {
+      "name": "mobile board shows the scheduled puzzle",
+      "ok": true,
+      "detail": "Has a head"
+    },
+    {
+      "name": "sound is opt-in",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "sound preference survives reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "keyboard keeps puzzle and composer visible",
+      "ok": true,
+      "detail": "{\"fits\":true,\"inputBottom\":490.25,\"lastLabelBottom\":352.71875}"
+    },
+    {
+      "name": "mobile fill c3",
+      "ok": true,
+      "detail": "word=1, targets=1, answer=person"
+    },
+    {
+      "name": "mobile fill c2",
+      "ok": true,
+      "detail": "word=1, targets=2, answer=nail"
+    },
+    {
+      "name": "mobile fill c1",
+      "ok": true,
+      "detail": "word=1, targets=3, answer=footstool"
+    },
+    {
+      "name": "mobile fill center",
+      "ok": true,
+      "detail": "word=1, targets=4, answer=bed"
+    },
+    {
+      "name": "mobile completed in four with a time",
+      "ok": true,
+      "detail": "Filled in 4 guesses / 0:04 on the clock"
+    },
+    {
+      "name": "reduced motion minimizes word transitions",
+      "ok": true,
+      "detail": "0.001s"
+    },
+    {
+      "name": "changelog 1280 light shows serving version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 light contains the canonical releases",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 light has honest notes or empty state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 light fits without horizontal scrolling",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 light follows system theme",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 light returns to the game",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 dark shows serving version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 dark contains the canonical releases",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 dark has honest notes or empty state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 dark fits without horizontal scrolling",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 dark follows system theme",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 1280 dark returns to the game",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 light shows serving version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 light contains the canonical releases",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 light has honest notes or empty state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 light fits without horizontal scrolling",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 light follows system theme",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 light returns to the game",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 dark shows serving version",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 dark contains the canonical releases",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 dark has honest notes or empty state",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 dark fits without horizontal scrolling",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 dark follows system theme",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog 390 dark returns to the game",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

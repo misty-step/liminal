@@ -17,6 +17,9 @@ TypeScript strict, bun, vitest, Cloudflare Workers deploy.
   answers that land there and a held-out answer.
 - `design/reimagine/` — design exploration and rationale behind the current
   game (read before changing the mechanic).
+- `.agents/skills/verify-liminal/` — the verification skill (also at
+  `.claude/skills/verify-liminal`): drive the real game from a shell against
+  production (read-only) or a local Worker, with a feature map of what to prove.
 
 ## Rules of the game (product contract)
 

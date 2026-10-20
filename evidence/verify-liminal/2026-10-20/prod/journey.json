@@ -1,0 +1,200 @@
+{
+  "at": "2026-10-20T22:28:13.002Z",
+  "base": "https://liminal.mistystep.io",
+  "liveJudge": false,
+  "revision": "3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed",
+  "puzzle": {
+    "date": "2026-10-20",
+    "number": 28,
+    "id": "water-no-bones-sting"
+  },
+  "results": [
+    {
+      "name": "health is ok in production mode",
+      "ok": true,
+      "detail": "{\"status\":\"ok\",\"service\":\"liminal\",\"environment\":\"production\",\"checks\":{\"deck\":\"ok\",\"storage\":\"ok\"},\"version\":\"0.2.1\",\"revision\":\"3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed\"}"
+    },
+    {
+      "name": "today is the shared numbered puzzle for this UTC date",
+      "ok": true,
+      "detail": "2026-10-20 #28"
+    },
+    {
+      "name": "today's number serves today's puzzle",
+      "ok": true,
+      "detail": "status=200"
+    },
+    {
+      "name": "tomorrow's number is refused",
+      "ok": true,
+      "detail": "status=404"
+    },
+    {
+      "name": "puzzle #0 does not exist",
+      "ok": true,
+      "detail": "404"
+    },
+    {
+      "name": "first visit opens how to play",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "board shows today's three circles",
+      "ok": true,
+      "detail": "Lives in water | Has no bones | Has a stinger"
+    },
+    {
+      "name": "empty board starts at zero guesses",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "circle label is refused for free",
+      "ok": true,
+      "detail": "That repeats a circle. Name a thing instead."
+    },
+    {
+      "name": "repeat word is refused for free",
+      "ok": true,
+      "detail": "“SQUID” is already on the board."
+    },
+    {
+      "name": "four authored answers fill four regions",
+      "ok": true,
+      "detail": "filled=4"
+    },
+    {
+      "name": "board ends with guess count and thinking time",
+      "ok": true,
+      "detail": "Filled in 4 guesses / 0:00 on the clock"
+    },
+    {
+      "name": "share text is four spoiler-free lines",
+      "ok": true,
+      "detail": "[\"Liminal #28\",\"🟪🟩🟧⬛\",\"4 guesses, 0:00 🎯\",\"https://liminal.mistystep.io/s/eyJ2IjoxLCJuIjoyOCwidCI6MCwidyI6W1sic3F1aWQiLCJDIl0sWyJsaW9uZmlzaCIsIkIiXSxbImJlZSIsIkEiXSxbImplbGx5ZmlzaCIsIk0iXV19\"] leaked=[]"
+    },
+    {
+      "name": "finished board survives reload",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "word detail shows a verdict per circle",
+      "ok": true,
+      "detail": "verdicts=3"
+    },
+    {
+      "name": "disagree is offered on a word",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "archive opens yesterday's different puzzle",
+      "ok": true,
+      "detail": "Builds a nest | Can fly | Smaller than a cat"
+    },
+    {
+      "name": "back to today restores today's board",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "changelog names the serving version",
+      "ok": true,
+      "detail": "0.2.1"
+    },
+    {
+      "name": "share page hides every word until tapped",
+      "ok": true,
+      "detail": "visible=[]"
+    },
+    {
+      "name": "tapping reveals one word",
+      "ok": true,
+      "detail": "1 squid filled the purple gap (taps=1; 0 dropped before hydration)"
+    },
+    {
+      "name": "malformed share link says it is broken",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "schedule outage shows retry and no puzzle",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "retry after the outage loads today's board",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "slow schedule shows a busy board, then today's puzzle",
+      "ok": true,
+      "detail": "loading=true"
+    },
+    {
+      "name": "judge outage is honest and spends nothing",
+      "ok": true,
+      "detail": "Couldn’t reach the judge. Try again in a moment. No guess used."
+    },
+    {
+      "name": "judge rate limit is honest and spends nothing",
+      "ok": true,
+      "detail": "Too many tries at once. Wait a moment. No guess used."
+    },
+    {
+      "name": "storage denied still plays",
+      "ok": true,
+      "detail": "errors=[]"
+    },
+    {
+      "name": "phone width fits board and composer",
+      "ok": true,
+      "detail": "{\"noSideScroll\":true,\"labels\":true,\"composer\":true}"
+    },
+    {
+      "name": "phone completes a board",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "the journey wrote nothing to the server",
+      "ok": true,
+      "detail": "only GET/HEAD reached the app"
+    }
+  ],
+  "network": {
+    "sameOrigin": [
+      {
+        "request": "GET / sent",
+        "count": 12
+      },
+      {
+        "request": "GET /_next/* sent",
+        "count": 157
+      },
+      {
+        "request": "GET /api/today sent",
+        "count": 8
+      },
+      {
+        "request": "GET /changelog sent",
+        "count": 16
+      },
+      {
+        "request": "GET /api/puzzle/27 sent",
+        "count": 1
+      },
+      {
+        "request": "GET /s/* sent",
+        "count": 2
+      }
+    ],
+    "blockedExternalOrigins": [
+      "https://o4510313803677696.ingest.us.sentry.io",
+      "https://us.i.posthog.com"
+    ]
+  }
+}
