@@ -22,7 +22,7 @@ Preconditions:
 
 - **Offered (any target).** `verify-liminal journey <target>` asserts the `Disagree?` button exists in word detail, without sending.
 - **Send.** `verify-liminal qa` opens the first word, chooses `Disagree?`, fills `#report-note`, and submits `form.report`. `.report-status` reads "Noted. Thanks." Evidence: `qa-journeys/desktop-report.png`.
-- **Stored.** `bunx wrangler d1 execute LIMINAL_DB --env production --local --persist-to ~/.cache/tmp/verify-liminal/offline/d1 --command "select count(*) from reports"` returns at least 1. Run this before cleanup, which deletes the D1.
+- **Stored.** `verify-liminal d1 offline "select count(*) as reports from reports"` returns at least 1. Run this before cleanup, which deletes the D1.
 
 ## Gotchas
 

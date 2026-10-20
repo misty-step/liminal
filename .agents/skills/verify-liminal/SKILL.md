@@ -39,7 +39,7 @@ The helper refuses `--live-judge` on any non-loopback URL.
 ## Launch
 
 ```sh
-$V build                 # bun install, OpenNext build, wrangler dry-run bundle -> .open-next/bundle
+$V build                 # bun install, Playwright Chromium, OpenNext build, wrangler dry-run bundle -> .open-next/bundle
 $V launch                # instance "offline": prints its URL once /api/health is ok
 pass-env run -e OPENROUTER_API_KEY=workstation/OPENROUTER_MISTY_STEP_LIMINAL_SHARED_JUDGMENT_API_KEY \
   -- $V launch --judge   # instance "judge": same Worker, with the live judge
@@ -76,7 +76,7 @@ Read-only. It checks:
 - `/api/today` is today's UTC date and number (#1 = 2026-09-23), with three labels and a `calibrated` judge status;
 - tomorrow's number answers 404;
 - for prod, plain HTTP answers 308 to HTTPS;
-- for a local instance, our port is listening.
+- for a local instance, the process listening on its port belongs to the process group this launch started.
 
 Any `FAIL` line means the target is not worth driving. A revision mismatch on
 prod right after a merge usually means the deploy has not finished; see the
@@ -112,7 +112,10 @@ Each feature file in [features/](features/README.md) names its selectors and
 expected text.
 
 Exit code `0` means every check passed. Each check prints `PASS` or `FAIL` with
-the observed value.
+the observed value. A step that throws (a timeout, a missing element) records
+`FAIL journey ran every step` with the error and skips the rest, but
+`journey.json` is still written. `journey` accepts nothing after the target
+except `--live-judge`.
 
 ## Evidence
 
@@ -130,7 +133,7 @@ Proof standards:
 
 - drive the visible UI (input `#guess`, the Place button, the Share button), never internal setters;
 - capture the action and the resulting state;
-- check the side effect where it lives. Prod's side effect is none, and `journey.json` proves it with its request census. The local dispute's side effect is the D1 row: `bunx wrangler d1 execute LIMINAL_DB --env production --local --persist-to ~/.cache/tmp/verify-liminal/offline/d1 --command "select count(*) from reports"`.
+- check the side effect where it lives. Prod's side effect is none, and `journey.json` proves it with its request census. The local dispute's side effect is the D1 row: `$V d1 offline "select count(*) as reports from reports"`. `d1` only ever runs `wrangler d1 execute --local` against the instance's own scratch D1.
 
 Simulated breaking states are routed inside the browser and never reach the
 server. The local Worker is a stand-in for Cloudflare, so the real Jev
@@ -147,7 +150,11 @@ $V cleanup               # stop both instances; delete their D1 state and judge.
 $V cleanup judge         # just one
 ```
 
-It stops only the process group `launch` recorded, never anything by name.
+It stops only the process group `launch` recorded, and only after checking
+that the recorded pid still has the start time it had at launch, so a stale pid
+file never signals someone else's process. It never kills anything by name.
+Run `$V cleanup` after any interrupted or failed run. An interrupted `launch`
+cleans up after itself.
 Evidence under `evidence/verify-liminal/` (or `$OUT`) is never touched. After
 cleanup, confirm the evidence still exists with `ls "$OUT"`.
 

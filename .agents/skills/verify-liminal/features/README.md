@@ -54,12 +54,13 @@ H2s in order: `Sub-features`, `How to get to it (user POV)`,
 - [Archive and schedule](./archive.md): the shared daily number, earlier days, and the refused future (US-005, US-006).
 - [Dispute a verdict](./dispute.md): "Disagree?" stores a report. Local only (US-004).
 - [Changelog](./changelog.md): release notes for the serving version (US-012).
-- [States that break](./breaking-states.md): schedule outage, judge outage and rate limit, slow network, denied storage, phone width and keyboard, reduced motion, and the paused clock (US-002, US-003, US-005, US-009).
+- [States that break](./breaking-states.md): schedule outage, judge outage and rate limit, slow network, denied storage, phone width and keyboard, reduced motion, the paused clock, and optional sound (US-002, US-003, US-005, US-009, US-010).
 
 ## Not covered, on purpose
 
 - **Sign-in:** Liminal has no accounts, sessions, or owner-only pages, so
   there is no owner identity to sign in as.
+- **Safe app updates** (US-011) are proven by CI and the deploy pipeline. CI walks the stories against the exact bundled artifact (`scripts/verify-artifact.py`), and `Deploy app` promotes it with rollback. After a merge, `verify-liminal doctor prod` confirms the served revision.
 - **Nightly puzzle publication** (`puzzles:daily`, US-008) spends generator
   credit and writes the production schedule. It is an operator pipeline, not a
   player journey. The doctor checks only its player-visible outcome, today's

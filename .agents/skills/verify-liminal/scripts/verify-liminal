@@ -25,6 +25,7 @@ verify-liminal journey <target> [--live-judge]
                                       Read-only player journey with screenshots. Safe on prod.
                                       --live-judge also places novel words (loopback targets only).
 verify-liminal qa                     Repository write journeys (reports, storage) on "offline".
+verify-liminal d1 <instance> "<SQL>"  Query a launched instance's local D1 (never the remote one).
 verify-liminal cleanup [<instance>|--all]
                                       Stop instances this tool started; delete their scratch D1.
                                       Evidence is never removed.
@@ -34,7 +35,16 @@ EOF
 
 instance_dir() { printf '%s/%s' "$STATE" "$1"; }
 
-alive() { [[ -f "$1/pid" ]] && kill -0 "$(cat "$1/pid")" 2>/dev/null; }
+# Kernel start time of a pid (field 22 of /proc/<pid>/stat). Recorded at launch
+# so a stale pid file can never point cleanup at a process this tool did not start.
+proc_start() { sed -E 's/^.*\) //' "/proc/$1/stat" 2>/dev/null | cut -d' ' -f20; }
+
+alive() {
+  [[ -f "$1/pid" && -f "$1/start" ]] || return 1
+  local pid
+  pid="$(cat "$1/pid")"
+  [[ -n $pid && "$(proc_start "$pid")" == "$(cat "$1/start")" ]]
+}
 
 resolve_target() {
   case "${1:-}" in
@@ -75,6 +85,7 @@ cmd_build() {
   local sha
   sha="$(git rev-parse HEAD)"
   bun install --frozen-lockfile
+  bunx --no-install playwright install chromium
   # Local verification builds: no browser Sentry or PostHog keys, so the
   # production build guard stays off and no synthetic telemetry leaves the box.
   env -u NEXT_PUBLIC_SENTRY_ENVIRONMENT -u SENTRY_ENVIRONMENT -u NEXT_PUBLIC_SENTRY_DSN \
@@ -102,6 +113,8 @@ cmd_launch() {
   rm -rf "$dir"
   mkdir -p "$dir"
   chmod 700 "$dir"
+  # An interrupted launch stops what it started and deletes the key file.
+  trap 'stop_instance "$name"; exit 130' INT TERM
 
   # Deploy, generator and telemetry credentials never reach a local rehearsal.
   local -a strip=(-u CLOUDFLARE_API_TOKEN -u LIMINAL_GENERATOR_API_KEY -u SENTRY_DSN -u SENTRY_AUTH_TOKEN)
@@ -124,7 +137,11 @@ cmd_launch() {
   fi
 
   env "${strip[@]}" "${WRANGLER[@]}" d1 migrations apply LIMINAL_DB --env production --local \
-    --persist-to "$dir/d1" >"$dir/migrate.log" 2>&1 || die "D1 migrations failed; see $dir/migrate.log"
+    --persist-to "$dir/d1" >"$dir/migrate.log" 2>&1 || {
+    tail -n 20 "$dir/migrate.log" >&2
+    stop_instance "$name"
+    die "D1 migrations failed; their log is above"
+  }
 
   local port base
   port="$(free_port)"
@@ -133,7 +150,9 @@ cmd_launch() {
     --no-bundle --local --persist-to "$dir/d1" --ip 127.0.0.1 --port "$port" \
     --inspector-port 0 --show-interactive-dev-session=false "${extra[@]}" \
     >"$dir/worker.log" 2>&1 </dev/null &
-  printf '%s\n' "$!" >"$dir/pid"
+  local pid=$!
+  proc_start "$pid" >"$dir/start"
+  printf '%s\n' "$pid" >"$dir/pid"
   printf '%s\n' "$base" >"$dir/base"
 
   # A cold Worker can take a minute to answer its first request on a busy
@@ -146,6 +165,7 @@ cmd_launch() {
 import json, sys
 h = json.load(sys.stdin)
 sys.exit(0 if h.get("status") == "ok" and h.get("checks") == {"deck": "ok", "storage": "ok"} else 1)'; then
+      trap - INT TERM
       say "instance $name ready (pid $(cat "$dir/pid"))"
       printf '%s\n' "$base"
       return 0
@@ -165,19 +185,26 @@ cmd_doctor() {
   base="$(resolve_target "$target")"
   local expected=""
   case "$target" in
-    prod | production) expected="$(git -C "$REPO" ls-remote origin refs/heads/master | cut -f1)" ;;
+    prod | production)
+      expected="$(git -C "$REPO" ls-remote origin refs/heads/master 2>/dev/null | cut -f1)"
+      [[ -n $expected ]] || expected="unreadable: git ls-remote origin master failed"
+      ;;
     offline | judge) expected="$(cat "$REPO/.open-next/SOURCE_SHA" 2>/dev/null || true)" ;;
   esac
   local fail=0
   if [[ $target == offline || $target == judge ]]; then
     local dir
     dir="$(instance_dir "$target")"
-    local listener
-    listener="$(ss -ltnpH "sport = :${base##*:}" 2>/dev/null || true)"
-    if [[ -n $listener ]]; then
-      printf 'ok    port %s is listening (instance %s, pid %s)\n' "${base##*:}" "$target" "$(cat "$dir/pid")"
+    local pid owner="" listener
+    pid="$(cat "$dir/pid")"
+    # The listener is a child (workerd) of our launch; its process group must be ours.
+    for listener in $(ss -ltnpH "sport = :${base##*:}" 2>/dev/null | grep -o 'pid=[0-9]*' | cut -d= -f2); do
+      [[ "$(ps -o pgid= -p "$listener" 2>/dev/null | tr -d ' ')" == "$pid" ]] && owner="$listener"
+    done
+    if [[ -n $owner ]]; then
+      printf 'ok    port %s is ours (instance %s, group %s, listener pid %s)\n' "${base##*:}" "$target" "$pid" "$owner"
     else
-      printf 'FAIL  nothing listens on %s\n' "$base"
+      printf 'FAIL  no process of instance %s (group %s) listens on %s\n' "$target" "$pid" "$base"
       fail=1
     fi
   fi
@@ -244,7 +271,11 @@ cmd_journey() {
   local target="${1:?target: prod | offline | judge | <URL>}"
   shift
   local live=0
-  [[ ${1:-} == --live-judge ]] && live=1
+  case "${1:-}" in
+    "") ;;
+    --live-judge) live=1 ;;
+    *) die "journey takes only --live-judge after the target, not '$1'" ;;
+  esac
   local base out
   base="$(resolve_target "$target")"
   if ((live)) && ! is_loopback "$base"; then
@@ -266,17 +297,28 @@ cmd_qa() {
   BASE="$base" OUT="$out/local-storage" bun e2e/local-storage.ts
 }
 
+cmd_d1() {
+  local name="${1:?instance: offline | judge}" sql="${2:?SQL statement}"
+  local dir
+  dir="$(instance_dir "$name")"
+  [[ -d $dir/d1 ]] || die "instance $name has no local D1; launch it first (cleanup deletes it)"
+  cd "$REPO"
+  env -u CLOUDFLARE_API_TOKEN "${WRANGLER[@]}" d1 execute LIMINAL_DB --env production --local \
+    --persist-to "$dir/d1" --command "$sql" --json
+}
+
 stop_instance() {
   local name="$1" dir
   dir="$(instance_dir "$name")"
   [[ -d $dir ]] || return 0
+  # alive() checks the recorded start time, so a reused pid is never signalled.
   if alive "$dir"; then
     local pid
     pid="$(cat "$dir/pid")"
     # setsid made the worker its own process group; stop only that group.
-    kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
-    for _ in $(seq 1 20); do kill -0 "$pid" 2>/dev/null || break; sleep 0.5; done
-    kill -0 "$pid" 2>/dev/null && kill -KILL -- "-$pid" 2>/dev/null || true
+    kill -TERM -- "-$pid" 2>/dev/null || true
+    for _ in $(seq 1 20); do pgrep -g "$pid" >/dev/null || break; sleep 0.5; done
+    pgrep -g "$pid" >/dev/null && kill -KILL -- "-$pid" 2>/dev/null || true
   fi
   rm -rf "$dir"
   say "cleaned instance $name"
@@ -300,6 +342,7 @@ main() {
     doctor) cmd_doctor "$@" ;;
     journey) cmd_journey "$@" ;;
     qa) cmd_qa "$@" ;;
+    d1) cmd_d1 "$@" ;;
     cleanup) cmd_cleanup "$@" ;;
     help | -h | --help) usage ;;
     *) usage >&2; exit 2 ;;
