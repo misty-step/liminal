@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-20T22:28:13.002Z",
+  "at": "2026-10-20T22:42:11.596Z",
   "base": "https://liminal.mistystep.io",
   "liveJudge": false,
   "revision": "3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed",
@@ -169,19 +169,19 @@
     "sameOrigin": [
       {
         "request": "GET / sent",
-        "count": 12
+        "count": 13
       },
       {
         "request": "GET /_next/* sent",
-        "count": 157
+        "count": 154
       },
       {
         "request": "GET /api/today sent",
-        "count": 8
+        "count": 9
       },
       {
         "request": "GET /changelog sent",
-        "count": 16
+        "count": 15
       },
       {
         "request": "GET /api/puzzle/27 sent",

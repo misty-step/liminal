@@ -21,10 +21,10 @@
   - figure "Share preview":
     - text: "Liminal #28"
     - img "Guess results": 🟪🟩🟧⬛
-    - text: 4 guesses, 0:00 🎯 127.0.0.1:40165/s/…
+    - text: 4 guesses, 0:00 🎯 127.0.0.1:42483/s/…
   - button "Share"
   - 'button "Play #27"'
-  - paragraph: Next puzzle in 1h 34m
+  - paragraph: Next puzzle in 1h 11m
 - navigation "About Liminal":
   - link "Changelog":
     - /url: /changelog

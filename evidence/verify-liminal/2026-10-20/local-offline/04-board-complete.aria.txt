@@ -12,7 +12,7 @@
   - 'button "footstool. Has a head: outside; Has a foot: inside; Isn''t alive: inside. Fills a region."': footstool
   - 'button "bed. Has a head: inside; Has a foot: inside; Isn''t alive: inside. Fills a region."': bed
   - heading "Filled in 4 guesses" [level=2]
-  - paragraph: 0:01 on the clock
+  - paragraph: 0:03 on the clock
   - list:
     - listitem: Has a head + Has a foot person, dog, bird, chicken
     - listitem: Has a head + Isn't alive nail, hammer, pin, coin, screw
@@ -21,10 +21,10 @@
   - figure "Share preview":
     - text: "Liminal #28"
     - img "Guess results": 🟪🟩🟧⬛
-    - text: 4 guesses, 0:01 🎯 127.0.0.1:35851/s/…
+    - text: 4 guesses, 0:03 🎯 127.0.0.1:49147/s/…
   - button "Share"
   - 'button "Play #27"'
-  - paragraph: Next puzzle in 1h 41m
+  - paragraph: Next puzzle in 1h 16m
 - navigation "About Liminal":
   - link "Changelog":
     - /url: /changelog

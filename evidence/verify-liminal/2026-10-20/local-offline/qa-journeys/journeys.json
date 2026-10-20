@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-20T22:21:53.411Z",
+  "at": "2026-10-20T22:46:14.537Z",
   "results": [
     {
       "name": "board shows the scheduled puzzle",
@@ -29,7 +29,7 @@
     {
       "name": "desktop completed in four with a time",
       "ok": true,
-      "detail": "Filled in 4 guesses / 0:02 on the clock"
+      "detail": "Filled in 4 guesses / 0:00 on the clock"
     },
     {
       "name": "four fills survive refresh",
@@ -139,7 +139,7 @@
     {
       "name": "mobile completed in four with a time",
       "ok": true,
-      "detail": "Filled in 4 guesses / 0:04 on the clock"
+      "detail": "Filled in 4 guesses / 0:03 on the clock"
     },
     {
       "name": "reduced motion minimizes word transitions",

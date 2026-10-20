@@ -1,4 +1,4 @@
-$ verify-liminal journey prod  # 2026-10-20T22:27:27Z
+$ verify-liminal journey prod  # 2026-10-20T22:41:21Z at e5062f9
 journey on https://liminal.mistystep.io -> ./evidence/verify-liminal/2026-10-20/prod
 PASS health is ok in production mode — {"status":"ok","service":"liminal","environment":"production","checks":{"deck":"ok","storage":"ok"},"version":"0.2.1","revision":"3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed"}
 PASS today is the shared numbered puzzle for this UTC date — 2026-10-20 #28

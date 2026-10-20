@@ -1,4 +1,4 @@
-$ verify-liminal doctor prod  # 2026-10-20T22:27:20Z
+$ verify-liminal doctor prod  # 2026-10-20T22:41:16Z at e5062f9
 ok    plain HTTP redirects with 308 to HTTPS
 ok    /api/health 200 status=ok checks={'deck': 'ok', 'storage': 'ok'}
 ok    environment=production

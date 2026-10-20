@@ -24,7 +24,7 @@
     - text: 4 guesses, 0:00 🎯 liminal.mistystep.io/s/…
   - button "Share"
   - 'button "Play #27"'
-  - paragraph: Next puzzle in 1h 32m
+  - paragraph: Next puzzle in 1h 19m
 - navigation "About Liminal":
   - link "Changelog":
     - /url: /changelog

@@ -1,6 +1,6 @@
-$ verify-liminal journey offline  # 2026-10-20T22:19:04Z
-journey on http://127.0.0.1:35851 -> ./evidence/verify-liminal/2026-10-20/local-offline
-PASS health is ok in production mode — {"status":"ok","service":"liminal","environment":"production","checks":{"deck":"ok","storage":"ok"},"version":"0.2.1","revision":"3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed"}
+$ verify-liminal journey offline  # 2026-10-20T22:43:11Z at e5062f9
+journey on http://127.0.0.1:49147 -> ./evidence/verify-liminal/2026-10-20/local-offline
+PASS health is ok in production mode — {"status":"ok","service":"liminal","environment":"production","checks":{"deck":"ok","storage":"ok"},"version":"0.2.1","revision":"e5062f9d8b7dbbd9f1154e7e82406b31023b6baa"}
 PASS today is the shared numbered puzzle for this UTC date — 2026-10-20 #28
 PASS today's number serves today's puzzle — status=200
 PASS tomorrow's number is refused — status=404
@@ -11,8 +11,8 @@ PASS empty board starts at zero guesses
 PASS circle label is refused for free — That repeats a circle. Name a thing instead.
 PASS repeat word is refused for free — “PERSON” is already on the board.
 PASS four authored answers fill four regions — filled=4
-PASS board ends with guess count and thinking time — Filled in 4 guesses / 0:01 on the clock
-PASS share text is four spoiler-free lines — ["Liminal #28","🟪🟩🟧⬛","4 guesses, 0:01 🎯","http://127.0.0.1:35851/s/eyJ2IjoxLCJuIjoyOCwidCI6MSwidyI6W1sicGVyc29uIiwiQyJdLFsibmFpbCIsIkIiXSxbImZvb3RzdG9vbCIsIkEiXSxbImJlZCIsIk0iXV19"] leaked=[]
+PASS board ends with guess count and thinking time — Filled in 4 guesses / 0:03 on the clock
+PASS share text is four spoiler-free lines — ["Liminal #28","🟪🟩🟧⬛","4 guesses, 0:03 🎯","http://127.0.0.1:49147/s/eyJ2IjoxLCJuIjoyOCwidCI6MywidyI6W1sicGVyc29uIiwiQyJdLFsibmFpbCIsIkIiXSxbImZvb3RzdG9vbCIsIkEiXSxbImJlZCIsIk0iXV19"] leaked=[]
 PASS finished board survives reload
 PASS word detail shows a verdict per circle — verdicts=3
 PASS disagree is offered on a word

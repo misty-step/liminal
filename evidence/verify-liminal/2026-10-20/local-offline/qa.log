@@ -1,10 +1,10 @@
-$ verify-liminal qa  # 2026-10-20T22:20:20Z
+$ verify-liminal qa  # 2026-10-20T22:44:11Z at e5062f9
 PASS board shows the scheduled puzzle — Has a head
 PASS desktop fill c3 — word=1, targets=1, answer=person
 PASS desktop fill c2 — word=1, targets=2, answer=nail
 PASS desktop fill c1 — word=1, targets=3, answer=footstool
 PASS desktop fill center — word=1, targets=4, answer=bed
-PASS desktop completed in four with a time — Filled in 4 guesses / 0:02 on the clock
+PASS desktop completed in four with a time — Filled in 4 guesses / 0:00 on the clock
 PASS four fills survive refresh — words=4, title=Filled in 4 guesses
 PASS word detail has three verdicts — verdicts=3
 PASS word verdict report is filed — Noted. Thanks.
@@ -26,7 +26,7 @@ PASS mobile fill c3 — word=1, targets=1, answer=person
 PASS mobile fill c2 — word=1, targets=2, answer=nail
 PASS mobile fill c1 — word=1, targets=3, answer=footstool
 PASS mobile fill center — word=1, targets=4, answer=bed
-PASS mobile completed in four with a time — Filled in 4 guesses / 0:04 on the clock
+PASS mobile completed in four with a time — Filled in 4 guesses / 0:03 on the clock
 PASS reduced motion minimizes word transitions — 0.001s
 PASS changelog 1280 light shows serving version
 PASS changelog 1280 light contains the canonical releases

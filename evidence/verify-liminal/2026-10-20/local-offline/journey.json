@@ -1,8 +1,8 @@
 {
-  "at": "2026-10-20T22:20:20.858Z",
-  "base": "http://127.0.0.1:35851",
+  "at": "2026-10-20T22:44:11.387Z",
+  "base": "http://127.0.0.1:49147",
   "liveJudge": false,
-  "revision": "3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed",
+  "revision": "e5062f9d8b7dbbd9f1154e7e82406b31023b6baa",
   "puzzle": {
     "date": "2026-10-20",
     "number": 28,
@@ -12,7 +12,7 @@
     {
       "name": "health is ok in production mode",
       "ok": true,
-      "detail": "{\"status\":\"ok\",\"service\":\"liminal\",\"environment\":\"production\",\"checks\":{\"deck\":\"ok\",\"storage\":\"ok\"},\"version\":\"0.2.1\",\"revision\":\"3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed\"}"
+      "detail": "{\"status\":\"ok\",\"service\":\"liminal\",\"environment\":\"production\",\"checks\":{\"deck\":\"ok\",\"storage\":\"ok\"},\"version\":\"0.2.1\",\"revision\":\"e5062f9d8b7dbbd9f1154e7e82406b31023b6baa\"}"
     },
     {
       "name": "today is the shared numbered puzzle for this UTC date",
@@ -67,12 +67,12 @@
     {
       "name": "board ends with guess count and thinking time",
       "ok": true,
-      "detail": "Filled in 4 guesses / 0:01 on the clock"
+      "detail": "Filled in 4 guesses / 0:03 on the clock"
     },
     {
       "name": "share text is four spoiler-free lines",
       "ok": true,
-      "detail": "[\"Liminal #28\",\"🟪🟩🟧⬛\",\"4 guesses, 0:01 🎯\",\"http://127.0.0.1:35851/s/eyJ2IjoxLCJuIjoyOCwidCI6MSwidyI6W1sicGVyc29uIiwiQyJdLFsibmFpbCIsIkIiXSxbImZvb3RzdG9vbCIsIkEiXSxbImJlZCIsIk0iXV19\"] leaked=[]"
+      "detail": "[\"Liminal #28\",\"🟪🟩🟧⬛\",\"4 guesses, 0:03 🎯\",\"http://127.0.0.1:49147/s/eyJ2IjoxLCJuIjoyOCwidCI6MywidyI6W1sicGVyc29uIiwiQyJdLFsibmFpbCIsIkIiXSxbImZvb3RzdG9vbCIsIkEiXSxbImJlZCIsIk0iXV19\"] leaked=[]"
     },
     {
       "name": "finished board survives reload",
@@ -169,19 +169,19 @@
     "sameOrigin": [
       {
         "request": "GET / sent",
-        "count": 13
+        "count": 11
       },
       {
         "request": "GET /_next/* sent",
-        "count": 142
+        "count": 138
       },
       {
         "request": "GET /api/today sent",
-        "count": 8
+        "count": 9
       },
       {
         "request": "GET /changelog sent",
-        "count": 14
+        "count": 15
       },
       {
         "request": "GET /api/puzzle/27 sent",

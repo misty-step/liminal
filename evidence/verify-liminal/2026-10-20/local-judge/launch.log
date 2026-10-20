@@ -1,4 +1,4 @@
-$ pass-env run -e OPENROUTER_API_KEY=workstation/OPENROUTER_MISTY_STEP_LIMINAL_SHARED_JUDGMENT_API_KEY -- verify-liminal launch --judge  # 2026-10-20T22:25:02Z
-instance judge ready (pid 998627)
-http://127.0.0.1:40165
+$ pass-env run -e OPENROUTER_API_KEY=workstation/OPENROUTER_MISTY_STEP_LIMINAL_SHARED_JUDGMENT_API_KEY -- verify-liminal launch --judge  # 2026-10-20T22:47:22Z
+instance judge ready (pid 1758657)
+http://127.0.0.1:42483
 exit=0

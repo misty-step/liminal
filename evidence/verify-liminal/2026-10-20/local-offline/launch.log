@@ -1,4 +1,4 @@
-$ verify-liminal launch  # 2026-10-20T22:18:03Z
-instance offline ready (pid 709519)
-http://127.0.0.1:35851
+$ verify-liminal launch  # 2026-10-20T22:42:11Z at e5062f9
+instance offline ready (pid 1590014)
+http://127.0.0.1:49147
 exit=0
