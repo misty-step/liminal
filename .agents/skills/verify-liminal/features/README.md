@@ -61,6 +61,7 @@ H2s in order: `Sub-features`, `How to get to it (user POV)`,
 - **Sign-in:** Liminal has no accounts, sessions, or owner-only pages, so
   there is no owner identity to sign in as.
 - **Safe app updates** (US-011) are proven by CI and the deploy pipeline. CI walks the stories against the exact bundled artifact (`scripts/verify-artifact.py`), and `Deploy app` promotes it with rollback. After a merge, `verify-liminal doctor prod` confirms the served revision.
+- **Product analytics** (the PostHog capability in SPEC) is excluded because the journey blocks every external origin, so synthetic play never reaches the real sink. To prove capture, run `BASE=<local URL> bun e2e/product-analytics.ts` (README, Development). It sends synthetic events to the live sink.
 - **Nightly puzzle publication** (`puzzles:daily`, US-008) spends generator
   credit and writes the production schedule. It is an operator pipeline, not a
   player journey. The doctor checks only its player-visible outcome, today's

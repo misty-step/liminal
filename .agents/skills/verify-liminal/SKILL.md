@@ -127,7 +127,7 @@ Artifacts go to `$OUT`, default `evidence/verify-liminal/<UTC date>/<prod|local-
 - `journey.json`, with every check, the revision, the puzzle ID, and a same-origin request census (method, path, sent or blocked) plus the external origins it blocked;
 - for `qa`, `qa-journeys/` and `local-storage/`.
 
-Save the doctor's output yourself: `$V doctor prod | tee "$OUT/doctor.txt"`.
+`doctor` saves its own output as `doctor.txt` in the same folder.
 
 Proof standards:
 
@@ -156,7 +156,7 @@ file never signals someone else's process. It never kills anything by name.
 Run `$V cleanup` after any interrupted or failed run. An interrupted `launch`
 cleans up after itself.
 Evidence under `evidence/verify-liminal/` (or `$OUT`) is never touched. After
-cleanup, confirm the evidence still exists with `ls "$OUT"`.
+cleanup, confirm it still exists with `ls evidence/verify-liminal/$(date -u +%F)/*`.
 
 ## Feature map
 
