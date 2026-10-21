@@ -1,0 +1,8 @@
+ok    plain HTTP redirects with 308 to HTTPS
+ok    /api/health 200 status=ok checks={'deck': 'ok', 'storage': 'ok'}
+ok    environment=production
+ok    revision=3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed expected=3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed
+ok    /api/today 200 date=2026-10-21 number=29 expected 2026-10-21 #29
+ok    today's circles: ['Has fur', 'Is a pet or farm animal', 'Smaller than a dog']
+ok    judgeStatus=calibrated
+ok    /api/puzzle/30 (tomorrow) answers 404, expected 404

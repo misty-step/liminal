@@ -23,7 +23,7 @@ Preconditions:
 - `verify-liminal doctor judge` passes.
 
 - **Novel word.** `verify-liminal journey judge --live-judge` places the first of `umbrella, teaspoon, lighthouse, accordion, volcano` that is not authored today, then waits for `main#game[aria-busy="false"]`. `.meter-count` reads 1, and the word's `aria-label` lists three verdicts, e.g. "umbrella. Has a head: on the line; Has a foot: on the line; Isn't alive: inside." Evidence: `18-live-judge-novel.png`.
-- **Hostile input.** Place the instruction sentence. The `.target.filled` count is unchanged, and `p.status` explains where it landed or why it was refused. Evidence: `19-live-judge-hostile.png`.
+- **Hostile input.** Place the instruction sentence. The `.target.filled` count is unchanged, and `p.status` must not say it fills the center, fills a gap, or fits a place already filled. Evidence: `19-live-judge-hostile.png`.
 - **Side effect.** The judgment is cached in the local D1: `verify-liminal d1 judge "select count(*) as judgments from judgments"` is at least 1.
 
 ## Gotchas

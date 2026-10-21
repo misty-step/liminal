@@ -69,7 +69,8 @@ Run it first, and again after any surprising failure:
 $V doctor prod           # or: offline | judge | <URL>
 ```
 
-Read-only. It checks:
+Reads the target without changing its data, and writes `doctor.txt` to the
+evidence folder. It checks:
 
 - `/api/health` is `ok`, the environment is `production`, and deck and storage are `ok`;
 - the served `revision` equals `origin/master` for prod, or the bundle's `SOURCE_SHA` for a local instance;
@@ -127,7 +128,11 @@ Artifacts go to `$OUT`, default `evidence/verify-liminal/<UTC date>/<prod|local-
 - `journey.json`, with every check, the revision, the puzzle ID, and a same-origin request census (method, path, sent or blocked) plus the external origins it blocked;
 - for `qa`, `qa-journeys/` and `local-storage/`.
 
-`doctor` saves its own output as `doctor.txt` in the same folder.
+`doctor` saves its own output as `doctor.txt` in the same folder, including
+failed HTTP or revision checks. It exits nonzero on failure and prints the
+saved file's location. Set `OUT` to a scratch folder for routine checks if you
+want to preserve committed evidence. An explicit `OUT` is used as-is for every
+target, so use a different folder for each target.
 
 Proof standards:
 

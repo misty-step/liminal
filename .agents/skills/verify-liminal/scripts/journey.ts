@@ -535,10 +535,12 @@ try {
     await place(page, hostile);
     await settle(page);
     const filledAfter = await page.locator(".target.filled").count();
+    const status = (await page.locator("p.status").innerText()).trim();
     check(
       "instruction-like input fills no region",
-      filledAfter === filledBefore,
-      (await page.locator("p.status").innerText()).trim() || `guesses=${await guessCount(page)}`,
+      filledAfter === filledBefore &&
+        !/fills the center|fills a gap|fits a place you already filled/i.test(status),
+      status || `guesses=${await guessCount(page)}`,
     );
     await shot(page, "19-live-judge-hostile");
     await context.close();

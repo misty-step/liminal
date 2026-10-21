@@ -42,7 +42,7 @@ instance_dir() { printf '%s/%s' "$STATE" "$1"; }
 proc_start() { sed -E 's/^.*\) //' "/proc/$1/stat" 2>/dev/null | cut -d' ' -f20; }
 
 alive() {
-  [[ -f "$1/pid" && -f "$1/start" ]] || return 1
+  [[ -s "$1/pid" && -s "$1/start" ]] || return 1
   local pid
   pid="$(cat "$1/pid")"
   [[ -n $pid && "$(proc_start "$pid")" == "$(cat "$1/start")" ]]
@@ -77,9 +77,8 @@ evidence_dir() {
 }
 
 is_loopback() {
-  # Parse like a browser does, so userinfo tricks (http://127.0.0.1@host) fail.
-  python3 -c 'import sys, urllib.parse
-sys.exit(0 if urllib.parse.urlsplit(sys.argv[1]).hostname in ("127.0.0.1", "localhost", "::1") else 1)' "$1"
+  # Use the same URL parser as the browser journey, including backslash handling.
+  bun -e 'try { process.exit(["127.0.0.1", "localhost", "[::1]"].includes(new URL(process.argv[1]).hostname) ? 0 : 1) } catch { process.exit(1) }' "$1"
 }
 
 cmd_build() {
@@ -104,6 +103,7 @@ free_port() { python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",
 
 cmd_launch() {
   local name=offline
+  [[ $# == 0 || ( $# == 1 && $1 == --judge ) ]] || die "launch takes only --judge"
   [[ ${1:-} == --judge ]] && name=judge
   cd "$REPO"
   [[ -f .open-next/bundle/worker.js ]] || die "no bundle; run: verify-liminal build"
@@ -116,7 +116,8 @@ cmd_launch() {
   mkdir -p "$dir"
   chmod 700 "$dir"
   # An interrupted launch stops what it started and deletes the key file.
-  trap 'stop_instance "$name"; exit 130' INT TERM
+  trap 'stop_instance "$name"; exit 130' INT
+  trap 'stop_instance "$name"; exit 143' TERM
 
   # Deploy, generator and telemetry credentials never reach a local rehearsal.
   local -a strip=(-u CLOUDFLARE_API_TOKEN -u LIMINAL_GENERATOR_API_KEY -u SENTRY_DSN -u SENTRY_AUTH_TOKEN)
@@ -188,8 +189,8 @@ cmd_doctor() {
   resolve_target "$target" >/dev/null
   out="$(evidence_dir "$(target_label "$target")")"
   # The doctor's own output is evidence too.
-  doctor_checks "$target" | tee "$out/doctor.txt"
-  local status=${PIPESTATUS[0]}
+  local status=0
+  doctor_checks "$target" 2>&1 | tee "$out/doctor.txt" || status=$?
   say "doctor output saved to $out/doctor.txt"
   return "$status"
 }
@@ -201,7 +202,7 @@ doctor_checks() {
   local expected=""
   case "$target" in
     prod | production)
-      expected="$(git -C "$REPO" ls-remote origin refs/heads/master 2>/dev/null | cut -f1)"
+      expected="$(git -C "$REPO" ls-remote origin refs/heads/master 2>/dev/null | cut -f1 || true)"
       [[ -n $expected ]] || expected="unreadable: git ls-remote origin master failed"
       ;;
     offline | judge) expected="$(cat "$REPO/.open-next/SOURCE_SHA" 2>/dev/null || true)" ;;
@@ -248,6 +249,9 @@ def get(path):
             return response.status, json.load(response)
     except urllib.error.HTTPError as error:
         return error.code, None
+    except (urllib.error.URLError, OSError, ValueError) as error:
+        report(False, f"GET {path}: {error}")
+        return 0, None
 
 def report(ok, message):
     global failed
@@ -256,7 +260,7 @@ def report(ok, message):
 
 status, health = get("/api/health")
 health = health or {}
-report(status == 200 and health.get("status") == "ok",
+report(status == 200 and health.get("status") == "ok" and health.get("checks") == {"deck": "ok", "storage": "ok"},
        f"/api/health {status} status={health.get('status')} checks={health.get('checks')}")
 report(health.get("environment") == "production", f"environment={health.get('environment')}")
 revision = health.get("revision")
@@ -285,6 +289,7 @@ PY
 cmd_journey() {
   local target="${1:?target: prod | offline | judge | <URL>}"
   shift
+  [[ $# == 0 || ( $# == 1 && $1 == --live-judge ) ]] || die "journey takes only --live-judge after the target"
   local live=0
   case "${1:-}" in
     "") ;;

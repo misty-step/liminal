@@ -1,0 +1,9 @@
+test_failed_git_lookup_keeps_revision_failure (test_verification_doctor.DoctorTests.test_failed_git_lookup_keeps_revision_failure) ... ok
+test_healthy_target_saves_success (test_verification_doctor.DoctorTests.test_healthy_target_saves_success) ... ok
+test_http_and_json_failures_keep_evidence (test_verification_doctor.DoctorTests.test_http_and_json_failures_keep_evidence) ... ok
+test_unreachable_target_keeps_failure_evidence (test_verification_doctor.DoctorTests.test_unreachable_target_keeps_failure_evidence) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 2.303s
+
+OK
