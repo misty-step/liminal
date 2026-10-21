@@ -1,0 +1,31 @@
+- link "Skip to the puzzle":
+  - /url: "#game"
+- banner:
+  - heading "Liminal" [level=1]
+  - text: October 20
+  - button "Turn sounds on"
+  - button "How to play": "?"
+- main:
+  - text: Has a head or a part called one Has a foot or a part called one Isn't alive
+  - 'button "person. Has a head: inside; Has a foot: inside; Isn''t alive: outside. Fills a region."': person
+  - 'button "nail. Has a head: inside; Has a foot: outside; Isn''t alive: inside. Fills a region."': nail
+  - 'button "footstool. Has a head: outside; Has a foot: inside; Isn''t alive: inside. Fills a region."': footstool
+  - 'button "bed. Has a head: inside; Has a foot: inside; Isn''t alive: inside. Fills a region."': bed
+  - heading "Filled in 4 guesses" [level=2]
+  - paragraph: 0:00 on the clock
+  - list:
+    - listitem: Has a head + Has a foot person, dog, bird, chicken
+    - listitem: Has a head + Isn't alive nail, hammer, pin, coin, screw
+    - listitem: Has a foot + Isn't alive footstool, ladder
+    - listitem: All three bed, table, page, column
+  - figure "Share preview":
+    - text: "Liminal #28"
+    - img "Guess results": 🟪🟩🟧⬛
+    - text: 4 guesses, 0:00 🎯 127.0.0.1:42483/s/…
+  - button "Share"
+  - 'button "Play #27"'
+  - paragraph: Next puzzle in 1h 11m
+- navigation "About Liminal":
+  - link "Changelog":
+    - /url: /changelog
+- alert

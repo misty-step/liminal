@@ -1,0 +1,9 @@
+ok    plain HTTP redirects with 308 to HTTPS
+ok    /api/health 200 status=ok checks={'deck': 'ok', 'storage': 'ok'}
+ok    environment=production
+FAIL  revision=3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed expected=unreadable: git ls-remote origin master failed
+ok    /api/today 200 date=2026-10-21 number=29 expected 2026-10-21 #29
+ok    today's circles: ['Has fur', 'Is a pet or farm animal', 'Smaller than a dog']
+ok    judgeStatus=calibrated
+ok    /api/puzzle/30 (tomorrow) answers 404, expected 404
+doctor output saved to <checkout>/evidence/verify-liminal/2026-10-21/doctor-regression/git-failure/doctor.txt

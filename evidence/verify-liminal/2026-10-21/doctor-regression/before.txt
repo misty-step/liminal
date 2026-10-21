@@ -1,0 +1,3 @@
+At 0676359, the regression suite ran 4 tests and failed 4 assertions (failed Git read, unreachable target, HTTP error, malformed JSON).
+Both the direct unreachable-target and failed-git reproductions left doctor.txt at 0 bytes and omitted the saved-output receipt.
+The old helper was read with git show 0676359:.agents/skills/verify-liminal/scripts/verify-liminal and run in the same checkout through VERIFY_LIMINAL_HELPER.

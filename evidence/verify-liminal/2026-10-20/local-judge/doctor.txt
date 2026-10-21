@@ -1,0 +1,10 @@
+$ verify-liminal doctor judge  # 2026-10-20T22:48:21Z at e5062f9
+ok    port 42483 is ours (instance judge, group 1758657, listener pid 1759062)
+ok    /api/health 200 status=ok checks={'deck': 'ok', 'storage': 'ok'}
+ok    environment=production
+ok    revision=e5062f9d8b7dbbd9f1154e7e82406b31023b6baa expected=e5062f9d8b7dbbd9f1154e7e82406b31023b6baa
+ok    /api/today 200 date=2026-10-20 number=28 expected 2026-10-20 #28
+ok    today's circles: ['Has a head', 'Has a foot', "Isn't alive"]
+ok    judgeStatus=calibrated
+ok    /api/puzzle/29 (tomorrow) answers 404, expected 404
+exit=0

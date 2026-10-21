@@ -1,0 +1,15 @@
+$ verify-liminal d1 offline select count(*) as reports from reports  # 2026-10-20T22:47:16Z at e5062f9
+[
+  {
+    "results": [
+      {
+        "reports": 1
+      }
+    ],
+    "success": true,
+    "meta": {
+      "duration": 0
+    }
+  }
+]
+exit=0

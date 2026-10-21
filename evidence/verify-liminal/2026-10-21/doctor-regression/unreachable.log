@@ -1,0 +1,11 @@
+FAIL  GET /api/health: <urlopen error [Errno 111] Connection refused>
+FAIL  /api/health 0 status=None checks=None
+FAIL  environment=None
+info  revision=None version=None
+FAIL  GET /api/today: <urlopen error [Errno 111] Connection refused>
+FAIL  /api/today 0 date=None number=None expected 2026-10-21 #29
+FAIL  today's circles: []
+FAIL  judgeStatus=None
+FAIL  GET /api/puzzle/30: <urlopen error [Errno 111] Connection refused>
+FAIL  /api/puzzle/30 (tomorrow) answers 0, expected 404
+doctor output saved to <checkout>/evidence/verify-liminal/2026-10-21/doctor-regression/unreachable/doctor.txt

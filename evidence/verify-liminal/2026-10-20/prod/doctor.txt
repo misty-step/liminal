@@ -1,0 +1,10 @@
+$ verify-liminal doctor prod  # 2026-10-20T22:41:16Z at e5062f9
+ok    plain HTTP redirects with 308 to HTTPS
+ok    /api/health 200 status=ok checks={'deck': 'ok', 'storage': 'ok'}
+ok    environment=production
+ok    revision=3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed expected=3b5ff9fb64f69eed7ecf7430f1c66efe8121f8ed
+ok    /api/today 200 date=2026-10-20 number=28 expected 2026-10-20 #28
+ok    today's circles: ['Lives in water', 'Has no bones', 'Has a stinger']
+ok    judgeStatus=calibrated
+ok    /api/puzzle/29 (tomorrow) answers 404, expected 404
+exit=0

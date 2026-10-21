@@ -1,0 +1,61 @@
+$ verify-liminal qa  # 2026-10-20T22:44:11Z at e5062f9
+PASS board shows the scheduled puzzle — Has a head
+PASS desktop fill c3 — word=1, targets=1, answer=person
+PASS desktop fill c2 — word=1, targets=2, answer=nail
+PASS desktop fill c1 — word=1, targets=3, answer=footstool
+PASS desktop fill center — word=1, targets=4, answer=bed
+PASS desktop completed in four with a time — Filled in 4 guesses / 0:00 on the clock
+PASS four fills survive refresh — words=4, title=Filled in 4 guesses
+PASS word detail has three verdicts — verdicts=3
+PASS word verdict report is filed — Noted. Thanks.
+PASS archive opens an earlier puzzle — today=Has a head, archive=Has keys
+PASS back to today restores daily puzzle — Has a head
+PASS circle label echo spends nothing — words=0, guesses=0, status=That repeats a circle. Name a thing instead.
+PASS case-insensitive repeat spends nothing — words=1, guesses=1, status=“PERSON” is already on the board.
+PASS no guess limit: the board stays open until complete — guesses=11, field enabled=true, end panels=0
+PASS judge outage is honest and spends nothing — status=Couldn’t reach the judge. Try again in a moment. No guess used., words=0, guesses=0
+PASS clock runs while the player thinks — 0 -> 2
+PASS clock holds while the judge considers a word — 2 -> 2; Couldn’t reach the judge. Try again in a moment. No guess used.
+PASS clock holds while the how-to is open — 2 -> 2
+PASS clock holds while the tab is hidden — 2 -> 2
+PASS mobile board shows the scheduled puzzle — Has a head
+PASS sound is opt-in
+PASS sound preference survives reload
+PASS keyboard keeps puzzle and composer visible — {"fits":true,"inputBottom":490.25,"lastLabelBottom":352.71875}
+PASS mobile fill c3 — word=1, targets=1, answer=person
+PASS mobile fill c2 — word=1, targets=2, answer=nail
+PASS mobile fill c1 — word=1, targets=3, answer=footstool
+PASS mobile fill center — word=1, targets=4, answer=bed
+PASS mobile completed in four with a time — Filled in 4 guesses / 0:03 on the clock
+PASS reduced motion minimizes word transitions — 0.001s
+PASS changelog 1280 light shows serving version
+PASS changelog 1280 light contains the canonical releases
+PASS changelog 1280 light has honest notes or empty state
+PASS changelog 1280 light fits without horizontal scrolling
+PASS changelog 1280 light follows system theme
+PASS changelog 1280 light returns to the game
+PASS changelog 1280 dark shows serving version
+PASS changelog 1280 dark contains the canonical releases
+PASS changelog 1280 dark has honest notes or empty state
+PASS changelog 1280 dark fits without horizontal scrolling
+PASS changelog 1280 dark follows system theme
+PASS changelog 1280 dark returns to the game
+PASS changelog 390 light shows serving version
+PASS changelog 390 light contains the canonical releases
+PASS changelog 390 light has honest notes or empty state
+PASS changelog 390 light fits without horizontal scrolling
+PASS changelog 390 light follows system theme
+PASS changelog 390 light returns to the game
+PASS changelog 390 dark shows serving version
+PASS changelog 390 dark contains the canonical releases
+PASS changelog 390 dark has honest notes or empty state
+PASS changelog 390 dark fits without horizontal scrolling
+PASS changelog 390 dark follows system theme
+PASS changelog 390 dark returns to the game
+
+53/53 checks passed
+PASS denied-getter: Filled in 4 guesses; how-to reopened; no errors; reload=false
+PASS denied-read: Filled in 4 guesses; how-to reopened; no errors; reload=false
+PASS denied-write: Filled in 4 guesses; how-to reopened; no errors; reload=false
+PASS available: Filled in 4 guesses; how-to reopened; no errors; reload=true
+exit=0

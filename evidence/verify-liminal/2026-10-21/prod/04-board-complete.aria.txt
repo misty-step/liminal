@@ -1,0 +1,31 @@
+- link "Skip to the puzzle":
+  - /url: "#game"
+- banner:
+  - heading "Liminal" [level=1]
+  - text: October 21
+  - button "Turn sounds on"
+  - button "How to play": "?"
+- main:
+  - text: Has fur Is a pet or farm animal Smaller than a dog
+  - 'button "horse. Has fur: inside; Is a pet or farm animal: inside; Smaller than a dog: outside. Fills a region."': horse
+  - 'button "squirrel. Has fur: inside; Is a pet or farm animal: outside; Smaller than a dog: inside. Fills a region."': squirrel
+  - 'button "chicken. Has fur: outside; Is a pet or farm animal: inside; Smaller than a dog: inside. Fills a region."': chicken
+  - 'button "hamster. Has fur: inside; Is a pet or farm animal: inside; Smaller than a dog: inside. Fills a region."': hamster
+  - heading "Filled in 4 guesses" [level=2]
+  - paragraph: 0:00 on the clock
+  - list:
+    - listitem: Has fur + Is a pet or farm animal horse, cow, sheep, goat
+    - listitem: Has fur + Smaller than a dog squirrel, chipmunk, raccoon, opossum
+    - listitem: Is a pet or farm animal + Smaller than a dog chicken, goldfish, parakeet, canary
+    - listitem: All three hamster, rabbit, guinea pig, gerbil, mouse
+  - figure "Share preview":
+    - text: "Liminal #29"
+    - img "Guess results": 🟪🟩🟧⬛
+    - text: 4 guesses, 0:00 🎯 liminal.mistystep.io/s/…
+  - button "Share"
+  - 'button "Play #28"'
+  - paragraph: Next puzzle in 21h 26m
+- navigation "About Liminal":
+  - link "Changelog":
+    - /url: /changelog
+- alert

@@ -1,0 +1,15 @@
+$ verify-liminal d1 judge select count(*) as judgments from judgments  # 2026-10-20T22:50:49Z at e5062f9
+[
+  {
+    "results": [
+      {
+        "judgments": 6
+      }
+    ],
+    "success": true,
+    "meta": {
+      "duration": 1
+    }
+  }
+]
+exit=0

@@ -161,6 +161,12 @@ async function qaContext(options: Parameters<typeof browser.newContext>[0] = {})
 
   await page.reload({ waitUntil: "domcontentloaded" });
   await page.locator("h2.end-title").waitFor();
+  // The board lays words out after the end panel renders; a busy machine shows the gap.
+  await page
+    .locator(".board .word-layer .word")
+    .nth(3)
+    .waitFor({ timeout: 10_000 })
+    .catch(() => undefined);
   const persistedWords = await page.locator(".board .word-layer .word").count();
   const persistedTitle = (await page.locator("h2.end-title").innerText()).trim();
   check(
