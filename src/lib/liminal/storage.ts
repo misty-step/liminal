@@ -1,3 +1,4 @@
+import { reduceGuess } from "./guessReducer";
 import { readLocalItem, writeLocalItem } from "./localStorage";
 import { boardState, parseStates } from "./regions";
 import type { GuessFeedback, GuessRecord, PuzzleProgress } from "./types";
@@ -63,10 +64,7 @@ export function recordGuess(
   answer: string,
   now: number = Date.now(),
 ): PuzzleProgress {
-  if (feedback.needsJudgment || feedback.rejected) return progress;
-  if (boardState(progress.guesses).complete) return progress;
-  const record: GuessRecord = { answer, states: feedback.states, at: now, source: feedback.source };
-  return { ...progress, guesses: [...progress.guesses, record], updatedAt: now };
+  return reduceGuess(progress, { kind: "feedback-received", feedback, answer, at: now });
 }
 
 export function canGuess(progress: PuzzleProgress): boolean {
