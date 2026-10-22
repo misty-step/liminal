@@ -103,3 +103,7 @@ appends one to the deck as uncalibrated. `bun run validate:live -- --only <id> -
 is its release gate. `bun run puzzles:audit` re-critiques
 published puzzles. Bump `judgments.version` for any answer/condition change:
 runtime caches key on that version.
+
+## No fallbacks
+
+No fallbacks, backup paths or masking safety nets. Write the one best solution: direct, clean, simple, elegant. If it fails, it must fail loudly and visibly so we can fix it. Security checks (auth, signatures, schema validation) stay, but fail loudly, never silently.
