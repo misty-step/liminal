@@ -241,6 +241,8 @@ Criteria:
    isolated storage before promoting those same bytes, without paid judging.
    Non-production runs SHALL NOT access production storage.
 2. THE SYSTEM SHALL NOT promote a failed, skipped, foreign, or stale CI candidate.
+   A candidate is stale when it does not descend from the healthy serving
+   revision; a newer master commit alone SHALL NOT prevent promotion.
 3. THE SYSTEM SHALL report its package version and full source revision in health.
 4. IF promotion or its live readback fails, THE SYSTEM SHALL restore the prior
    healthy native Worker version and verify it through provider and HTTP reads.
@@ -264,3 +266,4 @@ Criteria:
    light and dark themes, with no browser credential or runtime GitHub request.
 
 Evidence: `e2e/qa-journeys.ts`, `src/app/changelog/page.tsx`.
+

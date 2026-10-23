@@ -15,7 +15,7 @@ def github(path):
     return json.loads(subprocess.check_output(['gh', 'api', f'repos/{REPOSITORY}/{path}']))
 
 
-def require_candidate(run, jobs, head, source):
+def require_candidate(run, jobs, source):
     if not re.fullmatch(r'[0-9a-f]{40}', source):
         raise ValueError('invalid candidate SHA')
     if (run['name'], run['event'], run['head_branch'], run['status'], run['conclusion']) != (
@@ -24,11 +24,18 @@ def require_candidate(run, jobs, head, source):
         raise ValueError('candidate is not a successful default-branch CI run')
     if run['head_repository']['full_name'] != REPOSITORY:
         raise ValueError('foreign candidate repository')
-    if run['head_sha'] != source or head != source:
-        raise ValueError('candidate moved or is stale')
+    if run['head_sha'] != source:
+        raise ValueError('candidate producer moved')
     quality = [job for job in jobs if job['name'] == 'quality']
     if len(quality) != 1 or quality[0]['conclusion'] != 'success':
         raise ValueError('real quality job did not succeed')
+
+
+def require_forward(live, source):
+    if not isinstance(live, str) or not re.fullmatch(r'[0-9a-f]{40}', live):
+        raise ValueError('invalid serving revision')
+    if subprocess.run(['git', 'merge-base', '--is-ancestor', live, source]).returncode != 0:
+        raise ValueError('candidate does not descend from the serving revision')
 
 
 def cloudflare(path):
@@ -77,13 +84,18 @@ def main():
     # Validate the producer and fresh source before exposing any provider writes.
     run = github(f'actions/runs/{run_id}')
     jobs = github(f'actions/runs/{run_id}/jobs?per_page=100')['jobs']
-    head = github('git/ref/heads/master')['object']['sha']
-    require_candidate(run, jobs, head, source)
+    require_candidate(run, jobs, source)
     subprocess.run(['sha256sum', '--check', 'worker-artifact.sha256'], check=True)
     previous = active_version()
     previous_health = read_health()
-    if previous_health.get('status') != 'ok' or previous_health.get('checks') != {'deck': 'ok', 'storage': 'ok'}:
+    if (previous_health.get('status') != 'ok' or previous_health.get('environment') != 'production'
+            or previous_health.get('checks') != {'deck': 'ok', 'storage': 'ok'}):
         raise RuntimeError('previous release is not healthy')
+    # The serialized production workflow owns normal promotions. Trunk may
+    # advance during CI; only ancestry from the serving revision matters.
+    require_forward(previous_health.get('revision'), source)
+    if active_version() != previous:
+        raise RuntimeError('active version changed before promotion')
     receipt = {'source': source, 'ci_run': run_id, 'previous_version': previous, 'previous_health': previous_health}
     try:
         subprocess.run([
@@ -116,3 +128,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
