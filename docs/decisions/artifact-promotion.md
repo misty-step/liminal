@@ -16,8 +16,14 @@ D1 and no judge/deploy credentials. Synthetic browser Sentry traffic is blocked.
 A checksummed archive retains bundle, modules and static assets together.
 
 The sole production path consumes the successful default-branch CI artifact,
-refuses a moved or foreign source, and deploys with bundling disabled. Promotions
-are serialized. Health reports the package version and build revision; server
+refuses a moved producer or foreign source, and deploys with bundling disabled.
+Promotions are serialized. Full checkout history proves that the candidate
+descends from the healthy serving revision; current master need not equal the
+candidate. An unknown, older or divergent serving ancestry refuses promotion.
+The observed active native version is rechecked before the write. This boundary
+serializes the existing production workflow, not out-of-band provider writers;
+the native provider has no atomic expected-current condition claimed here.
+Health reports the package version and build revision; server
 Sentry uses the same compiled revision rather than rewriting its old secret.
 All existing secrets and vars are preserved. No database migration, schedule
 writer, paid calibration or credential restoration belongs in code promotion.
@@ -32,3 +38,4 @@ Existing `USER_STORIES.md` becomes `SPEC.md` unchanged except for the delivery
 story. Semantic judge quality remains the recorded deck/prompt calibration;
 code-only CI cannot purchase inference to manufacture new calibration proof.
 Release alarms remain the existing operations intake work, not a second sink.
+
