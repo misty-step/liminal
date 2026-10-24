@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liminal · Guess reducer replay</title>
+<style>
+:root {color-scheme: light dark; --paper: light-dark(#fafafa,#151719); --ink: light-dark(#202326,#eceff1); --line: light-dark(#d4d8dc,#42484d); --muted: light-dark(#515960,#afb8bf); --active: light-dark(#175f49,#92dfbb); --panel: light-dark(#ffffff,#202529)}
+* {box-sizing:border-box} body {margin:0;background:var(--paper);color:var(--ink);font:15px/1.5 system-ui,sans-serif} main {max-width:980px;margin:0 auto;padding:28px 20px} h1 {font-size:28px;letter-spacing:-.04em;margin:0 0 8px} h2 {font-size:16px;margin:0 0 12px} p {margin:8px 0 16px} .muted,small {color:var(--muted)} .controls {display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:22px 0} button,select {font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px;cursor:pointer} button:disabled {opacity:.45;cursor:default} :focus-visible {outline:3px solid var(--active);outline-offset:3px} input[type=range] {width:100%;accent-color:var(--active)} .grid {display:grid;grid-template-columns:1fr 1fr;gap:20px} .panel {background:var(--panel);border:1px solid var(--line);padding:18px;border-radius:12px;min-width:0} #flow {display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:16px 0} #flow span {border:1px solid var(--line);border-radius:12px;padding:8px} #flow .current {border:2px solid var(--active);color:var(--active)} .regions {display:grid;grid-template-columns:1fr 1fr;gap:8px} .region {border:1px solid var(--line);padding:10px;border-radius:12px;min-height:76px;overflow-wrap:anywhere} .region.filled {border-color:var(--active)} .region strong {display:block} pre {white-space:pre-wrap;overflow-wrap:anywhere;font:12px/1.6 ui-monospace,monospace} #event {font-size:19px;font-weight:600} #reason {min-height:68px} details {margin-top:20px} summary {cursor:pointer} .table-wrap {overflow-x:auto} table {border-collapse:collapse;width:100%;font-size:13px} td,th {text-align:left;padding:8px;border-bottom:1px solid var(--line)} caption {text-align:left;font-weight:600;margin:12px 0} a {color:var(--active)} @media(max-width:620px){.grid{grid-template-columns:1fr} main{padding:20px 12px}h1{font-size:24px}}
+</style>
+</head>
+<body><main>
+<h1>One game, one transition at a time</h1>
+<p class="muted">Liminal’s guess → feedback → saved progress loop. The same pure reducer runs here and behind <code>recordGuess</code> in the game.</p>
+<p id="provenance"></p>
+<div class="controls"><button id="previous" type="button">← Previous</button><button id="next" type="button">Next →</button><button id="reset" type="button">Reset</button><button id="finish" type="button">Finish</button><output id="position"></output></div>
+<label for="step">Replay position</label><input id="step" type="range" min="0" value="0" step="1">
+<div id="flow"><span>Feedback received</span><b aria-hidden="true">→</b><span id="decision">Ready</span><b aria-hidden="true">→</b><span id="effect">Initial state</span></div>
+<div class="grid">
+<section class="panel" aria-live="polite"><h2>Why this transition?</h2><div id="event"></div><p id="reason"></p><p id="delta"></p><small id="observation"></small></section>
+<section class="panel"><h2 id="score">Board</h2><div id="regions" class="regions"></div></section>
+</div>
+<details><summary>State before, event, state after</summary><div class="grid"><div><h2>Before</h2><pre id="before"></pre><h2>Event</h2><pre id="payload"></pre></div><div><h2>After</h2><pre id="after"></pre></div></div></details>
+<details><summary>Recorded attempts and scope</summary><p id="scope"></p><div class="table-wrap"><table><caption>Observed browser results</caption><thead><tr><th>Attempt</th><th>Input</th><th>Guesses</th><th>Regions</th></tr></thead><tbody id="attempts"></tbody></table></div><p>Clock folding, requests, sounds, focus, and persistence effects stay in the page. This replay covers the record boundary; it does not simulate those effects or claim to cover every branch.</p><p><a href="https://github.com/misty-step/explore-queue/issues/45">Experiment hypothesis</a> · <a href="https://github.com/misty-step/liminal/blob/master/SPEC.md">Game contract</a></p></details>
+<script>/* REPLAY_BUNDLE */</script>
+</main></body></html>
