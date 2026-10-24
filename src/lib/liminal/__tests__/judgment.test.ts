@@ -47,13 +47,14 @@ describe("judgment mapping", () => {
   it("builds one authored Choice question per launch-deck condition", () => {
     const questions = buildQuestions(vessel);
     expect(Object.keys(questions)).toEqual(vessel.conditions.map((c) => c.id));
-    for (const question of Object.values(questions)) {
+    for (const condition of vessel.conditions) {
+      const question = questions[condition.id];
       if (question.type !== "choice") {
         throw new Error(`expected a choice question, got ${question.type}`);
       }
-      expect(question.instructions.length).toBeGreaterThan(10);
+      expect(question.instructions).toBe(condition.judge);
       for (const key of CHOICE_KEYS) {
-        expect(question.criteria[key].length).toBeGreaterThan(0);
+        expect(question.criteria[key]).toBe(condition.levels[key]);
       }
     }
   });

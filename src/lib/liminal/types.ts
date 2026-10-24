@@ -37,11 +37,11 @@ export interface Condition {
   detail?: string;
   /**
    * Self-contained phrasing handed to the judge for this condition. It must not
-   * rely on antecedents from the display text. Falls back to `text` when omitted.
+   * rely on antecedents from the display text.
    */
-  judge?: string;
-  /** Authored Choice rubric. Absent means the condition falls back to a Noul yes/no. */
-  levels?: ChoiceLevels;
+  judge: string;
+  /** Authored Choice rubric required by the puzzle parser. */
+  levels: ChoiceLevels;
 }
 
 /** Answers for one target region. */
@@ -76,7 +76,7 @@ export interface Puzzle {
    * conditions. Uncalibrated puzzles refuse live judging (no guess consumed)
    * unless explicitly allowed.
    */
-  judgeStatus?: "calibrated" | "uncalibrated";
+  judgeStatus: "calibrated" | "uncalibrated";
 }
 
 export type JudgmentSource = "authored" | "cached" | "judged";
