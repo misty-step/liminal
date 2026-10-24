@@ -103,5 +103,3 @@ appends one to the deck as uncalibrated. `bun run validate:live -- --only <id> -
 is its release gate. `bun run puzzles:audit` re-critiques
 published puzzles. Bump `judgments.version` for any answer/condition change:
 runtime caches key on that version.
-
-Run `sitrep where <task-kind>` before dispatching.
